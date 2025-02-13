@@ -11,6 +11,8 @@ export default async function middleware(req: NextRequest) {
     .get("host")!
     .replace(".localhost:3000", `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`);
 
+  console.log(hostname);
+
   // special case for Vercel preview deployment URLs
   if (
     hostname.includes("---") &&
