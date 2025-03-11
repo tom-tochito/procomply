@@ -1,21 +1,39 @@
+"use client";
+
+import { useParams } from "next/navigation";
 import Image from "next/image";
-
-import logo from "@/assets/images/logo.png";
+import { notFound, useRouter } from "next/navigation";
 import { TENANTS } from "@/data/tenants";
-import { notFound } from "next/navigation";
+import logo from "@/assets/images/logo.png";
+import { useState, FormEvent } from "react";
 
-interface PageProps {
-  params: Promise<{ domain: string }>;
-}
+export default function Page() {
+  const router = useRouter();
+  const { domain } = useParams();
 
-export default async function Page({ params }: PageProps) {
-  const { domain } = await params;
+  // Try to match domain to known tenants
+  const _tenant = domain?.toString().split(".")[0];
+  const tenant = TENANTS.find((t) => t.id === _tenant);
 
-  const _tenant = domain.split(".")[0];
+  if (!tenant) {
+    // If tenant not found, show 404
+    notFound();
+  }
 
-  const tenant = TENANTS.find((tenant) => tenant.id === _tenant);
+  // Controlled form fields
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  if (!tenant) notFound();
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    // Simple client-side check:
+    if (email === "admin@procomply.co.uk" && password === "password") {
+      // On success, route them to the dashboard for this tenant
+      router.push(`/dashboard`);
+    } else {
+      alert("Invalid credentials!");
+    }
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100">
@@ -26,9 +44,10 @@ export default async function Page({ params }: PageProps) {
         </h1>
         <p className="mb-6 text-center text-sm text-black/75">
           Log in to{" "}
-          <span className="font-semibold capitalize">{tenant.name}</span>
+          <span className="font-semibold capitalize">{tenant?.name}</span>
         </p>
-        <form className="space-y-4">
+
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label
               htmlFor="email"
@@ -41,6 +60,8 @@ export default async function Page({ params }: PageProps) {
               name="email"
               type="email"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-[#F30] focus:outline-none focus:ring-1 focus:ring-[#F30]"
               placeholder="Enter your email"
             />
@@ -57,6 +78,8 @@ export default async function Page({ params }: PageProps) {
               name="password"
               type="password"
               required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-[#F30] focus:outline-none focus:ring-1 focus:ring-[#F30]"
               placeholder="Enter your password"
             />
