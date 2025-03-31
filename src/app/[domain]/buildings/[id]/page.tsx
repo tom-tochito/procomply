@@ -1,24 +1,18 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
-import logo from "@/assets/images/logo-white.png";
+import Header from "@/common/components/Header";
 import { getBuildingById } from "@/data/buildings";
 import { Task, getTasksByBuildingId } from "@/data/tasks";
 
-export default function BuildingDetailsPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const buildingId = params.id;
+export default function BuildingDetailsPage() {
+  const params = useParams();
+  const buildingId = params.id as string;
   const building = getBuildingById(buildingId);
   const initialTasks = getTasksByBuildingId(buildingId);
 
-  const router = useRouter();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [activeTab, setActiveTab] = useState("details");
   const [filterByTeam, setFilterByTeam] = useState("");
@@ -31,29 +25,6 @@ export default function BuildingDetailsPage({
   const [futureFilter, setFutureFilter] = useState(true);
   const [completedFilter, setCompletedFilter] = useState(true);
   const [onHoldFilter, setOnHoldFilter] = useState(true);
-
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setDropdownOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  const handleLogout = () => {
-    router.push("/login");
-  };
 
   const addNewTask = () => {
     const newTask: Task = {
@@ -122,47 +93,7 @@ export default function BuildingDetailsPage({
   return (
     <div className="p-6 space-y-8 bg-gray-50 min-h-screen">
       {/* Top header with logo and user info */}
-      <div className="flex justify-between items-center bg-black/90 p-4 rounded-lg shadow-sm">
-        <Image src={logo} alt="ProComply" />
-
-        <div className="relative" ref={dropdownRef}>
-          <button
-            className="size-10 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            aria-label="User menu"
-          >
-            TT
-          </button>
-
-          {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
-              <div className="px-4 py-2 border-b border-gray-100">
-                <p className="text-sm font-medium">Admin User</p>
-                <p className="text-xs text-gray-500">admin@procomply.com</p>
-              </div>
-              <a
-                href="#profile"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                Profile
-              </a>
-              <a
-                href="#settings"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                Settings
-              </a>
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 font-medium"
-              >
-                Logout
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
+      <Header />
       {/* Building header */}
       <div className="flex justify-between items-center">
         <div>
