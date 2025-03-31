@@ -6,6 +6,7 @@ import Link from "next/link";
 import Header from "@/common/components/Header";
 import { getBuildingById } from "@/data/buildings";
 import { Task, getTasksByBuildingId } from "@/data/tasks";
+import TaskDetailsDialog from "@/components/TaskDetailsDialog";
 
 export default function BuildingDetailsPage() {
   const params = useParams();
@@ -25,6 +26,10 @@ export default function BuildingDetailsPage() {
   const [futureFilter, setFutureFilter] = useState(true);
   const [completedFilter, setCompletedFilter] = useState(true);
   const [onHoldFilter, setOnHoldFilter] = useState(true);
+
+  // State for Task Details Dialog
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const addNewTask = () => {
     const newTask: Task = {
@@ -68,6 +73,18 @@ export default function BuildingDetailsPage() {
 
     return true;
   });
+
+  // --- Dialog Handlers ---
+  const handleOpenDialog = (task: Task) => {
+    setSelectedTask(task);
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedTask(null); // Clear selected task when closing
+  };
+  // --- End Dialog Handlers ---
 
   if (!building) {
     return (
@@ -565,7 +582,11 @@ export default function BuildingDetailsPage() {
               </thead>
               <tbody>
                 {filteredTasks.map((task) => (
-                  <tr key={task.id} className="border-b hover:bg-gray-50">
+                  <tr
+                    key={task.id}
+                    className="border-b hover:bg-gray-50 cursor-pointer"
+                    onClick={() => handleOpenDialog(task)}
+                  >
                     <td className="px-4 py-3 text-sm">
                       <div className="flex items-center space-x-1">
                         {task.completed ? (
@@ -674,6 +695,16 @@ export default function BuildingDetailsPage() {
             Please select the &quot;Tasks&quot; tab to view the implementation
           </p>
         </div>
+      )}
+
+      {/* Task Details Dialog */}
+      {selectedTask && (
+        <TaskDetailsDialog
+          isOpen={isDialogOpen}
+          onClose={handleCloseDialog}
+          task={selectedTask}
+          building={building}
+        />
       )}
     </div>
   );
