@@ -243,20 +243,27 @@ export default function BuildingsPage() {
               {/* Building image */}
               <div className="md:w-1/5 h-48 bg-gray-100 flex items-center justify-center relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
-                <img
-                  src={building.image || "/placeholder-building.jpg"}
-                  alt={building.name}
-                  className="w-full h-full object-cover"
-                />
+                <Link href={`/buildings/${building.id}`}>
+                  <img
+                    src={building.image || "/placeholder-building.jpg"}
+                    alt={building.name}
+                    className="w-full h-full object-cover"
+                  />
+                </Link>
               </div>
 
               {/* Building info */}
               <div className="flex-1 p-4 md:p-6 flex flex-col md:flex-row">
                 <div className="flex-grow">
                   <div className="flex items-center">
-                    <h2 className="text-lg font-medium text-gray-900">
-                      {building.id} {building.name}
-                    </h2>
+                    <Link
+                      href={`/buildings/${building.id}`}
+                      className="hover:text-blue-600"
+                    >
+                      <h2 className="text-lg font-medium text-gray-900">
+                        {building.id} {building.name}
+                      </h2>
+                    </Link>
                   </div>
                   <span
                     className={`inline-block px-2 py-0.5 text-xs rounded ${

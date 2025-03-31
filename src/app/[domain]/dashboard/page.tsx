@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import logo from "@/assets/images/logo-white.png";
+import Link from "next/link";
 
 ChartJS.register(
   CategoryScale,
@@ -349,9 +350,12 @@ export default function DashboardPage() {
             <button className="p-3 bg-green-50 text-green-700 rounded-md hover:bg-green-100 transition-colors text-sm font-medium">
               Generate Report
             </button>
-            <button className="p-3 bg-purple-50 text-purple-700 rounded-md hover:bg-purple-100 transition-colors text-sm font-medium">
+            <Link
+              href="/buildings"
+              className="p-3 bg-purple-50 text-purple-700 rounded-md hover:bg-purple-100 transition-colors text-sm font-medium text-center"
+            >
               Add Property
-            </button>
+            </Link>
             <button className="p-3 bg-orange-50 text-orange-700 rounded-md hover:bg-orange-100 transition-colors text-sm font-medium">
               View Calendar
             </button>
@@ -401,7 +405,14 @@ export default function DashboardPage() {
             </thead>
             <tbody>
               <tr className="border-t hover:bg-gray-50">
-                <td className="p-3 font-medium">40001 Viney Court</td>
+                <td className="p-3 font-medium">
+                  <Link
+                    href="/buildings/40001"
+                    className="text-blue-600 hover:underline"
+                  >
+                    40001 Viney Court
+                  </Link>
+                </td>
                 <td className="p-3">
                   <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">
                     72%
@@ -418,7 +429,14 @@ export default function DashboardPage() {
                 <td className="p-3 text-gray-400">--</td>
               </tr>
               <tr className="border-t hover:bg-gray-50">
-                <td className="p-3 font-medium">40002 Maple House</td>
+                <td className="p-3 font-medium">
+                  <Link
+                    href="/buildings/40002"
+                    className="text-blue-600 hover:underline"
+                  >
+                    40002 Maple House
+                  </Link>
+                </td>
                 <td className="p-3">
                   <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
                     89%

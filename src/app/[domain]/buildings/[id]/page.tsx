@@ -170,8 +170,12 @@ export default function BuildingDetailsPage({
             {building.id} - {building.name}
           </h1>
           <div className="flex items-center text-sm text-gray-600 mt-1">
-            <Link href="/buildings" className="hover:text-blue-600">
+            <Link href="/dashboard" className="hover:text-blue-600">
               <span>Home</span>
+            </Link>
+            <span className="mx-2">/</span>
+            <Link href="/buildings" className="hover:text-blue-600">
+              <span>Buildings</span>
             </Link>
             <span className="mx-2">/</span>
             <span>{building.division}</span>
