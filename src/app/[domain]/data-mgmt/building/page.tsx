@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 export default function BuildingRedirectPage() {
   const router = useRouter();
+  const params = useParams();
 
   useEffect(() => {
-    router.push("/buildings");
-  }, [router]);
+    // Redirect to the buildings page but keep the domain parameter
+    const domain = params.domain;
+    router.push(`/${domain}/buildings`);
+  }, [router, params]);
 
   return (
     <div className="p-6 flex justify-center items-center h-screen">

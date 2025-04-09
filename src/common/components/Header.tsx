@@ -3,11 +3,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import logo from "@/assets/images/logo-white.png";
 
 export default function Header() {
   const router = useRouter();
+  const params = useParams();
+  const domain = params.domain;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [dataMgmtOpen, setDataMgmtOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -44,7 +46,7 @@ export default function Header() {
     <div className="bg-black rounded-lg shadow-sm p-4">
       <div className="max-w-[1400px] mx-auto flex justify-between items-center">
         <div className="flex items-center gap-x-16">
-          <Link href="/dashboard" className="flex-shrink-0">
+          <Link href={`/${domain}/dashboard`} className="flex-shrink-0">
             <Image src={logo} alt="ProComply" width={120} height={24} className="w-auto h-6" priority />
           </Link>
           
@@ -69,7 +71,7 @@ export default function Header() {
               {dataMgmtOpen && (
                 <div className="absolute left-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
                   <Link
-                    href="/data-mgmt/company"
+                    href={`/${domain}/data-mgmt/company`}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                   >
                     <span className="inline-flex items-center justify-center mr-2 text-gray-600">
@@ -80,7 +82,7 @@ export default function Header() {
                     Company
                   </Link>
                   <Link
-                    href="/data-mgmt/division"
+                    href={`/${domain}/data-mgmt/division`}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                   >
                     <span className="inline-flex items-center justify-center mr-2 text-gray-600">
@@ -91,7 +93,7 @@ export default function Header() {
                     Division
                   </Link>
                   <Link
-                    href="/data-mgmt/building"
+                    href={`/${domain}/buildings`}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                   >
                     <span className="inline-flex items-center justify-center mr-2 text-gray-600">
@@ -102,7 +104,7 @@ export default function Header() {
                     Building
                   </Link>
                   <Link
-                    href="/data-mgmt/task"
+                    href={`/${domain}/data-mgmt/task`}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                   >
                     <span className="inline-flex items-center justify-center mr-2 text-gray-600">
@@ -113,7 +115,7 @@ export default function Header() {
                     Task
                   </Link>
                   <Link
-                    href="/data-mgmt/document"
+                    href={`/${domain}/data-mgmt/document`}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                   >
                     <span className="inline-flex items-center justify-center mr-2 text-gray-600">
@@ -124,7 +126,7 @@ export default function Header() {
                     Document
                   </Link>
                   <Link
-                    href="/data-mgmt/person"
+                    href={`/${domain}/data-mgmt/person`}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                   >
                     <span className="inline-flex items-center justify-center mr-2 text-gray-600">
@@ -135,7 +137,7 @@ export default function Header() {
                     Person
                   </Link>
                   <Link
-                    href="/data-mgmt/team"
+                    href={`/${domain}/data-mgmt/team`}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                   >
                     <span className="inline-flex items-center justify-center mr-2 text-gray-600">
@@ -147,7 +149,7 @@ export default function Header() {
                   </Link>
                   <div className="border-t border-gray-100 my-1"></div>
                   <Link
-                    href="/data-mgmt/create-task"
+                    href={`/${domain}/data-mgmt/create-task`}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                   >
                     <span className="inline-flex items-center justify-center mr-2 text-gray-600">
@@ -158,7 +160,7 @@ export default function Header() {
                     1. Create Task (to Building)
                   </Link>
                   <Link
-                    href="/data-mgmt/create-survey"
+                    href={`/${domain}/data-mgmt/create-survey`}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                   >
                     <span className="inline-flex items-center justify-center mr-2 text-gray-600">
@@ -169,7 +171,7 @@ export default function Header() {
                     2. Create Survey (to Completed Task)
                   </Link>
                   <Link
-                    href="/data-mgmt/delete-task"
+                    href={`/${domain}/data-mgmt/delete-task`}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                   >
                     <span className="inline-flex items-center justify-center mr-2 text-gray-600">
@@ -180,7 +182,7 @@ export default function Header() {
                     00. Delete Task
                   </Link>
                   <Link
-                    href="/data-mgmt/archive-building"
+                    href={`/${domain}/data-mgmt/archive-building`}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                   >
                     <span className="inline-flex items-center justify-center mr-2 text-gray-600">
@@ -195,7 +197,7 @@ export default function Header() {
             </div>
             
             <Link
-              href="/template-management"
+              href={`/${domain}/template-management`}
               className="flex items-center text-white text-sm hover:text-gray-300 transition-colors group whitespace-nowrap"
             >
               <span className="inline-flex items-center justify-center mr-1.5 text-gray-400 group-hover:text-gray-300">
@@ -207,7 +209,7 @@ export default function Header() {
             </Link>
             
             <Link
-              href="/compliance-overview"
+              href={`/${domain}/compliance-overview`}
               className="flex items-center text-white text-sm hover:text-gray-300 transition-colors group whitespace-nowrap"
             >
               <span className="inline-flex items-center justify-center mr-1.5 text-gray-400 group-hover:text-gray-300">
