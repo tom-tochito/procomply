@@ -112,7 +112,7 @@ export default function Header() {
 
         <div className="relative" ref={dropdownRef}>
           <button
-            className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors text-sm font-medium"
+            className="size-10 bg-black rounded-full flex items-center justify-center text-white hover:bg-orange-500 transition-colors text-base font-medium"
             onClick={() => setDropdownOpen(!dropdownOpen)}
             aria-label="User menu"
           >
