@@ -29,18 +29,6 @@ export default function Header() {
         setDropdownOpen(false);
       }
       if (
-        dataMgmtRef.current &&
-        !dataMgmtRef.current.contains(event.target as Node)
-      ) {
-        setDataMgmtOpen(false);
-      }
-      if (
-        templateMgmtRef.current &&
-        !templateMgmtRef.current.contains(event.target as Node)
-      ) {
-        setTemplateMgmtOpen(false);
-      }
-      if (
         mobileMenuRef.current &&
         !mobileMenuRef.current.contains(event.target as Node)
       ) {
@@ -60,6 +48,19 @@ export default function Header() {
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
+    // Reset submenu states when closing the mobile menu
+    setDataMgmtOpen(false);
+    setTemplateMgmtOpen(false);
+  };
+
+  const toggleDataMgmtMenu = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event bubbling
+    setDataMgmtOpen(!dataMgmtOpen);
+  };
+
+  const toggleTemplateMgmtMenu = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event bubbling
+    setTemplateMgmtOpen(!templateMgmtOpen);
   };
 
   return (
@@ -81,7 +82,7 @@ export default function Header() {
           <div className="hidden md:flex items-center gap-x-8">
             <div className="relative" ref={dataMgmtRef}>
               <button
-                onClick={() => setDataMgmtOpen(!dataMgmtOpen)}
+                onClick={toggleDataMgmtMenu}
                 className="flex items-center text-white text-sm hover:text-gray-300 transition-colors group whitespace-nowrap"
               >
                 <span className="inline-flex items-center justify-center mr-1.5 text-gray-400 group-hover:text-gray-300">
@@ -280,101 +281,15 @@ export default function Header() {
                     Team
                   </Link>
                   <div className="border-t border-gray-100 my-1"></div>
-                  <Link
-                    href={`/${domain}/data-mgmt/create-task`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                        />
-                      </svg>
-                    </span>
-                    1. Create Task (to Building)
-                  </Link>
-                  <Link
-                    href={`/${domain}/data-mgmt/create-survey`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                        />
-                      </svg>
-                    </span>
-                    2. Create Survey (to Completed Task)
-                  </Link>
-                  <Link
-                    href={`/${domain}/data-mgmt/delete-task`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </span>
-                    00. Delete Task
-                  </Link>
-                  <Link
-                    href={`/${domain}/data-mgmt/archive-building`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
-                        />
-                      </svg>
-                    </span>
-                    Archive Building
-                  </Link>
+                  
+                  
                 </div>
               )}
             </div>
 
             <div className="relative" ref={templateMgmtRef}>
               <button
-                onClick={() => setTemplateMgmtOpen(!templateMgmtOpen)}
+                onClick={toggleTemplateMgmtMenu}
                 className="flex items-center text-white text-sm hover:text-gray-300 transition-colors group whitespace-nowrap"
               >
                 <span className="inline-flex items-center justify-center mr-1.5 text-gray-400 group-hover:text-gray-300">
@@ -686,16 +601,50 @@ export default function Header() {
       {mobileMenuOpen && (
         <div
           ref={mobileMenuRef}
-          className="fixed inset-0 bg-black bg-opacity-95 z-10 md:hidden flex flex-col overflow-y-auto pt-16"
+          className="fixed inset-0 bg-black bg-opacity-95 z-10 md:hidden flex flex-col overflow-y-auto"
         >
-          <div className="px-6 py-8 space-y-6">
+          {/* Close button at the top */}
+          <div className="flex justify-between items-center px-6 pt-4 pb-2">
+            <div className="flex items-center">
+              <Image
+                src={logo}
+                alt="ProComply"
+                width={90}
+                height={20}
+                className="w-auto h-5"
+                priority
+              />
+            </div>
+            <button
+              onClick={closeMobileMenu}
+              className="text-white hover:text-gray-300 p-2"
+              aria-label="Close menu"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <div className="px-6 py-6 space-y-6 flex-grow overflow-y-auto">
+            {/* Data Management Section */}
             <div className="text-white">
               <button
-                onClick={() => {
-                  setDataMgmtOpen(!dataMgmtOpen);
-                  setTemplateMgmtOpen(false);
-                }}
-                className="flex items-center justify-between w-full mb-4 py-2 border-b border-gray-700"
+                onClick={toggleDataMgmtMenu}
+                className="flex items-center justify-between w-full py-3 px-3 mb-2 rounded hover:bg-gray-800 active:bg-gray-700 border-b border-gray-700"
+                aria-expanded={dataMgmtOpen}
+                aria-controls="data-mgmt-submenu"
               >
                 <div className="flex items-center">
                   <span className="inline-flex items-center justify-center mr-3 text-gray-400">
@@ -724,7 +673,7 @@ export default function Header() {
                 </div>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className={`h-5 w-5 transform transition-transform ${
+                  className={`h-5 w-5 transform transition-transform duration-200 ${
                     dataMgmtOpen ? "rotate-180" : ""
                   }`}
                   fill="none"
@@ -740,68 +689,102 @@ export default function Header() {
                 </svg>
               </button>
 
-              {dataMgmtOpen && (
-                <div className="pl-10 pb-4 space-y-3">
-                  <Link
-                    href={`/${domain}/data-mgmt/company`}
-                    onClick={closeMobileMenu}
-                    className="block py-2 text-sm text-gray-300 hover:text-white"
-                  >
-                    Company
-                  </Link>
-                  <Link
-                    href={`/${domain}/data-mgmt/division`}
-                    onClick={closeMobileMenu}
-                    className="block py-2 text-sm text-gray-300 hover:text-white"
-                  >
-                    Division
-                  </Link>
-                  <Link
-                    href={`/${domain}/buildings`}
-                    onClick={closeMobileMenu}
-                    className="block py-2 text-sm text-gray-300 hover:text-white"
-                  >
-                    Building
-                  </Link>
-                  <Link
-                    href={`/${domain}/data-mgmt/task`}
-                    onClick={closeMobileMenu}
-                    className="block py-2 text-sm text-gray-300 hover:text-white"
-                  >
-                    Task
-                  </Link>
-                  <Link
-                    href={`/${domain}/data-mgmt/document`}
-                    onClick={closeMobileMenu}
-                    className="block py-2 text-sm text-gray-300 hover:text-white"
-                  >
-                    Document
-                  </Link>
-                  <Link
-                    href={`/${domain}/data-mgmt/person`}
-                    onClick={closeMobileMenu}
-                    className="block py-2 text-sm text-gray-300 hover:text-white"
-                  >
-                    Person
-                  </Link>
-                  <Link
-                    href={`/${domain}/data-mgmt/team`}
-                    onClick={closeMobileMenu}
-                    className="block py-2 text-sm text-gray-300 hover:text-white"
-                  >
-                    Team
-                  </Link>
-                </div>
-              )}
+              {/* Data Management Submenu */}
+              <div
+                id="data-mgmt-submenu"
+                className={`pl-10 pb-4 space-y-1 overflow-hidden transition-all duration-300 ${
+                  dataMgmtOpen
+                    ? "max-h-[500px] opacity-100"
+                    : "max-h-0 opacity-0"
+                }`}
+              >
+                <Link
+                  href={`/${domain}/data-mgmt/company`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Company
+                </Link>
+                <Link
+                  href={`/${domain}/data-mgmt/division`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Division
+                </Link>
+                <Link
+                  href={`/${domain}/buildings`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Building
+                </Link>
+                <Link
+                  href={`/${domain}/data-mgmt/task`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Task
+                </Link>
+                <Link
+                  href={`/${domain}/data-mgmt/document`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Document
+                </Link>
+                <Link
+                  href={`/${domain}/data-mgmt/person`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Person
+                </Link>
+                <Link
+                  href={`/${domain}/data-mgmt/team`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Team
+                </Link>
+                <Link
+                  href={`/${domain}/data-mgmt/create-task`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Create Task
+                </Link>
+                <Link
+                  href={`/${domain}/data-mgmt/create-survey`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Create Survey
+                </Link>
+                <Link
+                  href={`/${domain}/data-mgmt/delete-task`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Delete Task
+                </Link>
+                <Link
+                  href={`/${domain}/data-mgmt/archive-building`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Archive Building
+                </Link>
+              </div>
             </div>
 
+            {/* Template Management Section */}
             <div className="text-white">
               <button
-                onClick={() => {
-                  setTemplateMgmtOpen(!templateMgmtOpen);
-                  setDataMgmtOpen(false);
-                }}
-                className="flex items-center justify-between w-full mb-4 py-2 border-b border-gray-700"
+                onClick={toggleTemplateMgmtMenu}
+                className="flex items-center justify-between w-full py-3 px-3 mb-2 rounded hover:bg-gray-800 active:bg-gray-700 border-b border-gray-700"
+                aria-expanded={templateMgmtOpen}
+                aria-controls="template-mgmt-submenu"
               >
                 <div className="flex items-center">
                   <span className="inline-flex items-center justify-center mr-3 text-gray-400">
@@ -824,7 +807,7 @@ export default function Header() {
                 </div>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className={`h-5 w-5 transform transition-transform ${
+                  className={`h-5 w-5 transform transition-transform duration-200 ${
                     templateMgmtOpen ? "rotate-180" : ""
                   }`}
                   fill="none"
@@ -840,86 +823,131 @@ export default function Header() {
                 </svg>
               </button>
 
-              {templateMgmtOpen && (
-                <div className="pl-10 pb-4 space-y-3">
-                  <Link
-                    href={`/${domain}/template-mgmt/survey-type`}
-                    onClick={closeMobileMenu}
-                    className="block py-2 text-sm text-gray-300 hover:text-white"
-                  >
-                    SurveyType
-                  </Link>
-                  <Link
-                    href={`/${domain}/template-mgmt/task-category`}
-                    onClick={closeMobileMenu}
-                    className="block py-2 text-sm text-gray-300 hover:text-white"
-                  >
-                    Task Category
-                  </Link>
-                  <Link
-                    href={`/${domain}/template-mgmt/risk-area`}
-                    onClick={closeMobileMenu}
-                    className="block py-2 text-sm text-gray-300 hover:text-white"
-                  >
-                    Risk Area
-                  </Link>
-                  <Link
-                    href={`/${domain}/template-mgmt/subsection`}
-                    onClick={closeMobileMenu}
-                    className="block py-2 text-sm text-gray-300 hover:text-white"
-                  >
-                    Subsection
-                  </Link>
-                  <Link
-                    href={`/${domain}/template-mgmt/legislation`}
-                    onClick={closeMobileMenu}
-                    className="block py-2 text-sm text-gray-300 hover:text-white"
-                  >
-                    Legislation
-                  </Link>
-                  <Link
-                    href={`/${domain}/template-mgmt/country`}
-                    onClick={closeMobileMenu}
-                    className="block py-2 text-sm text-gray-300 hover:text-white"
-                  >
-                    Country
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            <div className="text-white">
-              <Link
-                href={`/${domain}/compliance-overview`}
-                onClick={closeMobileMenu}
-                className="flex items-center py-2 border-b border-gray-700"
+              {/* Template Management Submenu */}
+              <div
+                id="template-mgmt-submenu"
+                className={`pl-10 pb-4 space-y-1 overflow-hidden transition-all duration-300 ${
+                  templateMgmtOpen
+                    ? "max-h-[500px] opacity-100"
+                    : "max-h-0 opacity-0"
+                }`}
               >
-                <span className="inline-flex items-center justify-center mr-3 text-gray-400">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                    />
-                  </svg>
-                </span>
-                <span className="text-base font-medium">
-                  Compliance Overview
-                </span>
-              </Link>
+                <Link
+                  href={`/${domain}/template-mgmt/task-template`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Task Template
+                </Link>
+                <Link
+                  href={`/${domain}/template-mgmt/document-type-tmpl`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Document Type Template
+                </Link>
+                <Link
+                  href={`/${domain}/template-mgmt/survey-type`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  SurveyType
+                </Link>
+                <Link
+                  href={`/${domain}/template-mgmt/task-category`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Task Category
+                </Link>
+                <Link
+                  href={`/${domain}/template-mgmt/risk-area`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Risk Area
+                </Link>
+                <Link
+                  href={`/${domain}/template-mgmt/subsection`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Subsection
+                </Link>
+                <Link
+                  href={`/${domain}/template-mgmt/legislation`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Legislation
+                </Link>
+                <Link
+                  href={`/${domain}/template-mgmt/country`}
+                  onClick={closeMobileMenu}
+                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                >
+                  Country
+                </Link>
+              </div>
             </div>
 
+            {/* Direct links */}
+            <Link
+              href={`/${domain}/compliance-overview`}
+              onClick={closeMobileMenu}
+              className="flex items-center py-3 px-3 my-2 rounded hover:bg-gray-800 active:bg-gray-700 text-white border-b border-gray-700"
+            >
+              <span className="inline-flex items-center justify-center mr-3 text-gray-400">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                </svg>
+              </span>
+              <span className="text-base font-medium">Compliance Overview</span>
+            </Link>
+
+            <Link
+              href={`/${domain}/dashboard`}
+              onClick={closeMobileMenu}
+              className="flex items-center py-3 px-3 my-2 rounded hover:bg-gray-800 active:bg-gray-700 text-white border-b border-gray-700"
+            >
+              <span className="inline-flex items-center justify-center mr-3 text-gray-400">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3"
+                  />
+                </svg>
+              </span>
+              <span className="text-base font-medium">Dashboard</span>
+            </Link>
+
+            {/* Logout button */}
             <div className="pt-4 border-t border-gray-700">
               <button
-                onClick={handleLogout}
-                className="flex items-center w-full py-2 text-red-400 hover:text-red-300"
+                onClick={() => {
+                  handleLogout();
+                  closeMobileMenu();
+                }}
+                className="flex items-center w-full py-3 px-3 rounded hover:bg-gray-800 active:bg-gray-700 text-red-400 hover:text-red-300"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
