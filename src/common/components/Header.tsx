@@ -281,8 +281,6 @@ export default function Header() {
                     Team
                   </Link>
                   <div className="border-t border-gray-100 my-1"></div>
-                  
-                  
                 </div>
               )}
             </div>
