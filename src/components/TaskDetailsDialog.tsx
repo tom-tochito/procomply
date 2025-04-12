@@ -204,7 +204,7 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
   return (
     // Backdrop
     <div
-      className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center p-4 sm:p-6 md:p-8 transition-opacity duration-300"
+      className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center p-2 sm:p-4 md:p-8 transition-opacity duration-300"
       onClick={handleBackdropClick}
     >
       {/* Dialog Box - Animate entrance */}
@@ -213,33 +213,34 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
         onClick={(e) => e.stopPropagation()} // Prevent clicks inside dialog from closing it
       >
         {/* Dialog Header */}
-        <div className="bg-gray-800 text-white px-5 py-3 flex justify-between items-center flex-shrink-0">
-          <h2 className="text-lg sm:text-xl font-semibold truncate pr-4">
+        <div className="bg-gray-800 text-white px-3 sm:px-5 py-3 flex justify-between items-center flex-shrink-0">
+          <h2 className="text-base sm:text-lg md:text-xl font-semibold truncate pr-2 sm:pr-4">
             {task.description || "Task Details"}
           </h2>
-          <div className="flex items-center space-x-3 sm:space-x-4 flex-shrink-0">
+          <div className="flex items-center space-x-1 sm:space-x-3 md:space-x-4 flex-shrink-0">
             {/* Progress */}
-            <div className="flex items-center space-x-2 text-sm">
+            <div className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
               <ProgressBar percentage={getProgressPercentage(task.progress)} />
               <span className="hidden sm:inline font-medium">
-                {/* Display percentage based on conversion */}
                 {getProgressPercentage(task.progress)}% progress
               </span>
               <span className="sm:hidden font-medium">
-                {/* Display percentage based on conversion */}
                 {getProgressPercentage(task.progress)}%
               </span>
             </div>
-            <button className="bg-teal-500 hover:bg-teal-600 text-white px-3 sm:px-4 py-1.5 rounded text-sm font-medium whitespace-nowrap">
+            <button className="bg-teal-500 hover:bg-teal-600 text-white px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 rounded text-xs sm:text-sm font-medium whitespace-nowrap">
               Start Job
             </button>
             {/* Workflow / Assignee Icons (Placeholders) */}
-            <button title="Workflow" className="text-gray-400 hover:text-white">
+            <button
+              title="Workflow"
+              className="text-gray-400 hover:text-white hidden sm:block"
+            >
               <CogIcon className="h-5 w-5" />
             </button>
             <button
               title="Main Assignee"
-              className="text-gray-400 hover:text-white"
+              className="text-gray-400 hover:text-white hidden sm:block"
             >
               <UserGroupIcon className="h-5 w-5" />
             </button>
@@ -255,12 +256,12 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
         </div>
 
         {/* Metadata Bar */}
-        <div className="bg-gray-700 text-white px-5 py-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs flex-shrink-0 border-t border-gray-600">
+        <div className="bg-gray-700 text-white px-3 sm:px-5 py-1.5 flex flex-wrap items-center gap-x-2 sm:gap-x-4 gap-y-1 text-xs flex-shrink-0 border-t border-gray-600">
           {renderDueDateBadge("Due Date", task.dueDate)}
           {renderMetadataBadge("Priority", task.priority)}
           {renderMetadataBadge("Risk Level", task.riskLevel)}
           {/* Placeholder for Workflow/Assignee Text - align right */}
-          <div className="flex-grow flex justify-end space-x-4">
+          <div className="hidden sm:flex flex-grow justify-end space-x-4">
             <span className="flex items-center text-gray-300">
               <CogIcon className="h-4 w-4 mr-1" /> Workflow: --
             </span>
@@ -271,11 +272,30 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
         </div>
 
         {/* Dialog Body Area (Sidebar + Content) */}
-        <div className="flex flex-grow overflow-hidden">
+        <div className="flex flex-col sm:flex-row flex-grow overflow-hidden">
           {" "}
           {/* Main flex container for body */}
-          {/* Sidebar */}
-          <div className="w-48 md:w-56 bg-gray-100 border-r border-gray-200 p-3 sm:p-4 flex-shrink-0 overflow-y-auto space-y-1">
+          {/* Mobile Tabs for Sidebar */}
+          <div className="sm:hidden flex overflow-x-auto px-2 py-2 border-b border-gray-200 bg-gray-50">
+            {sidebarItems.map((item) => {
+              const isActive = activeSidebarItem === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveSidebarItem(item.id)}
+                  className={`flex-shrink-0 px-3 py-1 mx-1 rounded-full text-xs ${
+                    isActive
+                      ? "bg-gray-300 text-gray-900 font-medium"
+                      : "text-gray-600 bg-gray-100"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+          {/* Sidebar - Hidden on mobile */}
+          <div className="hidden sm:block w-32 md:w-48 lg:w-56 bg-gray-100 border-r border-gray-200 p-2 sm:p-3 md:p-4 flex-shrink-0 overflow-y-auto space-y-1">
             {sidebarItems.map((item) => {
               const IconComponent = item.icon;
               const isActive = activeSidebarItem === item.id;
@@ -283,14 +303,14 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                 <button
                   key={item.id}
                   onClick={() => setActiveSidebarItem(item.id)}
-                  className={`w-full text-left px-3 py-1.5 rounded flex items-center text-sm transition-colors duration-150 ${
+                  className={`w-full text-left px-2 sm:px-3 py-1 sm:py-1.5 rounded flex items-center text-xs sm:text-sm transition-colors duration-150 ${
                     isActive
                       ? "bg-gray-300 text-gray-900 font-medium shadow-sm"
                       : "text-gray-600 hover:bg-gray-200 hover:text-gray-800"
                   }`}
                 >
                   <IconComponent
-                    className={`h-4 w-4 mr-2 flex-shrink-0 ${
+                    className={`h-4 w-4 mr-1.5 sm:mr-2 flex-shrink-0 ${
                       isActive ? "text-gray-700" : "text-gray-500"
                     }`}
                   />
@@ -304,34 +324,36 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
             {" "}
             {/* Content area takes remaining space */}
             {/* Tabs */}
-            <div className="px-4 sm:px-6 pt-4 border-b border-gray-200 flex-shrink-0 flex space-x-4 sm:space-x-6">
+            <div className="px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 border-b border-gray-200 flex-shrink-0 flex space-x-3 sm:space-x-4 md:space-x-6 overflow-x-auto">
               <button
                 onClick={() => setActiveTab("general")}
-                className={`pb-2 text-sm font-medium flex items-center border-b-2 focus:outline-none ${
+                className={`pb-2 text-xs sm:text-sm font-medium flex items-center border-b-2 focus:outline-none whitespace-nowrap ${
                   activeTab === "general"
                     ? "text-blue-600 border-blue-600"
                     : "text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
-                <InfoIcon className="h-5 w-5 mr-1.5" /> General data
+                <InfoIcon className="h-4 sm:h-5 w-4 sm:w-5 mr-1 sm:mr-1.5" />{" "}
+                General data
               </button>
               <button
                 onClick={() => setActiveTab("photos")}
-                className={`pb-2 text-sm font-medium flex items-center border-b-2 focus:outline-none ${
+                className={`pb-2 text-xs sm:text-sm font-medium flex items-center border-b-2 focus:outline-none whitespace-nowrap ${
                   activeTab === "photos"
                     ? "text-blue-600 border-blue-600"
                     : "text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
-                <PhotoIcon className="h-5 w-5 mr-1.5" /> Task photos
+                <PhotoIcon className="h-4 sm:h-5 w-4 sm:w-5 mr-1 sm:mr-1.5" />{" "}
+                Task photos
               </button>
             </div>
             {/* Tab Content - Scrollable */}
-            <div className="flex-grow p-4 sm:p-6 overflow-y-auto">
+            <div className="flex-grow p-3 sm:p-4 md:p-6 overflow-y-auto">
               {activeTab === "general" && (
                 <div className="w-full">
                   {/* Section Header (Matches Sidebar Active Item) */}
-                  <h3 className="text-base sm:text-lg font-semibold mb-4 sm:mb-5 flex items-center text-gray-700">
+                  <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-3 sm:mb-4 md:mb-5 flex items-center text-gray-700">
                     {/* Dynamically show icon and title based on sidebar selection */}
                     {(() => {
                       const activeItem = sidebarItems.find(
@@ -342,7 +364,7 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                       return (
                         <>
                           {" "}
-                          <Icon className="h-5 w-5 mr-2 text-gray-600" />{" "}
+                          <Icon className="h-4 sm:h-5 w-4 sm:w-5 mr-1.5 sm:mr-2 text-gray-600" />{" "}
                           {activeItem.label}{" "}
                         </>
                       );
@@ -351,23 +373,19 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
 
                   {/* --- General Section Content --- */}
                   {activeSidebarItem === "general" && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 sm:gap-x-12 gap-y-4 sm:gap-y-5 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 sm:gap-x-8 md:gap-x-12 gap-y-3 sm:gap-y-4 md:gap-y-5 text-xs sm:text-sm">
                       {/* Left Column */}
-                      <div className="space-y-4 sm:space-y-5">
+                      <div className="space-y-3 sm:space-y-4 md:space-y-5">
                         <div>
-                          <p className="text-gray-500 text-xs sm:text-sm mb-0.5">
-                            Type:
-                          </p>
+                          <p className="text-gray-500 text-xs mb-0.5">Type:</p>
                           <p className="text-gray-800 font-medium">-</p>
                         </div>
                         <div>
-                          <p className="text-gray-500 text-xs sm:text-sm mb-0.5">
-                            Code:
-                          </p>
+                          <p className="text-gray-500 text-xs mb-0.5">Code:</p>
                           <p className="text-gray-800 font-medium">-</p>
                         </div>
                         <div>
-                          <p className="text-gray-500 text-xs sm:text-sm mb-0.5">
+                          <p className="text-gray-500 text-xs mb-0.5">
                             Observation:
                           </p>
                           <p className="text-gray-800 font-medium leading-relaxed">
@@ -375,7 +393,7 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                           </p>
                         </div>
                         <div>
-                          <p className="text-gray-500 text-xs sm:text-sm mb-0.5">
+                          <p className="text-gray-500 text-xs mb-0.5">
                             Risk Area:
                           </p>
                           <p className="text-gray-800 font-medium">
@@ -383,78 +401,83 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                           </p>
                         </div>
                         <div>
-                          <p className="text-gray-500 text-xs sm:text-sm mb-0.5">
+                          <p className="text-gray-500 text-xs mb-0.5">
                             Due Date:
                           </p>
                           {/* Use red background only if overdue or high prio? Based on screenshot, it's always red */}
-                          <p className="font-semibold bg-red-100 text-red-700 px-2 py-0.5 rounded inline-block text-xs sm:text-sm">
+                          <p className="font-semibold bg-red-100 text-red-700 px-2 py-0.5 rounded inline-block text-xs">
                             {task.dueDate}
                           </p>
                         </div>
                       </div>
+
                       {/* Right Column */}
-                      <div className="space-y-4 sm:space-y-5">
+                      <div className="space-y-3 sm:space-y-4 md:space-y-5">
                         <div>
-                          <p className="text-gray-500 text-xs sm:text-sm mb-0.5">
+                          <p className="text-gray-500 text-xs mb-0.5">
                             Building:
                           </p>
-                          <p className="text-gray-800 font-medium mb-1.5">
+                          <p className="text-gray-800 font-medium">
                             {buildingName}
                           </p>
-                          {buildingImage && (
-                            <img
-                              src={buildingImage}
-                              alt={buildingName}
-                              className="h-28 w-auto rounded border border-gray-200 object-cover"
-                              // Add error handling for images
-                              onError={(e) =>
-                                (e.currentTarget.style.display = "none")
-                              }
-                            />
-                          )}
                         </div>
                         <div>
-                          <p className="text-gray-500 text-xs sm:text-sm mb-0.5">
-                            Name:
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Status:
                           </p>
                           <p className="text-gray-800 font-medium">
-                            {task.description}
+                            {task.progress || "-"}
                           </p>
                         </div>
                         <div>
-                          <p className="text-gray-500 text-xs sm:text-sm mb-0.5">
-                            Instruction:
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Priority:
+                          </p>
+                          <p className="text-gray-800 font-medium">
+                            {task.priority}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Risk Level:
+                          </p>
+                          <p className="text-gray-800 font-medium">
+                            {task.riskLevel}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Description:
                           </p>
                           <p className="text-gray-800 font-medium leading-relaxed">
-                            -
+                            {task.description}
                           </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500 text-xs sm:text-sm mb-0.5">
-                            Subsection:
-                          </p>
-                          <p className="text-gray-800 font-medium">-</p>
                         </div>
                       </div>
                     </div>
                   )}
-                  {/* --- Placeholder for other sidebar sections --- */}
-                  {activeSidebarItem !== "general" && (
-                    <div className="text-center py-10 text-gray-400">
-                      Content for &quot;
-                      {
-                        sidebarItems.find((i) => i.id === activeSidebarItem)
-                          ?.label
-                      }
-                      &quot; goes here.
-                    </div>
-                  )}
+
+                  {/* Add other content sections for different sidebar items here */}
                 </div>
               )}
-              {/* --- Task Photos Tab Content --- */}
+
               {activeTab === "photos" && (
-                <div className="text-center py-10 text-gray-500">
-                  Task Photos content area.
+                <div className="space-y-5">
+                  <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-3 sm:mb-4 flex items-center text-gray-700">
+                    <PhotoIcon className="h-4 sm:h-5 w-4 sm:w-5 mr-1.5 sm:mr-2 text-gray-600" />
+                    Task Photos
+                  </h3>
+
+                  {/* Empty state for photos */}
+                  <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center text-center">
+                    <PhotoIcon className="h-10 w-10 text-gray-400 mb-3" />
+                    <p className="text-gray-500 text-sm mb-2">
+                      No photos have been added to this task yet
+                    </p>
+                    <button className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-3 sm:px-4 py-1.5 rounded text-xs sm:text-sm font-medium">
+                      Upload Photos
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
