@@ -1734,6 +1734,403 @@ export default function BuildingDetailsPage() {
         </div>
       )}
 
+      {activeTab === "documents" && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            {/* Left sidebar with filters */}
+            <div className="lg:col-span-3">
+              <div className="bg-white rounded-lg border overflow-hidden">
+                <h3 className="text-lg font-medium p-4 border-b">Documents</h3>
+
+                <div className="p-4 border-b">
+                  <h4 className="text-sm text-gray-600 font-medium mb-2">
+                    FILTERS:
+                  </h4>
+                  <div className="space-y-1">
+                    <div className="bg-blue-50 text-blue-700 py-1 px-2 font-medium text-sm rounded">
+                      All documents
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 text-gray-600"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      <span className="text-gray-700 hover:text-blue-600 cursor-pointer text-sm">
+                        Doc Categories
+                      </span>
+                    </div>
+
+                    <div className="ml-4 space-y-1">
+                      <div className="text-gray-700 hover:text-blue-600 cursor-pointer text-sm">
+                        Asbestos
+                      </div>
+                      <div className="text-gray-700 hover:text-blue-600 cursor-pointer text-sm">
+                        Electrical
+                      </div>
+                      <div className="text-gray-700 hover:text-blue-600 cursor-pointer text-sm">
+                        Energy
+                      </div>
+                      <div className="text-gray-700 hover:text-blue-600 cursor-pointer text-sm">
+                        Environmental
+                      </div>
+                      <div className="text-gray-700 hover:text-blue-600 cursor-pointer text-sm">
+                        Equality / Disability
+                      </div>
+                      <div className="text-gray-700 hover:text-blue-600 cursor-pointer text-sm">
+                        Fire
+                      </div>
+                      <div className="text-gray-700 hover:text-blue-600 cursor-pointer text-sm">
+                        Gas
+                      </div>
+                      <div className="text-gray-700 hover:text-blue-600 cursor-pointer text-sm">
+                        Health and Safety
+                      </div>
+                      <div className="text-gray-700 hover:text-blue-600 cursor-pointer text-sm">
+                        Legionella
+                      </div>
+                      <div className="text-gray-700 hover:text-blue-600 cursor-pointer text-sm">
+                        Lift
+                      </div>
+                      <div className="text-gray-700 hover:text-blue-600 cursor-pointer text-sm">
+                        Miscellaneous
+                      </div>
+                      <div className="text-gray-700 hover:text-blue-600 cursor-pointer text-sm">
+                        Operation
+                      </div>
+                      <div className="text-gray-700 hover:text-blue-600 cursor-pointer text-sm">
+                        Third Party
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main content area */}
+            <div className="lg:col-span-9">
+              {/* Search and controls */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
+                <div className="relative w-full md:w-80">
+                  <input
+                    type="text"
+                    placeholder="search documents"
+                    className="border rounded-md pl-3 pr-10 py-2 w-full"
+                  />
+                  <button className="absolute right-0 top-0 h-full px-3 text-gray-500">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="flex gap-2 w-full md:w-auto">
+                  <button className="p-2 border rounded-md">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-gray-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                      />
+                    </svg>
+                  </button>
+                  <button className="p-2 border rounded-md">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-gray-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                  <button className="bg-teal-600 text-white px-4 py-2 rounded-md font-medium ml-auto">
+                    Add document
+                  </button>
+                </div>
+              </div>
+
+              {/* Active/Archived tabs */}
+              <div className="flex mb-4">
+                <button className="flex items-center gap-2 bg-white rounded-tl-md rounded-tr-md border border-b-0 px-4 py-2 text-sm font-medium">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  Active
+                  <span className="bg-gray-200 text-gray-800 text-xs px-2 py-0.5 rounded-full">
+                    15
+                  </span>
+                </button>
+                <button className="flex items-center gap-2 bg-gray-100 rounded-tl-md rounded-tr-md border border-b-0 px-4 py-2 text-sm font-medium text-gray-600 ml-1">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                    />
+                  </svg>
+                  Archived
+                  <span className="bg-gray-200 text-gray-800 text-xs px-2 py-0.5 rounded-full">
+                    80
+                  </span>
+                </button>
+              </div>
+
+              {/* Documents table */}
+              <div className="bg-white rounded-lg border overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="bg-gray-50 border-b">
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                        Description
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                        Ref
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                        Category
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                        Sub Category
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                        Valid From
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                        Expiry
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                        Uploaded Date
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* Document row 1 */}
+                    <tr className="border-b hover:bg-gray-50 cursor-pointer">
+                      <td className="px-4 py-3 text-sm">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 mr-3 border bg-gray-100 flex-shrink-0 overflow-hidden">
+                            <img
+                              src="/doc-thumbnail.png"
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <span>Fire Risk Assessment</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm">51346G</td>
+                      <td className="px-4 py-3 text-sm">Fire</td>
+                      <td className="px-4 py-3 text-sm">Risk Assessment</td>
+                      <td className="px-4 py-3 text-sm">30/04/2024</td>
+                      <td className="px-4 py-3 text-sm">30/04/2025</td>
+                      <td className="px-4 py-3 text-sm">
+                        <div>13/05/2024 15:46:22</div>
+                        <div className="text-gray-500">lauren.johnson</div>
+                      </td>
+                    </tr>
+                    {/* Document row 2 */}
+                    <tr className="border-b hover:bg-gray-50 cursor-pointer">
+                      <td className="px-4 py-3 text-sm">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 mr-3 border bg-gray-100 flex-shrink-0 overflow-hidden">
+                            <img
+                              src="/doc-thumbnail.png"
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <span>Fire Risk Assessment</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm">51346H</td>
+                      <td className="px-4 py-3 text-sm">Fire</td>
+                      <td className="px-4 py-3 text-sm">Risk Assessment</td>
+                      <td className="px-4 py-3 text-sm">25/03/2025</td>
+                      <td className="px-4 py-3 text-sm">25/03/2026</td>
+                      <td className="px-4 py-3 text-sm">
+                        <div>19/04/2025 22:33:49</div>
+                        <div className="text-gray-500">admin</div>
+                      </td>
+                    </tr>
+                    {/* Document row 3 */}
+                    <tr className="border-b hover:bg-gray-50 cursor-pointer">
+                      <td className="px-4 py-3 text-sm">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 mr-3 border bg-gray-100 flex-shrink-0 overflow-hidden">
+                            <img
+                              src="/doc-thumbnail.png"
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <span>Fire Strategy Document</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm">55041</td>
+                      <td className="px-4 py-3 text-sm">Fire</td>
+                      <td className="px-4 py-3 text-sm">Survey</td>
+                      <td className="px-4 py-3 text-sm">20/10/2022</td>
+                      <td className="px-4 py-3 text-sm">—</td>
+                      <td className="px-4 py-3 text-sm">
+                        <div>10/01/2023 11:46:30</div>
+                        <div className="text-gray-500">abi.kelly</div>
+                      </td>
+                    </tr>
+                    {/* Document row 4 */}
+                    <tr className="border-b hover:bg-gray-50 cursor-pointer">
+                      <td className="px-4 py-3 text-sm">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 mr-3 border bg-gray-100 flex-shrink-0 overflow-hidden">
+                            <img
+                              src="/doc-thumbnail.png"
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <span>Health & Safety Risk Assessment</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm">31215G</td>
+                      <td className="px-4 py-3 text-sm">Health and Safety</td>
+                      <td className="px-4 py-3 text-sm">Risk Assessment</td>
+                      <td className="px-4 py-3 text-sm">13/08/2024</td>
+                      <td className="px-4 py-3 text-sm">13/08/2025</td>
+                      <td className="px-4 py-3 text-sm">
+                        <div>23/08/2024 08:39:48</div>
+                        <div className="text-gray-500">lauren.johnson</div>
+                      </td>
+                    </tr>
+                    {/* Document row 5 */}
+                    <tr className="border-b hover:bg-gray-50 cursor-pointer">
+                      <td className="px-4 py-3 text-sm">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 mr-3 border bg-gray-100 flex-shrink-0 overflow-hidden">
+                            <img
+                              src="/doc-thumbnail.png"
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <span>Inspection Log/Report</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm">—</td>
+                      <td className="px-4 py-3 text-sm">Miscellaneous</td>
+                      <td className="px-4 py-3 text-sm">Record</td>
+                      <td className="px-4 py-3 text-sm">—</td>
+                      <td className="px-4 py-3 text-sm">—</td>
+                      <td className="px-4 py-3 text-sm">
+                        <div>28/11/2018 17:02:03</div>
+                        <div className="text-gray-500">reva.bernardez</div>
+                      </td>
+                    </tr>
+                    {/* Document row 6 */}
+                    <tr className="border-b hover:bg-gray-50 cursor-pointer">
+                      <td className="px-4 py-3 text-sm">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 mr-3 border bg-gray-100 flex-shrink-0 overflow-hidden">
+                            <img
+                              src="/doc-thumbnail.png"
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <span>Legionella Risk Assessment</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm">90310F</td>
+                      <td className="px-4 py-3 text-sm">Legionella</td>
+                      <td className="px-4 py-3 text-sm">Risk Assessment</td>
+                      <td className="px-4 py-3 text-sm">10/02/2025</td>
+                      <td className="px-4 py-3 text-sm">10/02/2026</td>
+                      <td className="px-4 py-3 text-sm">
+                        <div>23/02/2025 23:44:19</div>
+                        <div className="text-gray-500">admin</div>
+                      </td>
+                    </tr>
+                    {/* Document row 7 */}
+                    <tr className="border-b hover:bg-gray-50 cursor-pointer">
+                      <td className="px-4 py-3 text-sm">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 mr-3 border bg-gray-100 flex-shrink-0 overflow-hidden">
+                            <img
+                              src="/doc-thumbnail.png"
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <span>Photograph</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm">—</td>
+                      <td className="px-4 py-3 text-sm">Miscellaneous</td>
+                      <td className="px-4 py-3 text-sm">Photograph</td>
+                      <td className="px-4 py-3 text-sm">28/11/2018</td>
+                      <td className="px-4 py-3 text-sm">—</td>
+                      <td className="px-4 py-3 text-sm">
+                        <div>28/11/2018 16:59:24</div>
+                        <div className="text-gray-500">lauren.johnson</div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {activeTab !== "tasks" &&
         activeTab !== "details" &&
         activeTab !== "contacts" && (
