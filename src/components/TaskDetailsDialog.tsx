@@ -104,6 +104,114 @@ const CogIcon = (
   </svg>
 );
 
+// Other icon imports
+const DocumentIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+    />
+  </svg>
+);
+
+const LegislationIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"
+    />
+  </svg>
+);
+
+const StatusIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+);
+
+const CompletionIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+    />
+  </svg>
+);
+
+const FeedIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+    />
+  </svg>
+);
+
+const RAGIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"
+    />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"
+    />
+  </svg>
+);
+
 // --- Helper Components ---
 
 // Simple Progress Bar Component
@@ -156,13 +264,13 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
   const sidebarItems = [
     { id: "general", label: "General", icon: InfoIcon },
     { id: "profile", label: "Profile", icon: UserGroupIcon },
-    { id: "feed", label: "Feed", icon: InfoIcon }, // Placeholder
-    { id: "rag", label: "RAG", icon: InfoIcon }, // Placeholder
-    { id: "documents", label: "Documents", icon: PhotoIcon }, // Placeholder - using photo for now
-    { id: "status", label: "Status", icon: InfoIcon }, // Placeholder
-    { id: "legislation", label: "Legislation", icon: InfoIcon }, // Placeholder
-    { id: "responsible", label: "Responsible", icon: UserGroupIcon }, // Placeholder
-    { id: "completion", label: "Completion", icon: InfoIcon }, // Placeholder
+    { id: "feed", label: "Feed", icon: FeedIcon },
+    { id: "rag", label: "RAG", icon: RAGIcon },
+    { id: "documents", label: "Documents", icon: DocumentIcon },
+    { id: "status", label: "Status", icon: StatusIcon },
+    { id: "legislation", label: "Legislation", icon: LegislationIcon },
+    { id: "responsible", label: "Responsible", icon: UserGroupIcon },
+    { id: "completion", label: "Completion", icon: CompletionIcon },
   ];
 
   // --- Badge Rendering Logic ---
@@ -378,35 +486,35 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                       <div className="space-y-3 sm:space-y-4 md:space-y-5">
                         <div>
                           <p className="text-gray-500 text-xs mb-0.5">Type:</p>
-                          <p className="text-gray-800 font-medium">-</p>
+                          <p className="text-gray-800 font-medium">
+                            Preventive
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Building:
+                          </p>
+                          <p className="text-gray-800 font-medium">
+                            {buildingName}
+                          </p>
+                          {buildingImage && (
+                            <div className="mt-2">
+                              <img
+                                src={buildingImage}
+                                alt={buildingName}
+                                className="w-full max-w-xs rounded-md border border-gray-200"
+                              />
+                            </div>
+                          )}
                         </div>
                         <div>
                           <p className="text-gray-500 text-xs mb-0.5">Code:</p>
                           <p className="text-gray-800 font-medium">-</p>
                         </div>
                         <div>
-                          <p className="text-gray-500 text-xs mb-0.5">
-                            Observation:
-                          </p>
-                          <p className="text-gray-800 font-medium leading-relaxed">
-                            -
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500 text-xs mb-0.5">
-                            Risk Area:
-                          </p>
+                          <p className="text-gray-500 text-xs mb-0.5">Name:</p>
                           <p className="text-gray-800 font-medium">
-                            {task.riskArea}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500 text-xs mb-0.5">
-                            Due Date:
-                          </p>
-                          {/* Use red background only if overdue or high prio? Based on screenshot, it's always red */}
-                          <p className="font-semibold bg-red-100 text-red-700 px-2 py-0.5 rounded inline-block text-xs">
-                            {task.dueDate}
+                            {task.description}
                           </p>
                         </div>
                       </div>
@@ -415,49 +523,336 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                       <div className="space-y-3 sm:space-y-4 md:space-y-5">
                         <div>
                           <p className="text-gray-500 text-xs mb-0.5">
-                            Building:
-                          </p>
-                          <p className="text-gray-800 font-medium">
-                            {buildingName}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500 text-xs mb-0.5">
-                            Status:
-                          </p>
-                          <p className="text-gray-800 font-medium">
-                            {task.progress || "-"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500 text-xs mb-0.5">
-                            Priority:
-                          </p>
-                          <p className="text-gray-800 font-medium">
-                            {task.priority}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500 text-xs mb-0.5">
-                            Risk Level:
-                          </p>
-                          <p className="text-gray-800 font-medium">
-                            {task.riskLevel}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500 text-xs mb-0.5">
-                            Description:
+                            Observation:
                           </p>
                           <p className="text-gray-800 font-medium leading-relaxed">
-                            {task.description}
+                            The client has a requirement for regular H&S
+                            inspections
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Instruction:
+                          </p>
+                          <p className="text-gray-800 font-medium leading-relaxed">
+                            ASAP Comply to visit each property and summarise
+                            health & safety findings including fire safety
+                            checks
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Risk Area:
+                          </p>
+                          <p className="text-gray-800 font-medium">
+                            Health & Safety
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Subsection:
+                          </p>
+                          <p className="text-gray-800 font-medium">Report</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Due Date:
+                          </p>
+                          <p className="font-semibold bg-blue-500 text-white px-2 py-0.5 rounded inline-block text-xs">
+                            {task.dueDate}
                           </p>
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Add other content sections for different sidebar items here */}
+                  {/* --- Profile Section --- */}
+                  {activeSidebarItem === "profile" && (
+                    <div className="space-y-4 text-sm">
+                      <div className="grid grid-cols-1 gap-y-3">
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Priority:
+                          </p>
+                          <p className="font-semibold bg-yellow-500 text-white px-2 py-0.5 rounded inline-block text-xs">
+                            {task.priority === "M"
+                              ? "Medium"
+                              : task.priority === "H"
+                              ? "High"
+                              : "Low"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Risk Level:
+                          </p>
+                          <p className="font-semibold bg-blue-500 text-white px-2 py-0.5 rounded inline-block text-xs">
+                            {task.riskLevel === "L"
+                              ? "Low"
+                              : task.riskLevel === "M"
+                              ? "Medium"
+                              : "High"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Statutory:
+                          </p>
+                          <p className="text-gray-800 font-medium">Yes</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Critical:
+                          </p>
+                          <p className="text-gray-800 font-medium">No</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Number of Attached Documents:
+                          </p>
+                          <p className="text-gray-800 font-medium">—</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Number of Required Documents:
+                          </p>
+                          <p className="text-gray-800 font-medium">1</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* --- Feed Section --- */}
+                  {activeSidebarItem === "feed" && (
+                    <div className="space-y-4 text-sm">
+                      <div className="text-center text-gray-500 py-8">
+                        No activities
+                      </div>
+                    </div>
+                  )}
+
+                  {/* --- RAG Section --- */}
+                  {activeSidebarItem === "rag" && (
+                    <div className="space-y-4 text-sm">
+                      <div className="grid grid-cols-1 gap-y-3">
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Repeat Value:
+                          </p>
+                          <p className="text-gray-800 font-medium">1</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Repeat Unit:
+                          </p>
+                          <p className="text-gray-800 font-medium">MONTHLY</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Amber Value:
+                          </p>
+                          <p className="text-gray-800 font-medium">1</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Amber Unit:
+                          </p>
+                          <p className="text-gray-800 font-medium">WEEKLY</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* --- Documents Section --- */}
+                  {activeSidebarItem === "documents" && (
+                    <div className="space-y-4 text-sm">
+                      <div className="grid grid-cols-1 gap-y-3">
+                        <div className="border rounded-md p-3">
+                          <div className="flex items-center mb-2">
+                            <input
+                              type="checkbox"
+                              className="mr-2"
+                              disabled
+                              checked
+                            />
+                            <span className="text-sm font-medium">
+                              Uploaded / linked
+                            </span>
+                          </div>
+                          <p className="text-gray-500 text-sm italic">
+                            No documents uploaded
+                          </p>
+                        </div>
+                        <div className="mt-4">
+                          <button className="flex items-center text-amber-600 hover:text-amber-800 font-medium text-sm">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4 mr-1"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            Start job to activate document upload
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* --- Status Section --- */}
+                  {activeSidebarItem === "status" && (
+                    <div className="space-y-4 text-sm">
+                      <div className="grid grid-cols-1 gap-y-3">
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Compliant:
+                          </p>
+                          <p className="text-gray-800 font-medium">Yes</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Due Status:
+                          </p>
+                          <p className="text-gray-800 font-medium">Pending</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Job Status:
+                          </p>
+                          <p className="text-gray-800 font-medium">—</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            On Hold:
+                          </p>
+                          <p className="text-gray-800 font-medium">No</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            On Hold Until:
+                          </p>
+                          <p className="text-gray-800 font-medium">—</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* --- Legislation Section --- */}
+                  {activeSidebarItem === "legislation" && (
+                    <div className="space-y-4 text-sm">
+                      <div className="grid grid-cols-1 gap-y-3">
+                        <div className="bg-gray-100 rounded-md p-3 flex items-center">
+                          <div className="flex-grow">
+                            <p className="font-medium text-gray-800">
+                              Health and Safety at Work etc Act 1974
+                            </p>
+                            <p className="text-xs text-gray-500">HASAWA 1974</p>
+                          </div>
+                        </div>
+                        <div className="bg-gray-100 rounded-md p-3 flex items-center">
+                          <div className="flex-grow">
+                            <p className="font-medium text-gray-800">
+                              The Management of Health & Safety at Work
+                              Regulations 1999
+                            </p>
+                            <p className="text-xs text-gray-500">MHSWR 1999</p>
+                          </div>
+                        </div>
+                        <div className="bg-gray-100 rounded-md p-3 flex items-center">
+                          <div className="flex-grow">
+                            <p className="font-medium text-gray-800">
+                              The Workplace (Health, Safety and Welfare)
+                              Regulations 1992
+                            </p>
+                            <p className="text-xs text-gray-500">WHSWR 1992</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* --- Responsible Section --- */}
+                  {activeSidebarItem === "responsible" && (
+                    <div className="space-y-4 text-sm">
+                      <div className="grid grid-cols-1 gap-y-3">
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">Team:</p>
+                          <p className="text-gray-800 font-medium">
+                            {task.team || "ASAP Comply Ltd"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Assignee:
+                          </p>
+                          <p className="text-gray-800 font-medium">
+                            {task.assignee || "Mark Burchall (ASAP)"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* --- Completion Section --- */}
+                  {activeSidebarItem === "completion" && (
+                    <div className="space-y-4 text-sm">
+                      <div className="grid grid-cols-1 gap-y-3">
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Progress %:
+                          </p>
+                          <p className="text-gray-800 font-medium">0</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            In Progress:
+                          </p>
+                          <p className="text-gray-800 font-medium">—</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            CompletedBy:
+                          </p>
+                          <p className="text-gray-800 font-medium">—</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            CompletedDate:
+                          </p>
+                          <p className="text-gray-800 font-medium">—</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Last Completed:
+                          </p>
+                          <p className="text-gray-800 font-medium">
+                            01/04/2025
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Last Completed By:
+                          </p>
+                          <p className="text-gray-800 font-medium">
+                            Mark Burchall - ASAP Comply Ltd
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            On-Time:
+                          </p>
+                          <p className="text-gray-800 font-medium">No</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
