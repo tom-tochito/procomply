@@ -2131,9 +2131,378 @@ export default function BuildingDetailsPage() {
         </div>
       )}
 
+      {activeTab === "planner" && (
+        <div className="space-y-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-6">
+            <div className="relative w-full md:w-64">
+              <input
+                type="text"
+                placeholder="search tasks"
+                className="border rounded-md pl-3 pr-10 py-2 w-full"
+              />
+              <button className="absolute right-3 top-1/2 -translate-y-1/2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="flex gap-3 w-full md:w-auto">
+              <button className="px-4 py-2 border rounded-md bg-white hover:bg-gray-50">
+                CSV
+              </button>
+              <div className="relative">
+                <button className="flex items-center gap-2 px-4 py-2 border rounded-md bg-white hover:bg-gray-50">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-teal-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <span>2025</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 text-gray-500"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Year planner table with scrollable area */}
+          <div className="bg-white rounded-lg border overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-max w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-50 border-b">
+                    <th className="sticky left-0 z-10 bg-gray-50 px-4 py-3 text-left text-sm font-medium text-gray-700 border-r">
+                      #
+                    </th>
+                    <th className="sticky left-12 z-10 bg-gray-50 px-4 py-3 text-left text-sm font-medium text-gray-700 border-r min-w-[200px]">
+                      Task
+                    </th>
+                    <th className="sticky left-[calc(200px+48px)] z-10 bg-gray-50 px-4 py-3 text-left text-sm font-medium text-gray-700 border-r w-[80px]">
+                      Freq
+                    </th>
+                    <th className="sticky left-[calc(280px+48px)] z-10 bg-gray-50 px-4 py-3 text-left text-sm font-medium text-gray-700 border-r min-w-[150px]">
+                      Team
+                    </th>
+                    <th className="sticky left-[calc(430px+48px)] z-10 bg-gray-50 px-4 py-3 text-left text-sm font-medium text-gray-700 border-r min-w-[150px]">
+                      Assignee
+                    </th>
+                    <th className="sticky left-[calc(580px+48px)] z-10 bg-gray-50 px-4 py-3 text-left text-sm font-medium text-gray-700 border-r min-w-[120px]">
+                      Sched Date
+                    </th>
+
+                    {/* December */}
+                    <th
+                      className="px-1 py-2 text-center text-sm font-medium text-gray-700 border-r border-b"
+                      colSpan={1}
+                    >
+                      <div>Dec</div>
+                    </th>
+
+                    {/* January */}
+                    <th
+                      className="px-1 py-2 text-center text-sm font-medium text-gray-700 border-r border-b"
+                      colSpan={4}
+                    >
+                      <div>Jan</div>
+                    </th>
+
+                    {/* February */}
+                    <th
+                      className="px-1 py-2 text-center text-sm font-medium text-gray-700 border-r border-b"
+                      colSpan={4}
+                    >
+                      <div>Feb</div>
+                    </th>
+
+                    {/* March */}
+                    <th
+                      className="px-1 py-2 text-center text-sm font-medium text-gray-700 border-r border-b"
+                      colSpan={4}
+                    >
+                      <div>Mar</div>
+                    </th>
+
+                    {/* April */}
+                    <th
+                      className="px-1 py-2 text-center text-sm font-medium text-gray-700 border-r border-b"
+                      colSpan={4}
+                    >
+                      <div>Apr</div>
+                    </th>
+
+                    {/* May */}
+                    <th
+                      className="px-1 py-2 text-center text-sm font-medium text-gray-700 border-b"
+                      colSpan={4}
+                    >
+                      <div>May</div>
+                    </th>
+                  </tr>
+
+                  <tr className="bg-gray-50 border-b">
+                    <th className="sticky left-0 z-10 bg-gray-50 px-4 py-2 text-left text-sm font-medium text-gray-700 border-r"></th>
+                    <th className="sticky left-12 z-10 bg-gray-50 px-4 py-2 text-left text-sm font-medium text-gray-700 border-r"></th>
+                    <th className="sticky left-[calc(200px+48px)] z-10 bg-gray-50 px-4 py-2 text-left text-sm font-medium text-gray-700 border-r"></th>
+                    <th className="sticky left-[calc(280px+48px)] z-10 bg-gray-50 px-4 py-2 text-left text-sm font-medium text-gray-700 border-r"></th>
+                    <th className="sticky left-[calc(430px+48px)] z-10 bg-gray-50 px-4 py-2 text-left text-sm font-medium text-gray-700 border-r"></th>
+                    <th className="sticky left-[calc(580px+48px)] z-10 bg-gray-50 px-4 py-2 text-left text-sm font-medium text-gray-700 border-r"></th>
+
+                    {/* Dates for December */}
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      29
+                    </th>
+
+                    {/* Dates for January */}
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      05
+                    </th>
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      12
+                    </th>
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      19
+                    </th>
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      26
+                    </th>
+
+                    {/* Dates for February */}
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      02
+                    </th>
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      09
+                    </th>
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      16
+                    </th>
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      23
+                    </th>
+
+                    {/* Dates for March */}
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      02
+                    </th>
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      09
+                    </th>
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      16
+                    </th>
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      23
+                    </th>
+
+                    {/* Dates for April */}
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      30
+                    </th>
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      06
+                    </th>
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      13
+                    </th>
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      20
+                    </th>
+
+                    {/* Dates for May */}
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      27
+                    </th>
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      04
+                    </th>
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
+                      11
+                    </th>
+                    <th className="px-1 py-2 text-center text-xs font-medium text-gray-700 w-[40px]">
+                      18
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr className="border-b">
+                    <td className="sticky left-0 z-10 bg-white px-4 py-3 text-sm border-r">
+                      1
+                    </td>
+                    <td className="sticky left-12 z-10 bg-white px-4 py-3 text-sm border-r">
+                      Fire Alarm Testing
+                    </td>
+                    <td className="sticky left-[calc(200px+48px)] z-10 bg-white px-4 py-3 text-sm border-r">
+                      Monthly
+                    </td>
+                    <td className="sticky left-[calc(280px+48px)] z-10 bg-white px-4 py-3 text-sm border-r">
+                      ASAP Comply Ltd
+                    </td>
+                    <td className="sticky left-[calc(430px+48px)] z-10 bg-white px-4 py-3 text-sm border-r">
+                      Mark Burchall
+                    </td>
+                    <td className="sticky left-[calc(580px+48px)] z-10 bg-white px-4 py-3 text-sm border-r">
+                      15/01/2025
+                    </td>
+
+                    {/* Calendar cells - Dec to May */}
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r bg-blue-100"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center"></td>
+                  </tr>
+
+                  <tr className="border-b">
+                    <td className="sticky left-0 z-10 bg-white px-4 py-3 text-sm border-r">
+                      2
+                    </td>
+                    <td className="sticky left-12 z-10 bg-white px-4 py-3 text-sm border-r">
+                      Quarterly Fire Door Inspection
+                    </td>
+                    <td className="sticky left-[calc(200px+48px)] z-10 bg-white px-4 py-3 text-sm border-r">
+                      Quarterly
+                    </td>
+                    <td className="sticky left-[calc(280px+48px)] z-10 bg-white px-4 py-3 text-sm border-r">
+                      ASAP Comply Ltd
+                    </td>
+                    <td className="sticky left-[calc(430px+48px)] z-10 bg-white px-4 py-3 text-sm border-r">
+                      John Wade
+                    </td>
+                    <td className="sticky left-[calc(580px+48px)] z-10 bg-white px-4 py-3 text-sm border-r">
+                      28/02/2025
+                    </td>
+
+                    {/* Calendar cells - Dec to May */}
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r bg-blue-100"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center"></td>
+                  </tr>
+
+                  <tr className="border-b">
+                    <td className="sticky left-0 z-10 bg-white px-4 py-3 text-sm border-r">
+                      3
+                    </td>
+                    <td className="sticky left-12 z-10 bg-white px-4 py-3 text-sm border-r">
+                      Annual Fire Risk Assessment
+                    </td>
+                    <td className="sticky left-[calc(200px+48px)] z-10 bg-white px-4 py-3 text-sm border-r">
+                      Annual
+                    </td>
+                    <td className="sticky left-[calc(280px+48px)] z-10 bg-white px-4 py-3 text-sm border-r">
+                      ASAP Comply Ltd
+                    </td>
+                    <td className="sticky left-[calc(430px+48px)] z-10 bg-white px-4 py-3 text-sm border-r">
+                      Wayne Ross
+                    </td>
+                    <td className="sticky left-[calc(580px+48px)] z-10 bg-white px-4 py-3 text-sm border-r">
+                      28/04/2025
+                    </td>
+
+                    {/* Calendar cells - Dec to May */}
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r bg-blue-100"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center border-r"></td>
+                    <td className="px-0 py-3 text-center"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Footer - Task count */}
+            <div className="py-3 px-4 border-t text-right text-sm text-gray-700">
+              <strong>NO. OF TASKS: 0</strong>
+            </div>
+          </div>
+        </div>
+      )}
+
       {activeTab !== "tasks" &&
         activeTab !== "details" &&
-        activeTab !== "contacts" && (
+        activeTab !== "contacts" &&
+        activeTab !== "documents" &&
+        activeTab !== "planner" && (
           <div className="p-10 text-center bg-white rounded-lg border">
             <svg
               xmlns="http://www.w3.org/2000/svg"
