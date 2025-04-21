@@ -5,6 +5,7 @@ import Link from "next/link";
 import Header from "@/common/components/Header";
 import { documents, Document } from "@/data/documents";
 import DocumentDetailsDialog from "@/components/DocumentDetailsDialog";
+import UploadDocumentDialog from "@/components/UploadDocumentDialog";
 import { useParams } from "next/navigation";
 
 // Icons
@@ -87,6 +88,7 @@ export default function DocumentPage() {
   const [fileTypeDropdownOpen, setFileTypeDropdownOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(
     null
   );
@@ -117,6 +119,19 @@ export default function DocumentPage() {
   // Handle dialog close
   const handleDialogClose = () => {
     setDialogOpen(false);
+  };
+
+  // Handle upload button click
+  const handleUploadClick = () => {
+    setUploadDialogOpen(true);
+  };
+
+  // Handle document upload
+  const handleUploadDocument = (documentData: any) => {
+    console.log("Document uploaded:", documentData);
+    // Here you would typically send the data to your backend
+    // For now, we'll just show an alert
+    alert(`Document "${documentData.file.name}" uploaded successfully!`);
   };
 
   // Filter documents based on search and filters
@@ -234,6 +249,13 @@ export default function DocumentPage() {
           document={selectedDocument}
         />
       )}
+
+      {/* Upload document dialog */}
+      <UploadDocumentDialog
+        isOpen={uploadDialogOpen}
+        onClose={() => setUploadDialogOpen(false)}
+        onUpload={handleUploadDocument}
+      />
 
       {/* Page title and breadcrumbs */}
       <div className="flex items-center justify-between">
@@ -414,7 +436,10 @@ export default function DocumentPage() {
               </div>
 
               {/* Upload Button */}
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center">
+              <button
+                onClick={handleUploadClick}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center"
+              >
                 <UploadIcon className="h-5 w-5 mr-2" />
                 <span>Upload Document</span>
               </button>
