@@ -30,6 +30,73 @@ export default function DashboardPage() {
   const [selectedTaskType, setSelectedTaskType] = useState("Survey tasks");
   const [selectedBuildingUse, setSelectedBuildingUse] =
     useState("Building Use");
+  const [activeActivityTab, setActiveActivityTab] = useState("Task Activity");
+
+  // Sample activities data
+  const taskActivities = [
+    {
+      title: "Monthly H&S Visit (Includes Temp & Lights)",
+      location: "40050 Sidcup House",
+      status: "Created this task",
+    },
+    {
+      title: "Monthly H&S Visit (Includes Temp & Lights)",
+      location: "40050 Sidcup House",
+      team: "ASAP Comply Ltd",
+      assignee: "Mark Burchall (ASAP)",
+    },
+    {
+      title: "Quarterly Communal Fire Door Inspections",
+      location: "40126 Orion House",
+      status: "Visited awaiting report",
+    },
+    {
+      title: "Quarterly Communal Fire Door Inspections",
+      location: "40008 Stirling Court",
+      status: "Put on hold by Marta",
+    },
+    {
+      title: "Quarterly Communal Fire Door Inspections",
+      location: "40071 Gloucester Place",
+      status: "Removed from scope by Marta",
+    },
+  ];
+
+  const jobActivities = [
+    {
+      title: "Fire Risk Assessment",
+      location: "40126 Orion House",
+      status: "Job assigned to London Fire Division",
+    },
+    {
+      title: "Asbestos Surveys",
+      location: "40008 Stirling Court",
+      status: "Survey completed, awaiting report",
+    },
+    {
+      title: "Fire Alarm Testing",
+      location: "40071 Gloucester Place",
+      status: "Job scheduled for next week",
+    },
+  ];
+
+  const docActivities = [
+    {
+      title: "Fire Risk Assessment Report",
+      location: "40126 Orion House",
+      status: "Document uploaded by John Smith",
+    },
+    {
+      title: "Asbestos Survey Report",
+      location: "40008 Stirling Court",
+      status: "Document pending approval",
+    },
+    {
+      title: "Health & Safety Policy",
+      location: "Company-wide",
+      status: "Document updated by Admin",
+    },
+  ];
 
   // Filter options
   const teamOptions = [
@@ -303,59 +370,207 @@ export default function DashboardPage() {
 
         {/* Column 3: Activities */}
         <div className="rounded-lg border p-5 bg-white shadow-sm">
-          <h3 className="font-bold mb-4 text-lg text-gray-800 border-b pb-2">
-            Recent Activities
-          </h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-bold text-lg text-gray-800">Activities</h3>
+            <div className="flex items-center">
+              <button className="p-1 text-gray-500 hover:text-gray-700 mr-1">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+              <span className="text-base font-medium px-2">Apr 2025</span>
+              <button className="p-1 text-gray-500 hover:text-gray-700 ml-1">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div className="border-b pb-4 mb-4">
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setActiveActivityTab("Task Activity")}
+                className={`px-2.5 py-1 text-xs rounded-md ${
+                  activeActivityTab === "Task Activity"
+                    ? "bg-gray-800 text-white"
+                    : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                }`}
+              >
+                Task Activity
+              </button>
+              <button
+                onClick={() => setActiveActivityTab("Job Activity")}
+                className={`px-2.5 py-1 text-xs rounded-md ${
+                  activeActivityTab === "Job Activity"
+                    ? "bg-gray-800 text-white"
+                    : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                }`}
+              >
+                Job Activity
+              </button>
+              <button
+                onClick={() => setActiveActivityTab("Doc Activity")}
+                className={`px-2.5 py-1 text-xs rounded-md ${
+                  activeActivityTab === "Doc Activity"
+                    ? "bg-gray-800 text-white"
+                    : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                }`}
+              >
+                Doc Activity
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm text-blue-600 font-medium flex items-center">
+              Newest Activities
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 ml-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </span>
+          </div>
+
           <div className="space-y-4 text-sm max-h-[350px] overflow-y-auto pr-2">
-            <div className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
-              <strong className="text-blue-600">Monthly PPM Visit</strong>{" "}
-              <br />
-              <span className="text-gray-700">40056 Delta Court</span> <br />
-              <span className="italic text-gray-500 text-xs mt-1 block">
-                Removed from scope as not deemed as a tall building
-              </span>
-            </div>
-            <div className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
-              <strong className="text-blue-600">
-                Quarterly Communal Fire Door Inspections
-              </strong>{" "}
-              <br />
-              <span className="text-gray-700">40126 Orion House</span> <br />
-              <span className="italic text-gray-500 text-xs mt-1 block">
-                Visited awaiting report
-              </span>
-            </div>
-            <div className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
-              <strong className="text-blue-600">
-                Quarterly Communal Fire Door Inspections
-              </strong>{" "}
-              <br />
-              <span className="text-gray-700">40008 Stirling Court</span> <br />
-              <span className="italic text-gray-500 text-xs mt-1 block">
-                Put on hold by Marta
-              </span>
-            </div>
-            <div className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
-              <strong className="text-blue-600">
-                Quarterly Communal Fire Door Inspections
-              </strong>{" "}
-              <br />
-              <span className="text-gray-700">40071 Gloucester Place</span>{" "}
-              <br />
-              <span className="italic text-gray-500 text-xs mt-1 block">
-                Removed from scope by Marta
-              </span>
-            </div>
-            <div className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
-              <strong className="text-blue-600">
-                Monthly H&S Visit (Includes Temp &amp; Lights)
-              </strong>{" "}
-              <br />
-              <span className="text-gray-700">40093 Cedar Road</span> <br />
-              <span className="italic text-gray-500 text-xs mt-1 block">
-                Scheduled Date → 2025-01-21
-              </span>
-            </div>
+            {activeActivityTab === "Task Activity" && (
+              <>
+                {taskActivities.map((activity, index) => (
+                  <div
+                    key={index}
+                    className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+                  >
+                    <strong className="text-blue-600">{activity.title}</strong>{" "}
+                    <br />
+                    <span className="text-gray-700">
+                      {activity.location}
+                    </span>{" "}
+                    <br />
+                    {activity.status && (
+                      <span className="italic text-gray-500 text-xs mt-1 block">
+                        {activity.status}
+                      </span>
+                    )}
+                    {activity.team && (
+                      <span className="flex items-center text-gray-500 text-xs mt-1">
+                        <span className="mr-1">Team</span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-3 w-3 inline-block mx-1"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                        <span className="text-gray-700">{activity.team}</span>
+                      </span>
+                    )}
+                    {activity.assignee && (
+                      <span className="flex items-center text-gray-500 text-xs mt-1">
+                        <span className="mr-1">Assignee</span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-3 w-3 inline-block mx-1"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                        <span className="text-gray-700">
+                          {activity.assignee}
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </>
+            )}
+
+            {activeActivityTab === "Job Activity" && (
+              <>
+                {jobActivities.map((activity, index) => (
+                  <div
+                    key={index}
+                    className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+                  >
+                    <strong className="text-blue-600">{activity.title}</strong>{" "}
+                    <br />
+                    <span className="text-gray-700">
+                      {activity.location}
+                    </span>{" "}
+                    <br />
+                    <span className="italic text-gray-500 text-xs mt-1 block">
+                      {activity.status}
+                    </span>
+                  </div>
+                ))}
+              </>
+            )}
+
+            {activeActivityTab === "Doc Activity" && (
+              <>
+                {docActivities.map((activity, index) => (
+                  <div
+                    key={index}
+                    className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+                  >
+                    <strong className="text-blue-600">{activity.title}</strong>{" "}
+                    <br />
+                    <span className="text-gray-700">
+                      {activity.location}
+                    </span>{" "}
+                    <br />
+                    <span className="italic text-gray-500 text-xs mt-1 block">
+                      {activity.status}
+                    </span>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </div>
       </div>
