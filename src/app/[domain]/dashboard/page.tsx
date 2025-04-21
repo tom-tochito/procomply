@@ -10,7 +10,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Header from "@/common/components/Header";
 
@@ -24,33 +24,70 @@ ChartJS.register(
 );
 
 export default function DashboardPage() {
+  // Filter state variables
+  const [dateRange, setDateRange] = useState("21-04-2024 - 21-04-2025");
+  const [selectedTeam, setSelectedTeam] = useState("Team");
+  const [selectedTaskType, setSelectedTaskType] = useState("Survey tasks");
+  const [selectedBuildingUse, setSelectedBuildingUse] =
+    useState("Building Use");
+
+  // Filter options
+  const teamOptions = [
+    "Team",
+    "ASAP Comply Ltd",
+    "Property Fire Protection",
+    "UK Fire Protection",
+    "All Teams",
+  ];
+  const taskTypeOptions = [
+    "Survey tasks",
+    "Fire Risk Assessment",
+    "Asbestos Survey",
+    "Legionella Risk Assessment",
+    "All Tasks",
+  ];
+  const buildingUseOptions = [
+    "Building Use",
+    "Residential",
+    "Commercial",
+    "Mixed Use",
+    "All Buildings",
+  ];
+  const dateRangeOptions = [
+    "21-04-2024 - 21-04-2025",
+    "Last 30 days",
+    "Last 90 days",
+    "Last 6 months",
+    "Last 12 months",
+  ];
+
   const data = {
     labels: ["Camden", "Hampstead", "Ealing", "Leased"],
     datasets: [
       {
-        label: "Completed - 812 tasks",
-        data: [292, 355, 340, 7],
+        label: "Completed - 891 tasks",
+        data: [312, 355, 217, 7],
         backgroundColor: "#4caf50", // green
         stack: "stack1",
         borderRadius: 4,
       },
       {
-        label: "Outstanding (In Progress) - 103 tasks",
-        data: [30, 25, 35, 13],
+        label: "Outstanding (In Progress) - 36 tasks",
+        data: [12, 10, 8, 6],
         backgroundColor: "#f44336", // red
         stack: "stack1",
         borderRadius: 4,
       },
       {
-        label: "Outstanding (Not Started) - 79 tasks",
-        data: [10, 15, 20, 5],
+        label: "Outstanding (Not Started) - 68 tasks",
+        data: [25, 20, 18, 5],
         backgroundColor: "#ff7575", // pinkish
         stack: "stack1",
         borderRadius: 4,
       },
       {
-        label: "Outstanding (On Hold) - 17 tasks",
-        data: [5, 8, 4, 0],
+        label: "Outstanding (On Hold) - NaN tasks",
+        data: [0, 0, 0, 0],
         backgroundColor: "#9999ff", // purple
         stack: "stack1",
         borderRadius: 4,
@@ -75,7 +112,7 @@ export default function DashboardPage() {
         },
       },
       title: {
-        display: true,
+        display: false,
         text: "Survey Tasks Summary",
         font: {
           size: 16,
@@ -138,17 +175,17 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
           <h3 className="text-gray-500 text-sm">Total Tasks</h3>
-          <p className="text-2xl font-bold">994</p>
+          <p className="text-2xl font-bold">995</p>
           <p className="text-xs text-gray-500 mt-1">Across all properties</p>
         </div>
         <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
           <h3 className="text-gray-500 text-sm">Completed</h3>
-          <p className="text-2xl font-bold">812</p>
-          <p className="text-xs text-gray-500 mt-1">81.7% completion rate</p>
+          <p className="text-2xl font-bold">891</p>
+          <p className="text-xs text-gray-500 mt-1">89.5% completion rate</p>
         </div>
         <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-red-500">
           <h3 className="text-gray-500 text-sm">Outstanding</h3>
-          <p className="text-2xl font-bold">182</p>
+          <p className="text-2xl font-bold">104</p>
           <p className="text-xs text-gray-500 mt-1">Requires attention</p>
         </div>
         <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
@@ -162,11 +199,105 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Column 1 & 2: Chart */}
         <div className="col-span-2 rounded-lg border p-5 bg-white shadow-sm">
+          <h2 className="text-xl font-bold mb-4">Survey Tasks Summary</h2>
+
+          {/* Filter row */}
+          <div className="flex flex-wrap gap-3 mb-4">
+            <div className="relative">
+              <select
+                className="appearance-none border rounded-md px-3 py-2 pr-8 bg-gray-50 text-gray-800 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value)}
+              >
+                {dateRangeOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg
+                  className="fill-current h-4 w-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                </svg>
+              </div>
+            </div>
+            <div className="relative">
+              <select
+                className="appearance-none border rounded-md px-3 py-2 pr-8 bg-white text-gray-800 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                value={selectedTeam}
+                onChange={(e) => setSelectedTeam(e.target.value)}
+              >
+                {teamOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg
+                  className="fill-current h-4 w-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                </svg>
+              </div>
+            </div>
+            <div className="relative">
+              <select
+                className="appearance-none border rounded-md px-3 py-2 pr-8 bg-white text-gray-800 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                value={selectedTaskType}
+                onChange={(e) => setSelectedTaskType(e.target.value)}
+              >
+                {taskTypeOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg
+                  className="fill-current h-4 w-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                </svg>
+              </div>
+            </div>
+            <div className="relative">
+              <select
+                className="appearance-none border rounded-md px-3 py-2 pr-8 bg-white text-gray-800 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                value={selectedBuildingUse}
+                onChange={(e) => setSelectedBuildingUse(e.target.value)}
+              >
+                {buildingUseOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg
+                  className="fill-current h-4 w-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
           <div className="h-[400px]">
             <Bar data={data} options={options} />
           </div>
           <div className="text-right text-sm text-gray-600 mt-3 font-medium">
-            994 tasks &nbsp; | &nbsp; 1 of 1
+            995 tasks &nbsp; | &nbsp; 1 of 1
           </div>
         </div>
 
