@@ -4,12 +4,15 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/common/components/Header";
 import { tasks } from "@/data/tasks";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import TaskDetailsDialog from "@/components/TaskDetailsDialog";
 import LabelModal from "@/components/LabelModal";
+import TaskModal from "@/components/TaskModal";
+import TaskTemplateModal from "@/components/TaskTemplateModal";
 
 export default function TaskPage() {
   const params = useParams();
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [selectedDivision, setSelectedDivision] = useState("Active Divisions");
@@ -31,6 +34,34 @@ export default function TaskPage() {
     { name: "Important", color: "#F7941D" },
     { name: "Statutory", color: "#39B54A" },
   ]);
+
+  // Task modal state
+  const [taskModalOpen, setTaskModalOpen] = useState(false);
+  const [taskTemplateModalOpen, setTaskTemplateModalOpen] = useState(false);
+  const [addTaskDropdownOpen, setAddTaskDropdownOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+
+  // Reference for the dropdown
+  const addTaskButtonRef = React.useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        addTaskButtonRef.current &&
+        !addTaskButtonRef.current.contains(event.target)
+      ) {
+        setAddTaskDropdownOpen(false);
+      }
+    }
+
+    // Add event listener
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      // Clean up
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Add this new state for responsive table
   const [visibleColumns, setVisibleColumns] = useState({
@@ -219,6 +250,29 @@ export default function TaskPage() {
   // Handle saving a new label
   const handleSaveLabel = (labelData) => {
     setLabels([...labels, labelData]);
+  };
+
+  // Handle saving a new task
+  const handleSaveTask = (taskData) => {
+    console.log("New task created:", taskData);
+    // Here you would typically send the data to your API
+    setTaskModalOpen(false);
+  };
+
+  // Handle add task dropdown options
+  const handleAddTaskOption = (option) => {
+    if (option === "blank") {
+      setTaskModalOpen(true);
+    } else if (option === "template") {
+      setTaskTemplateModalOpen(true);
+    }
+    setAddTaskDropdownOpen(false);
+  };
+
+  // Handle template selection
+  const handleSelectTemplate = (template) => {
+    setSelectedTemplate(template);
+    setTaskModalOpen(true);
   };
 
   return (
@@ -847,8 +901,9 @@ export default function TaskPage() {
               </div>
 
               <button
-                className="bg-green-500 text-white px-3 py-1.5 rounded-md text-sm font-medium mr-2 flex items-center group relative"
-                onClick={() => alert("Add task clicked")}
+                className="bg-green-500 text-white px-3 py-1.5 rounded-md text-sm font-medium mr-2 flex items-center relative"
+                onClick={() => setAddTaskDropdownOpen(!addTaskDropdownOpen)}
+                ref={addTaskButtonRef}
               >
                 Add task
                 <svg
@@ -865,27 +920,29 @@ export default function TaskPage() {
                     d="M19 9l-7 7-7-7"
                   />
                 </svg>
-                {/* Quick add task dropdown - shown on hover */}
-                <div className="absolute hidden group-hover:block top-full right-0 mt-1 w-48 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
-                  <div
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      alert("Quick add: Fire Risk Assessment");
-                    }}
-                  >
-                    Fire Risk Assessment
+                {/* Add task dropdown menu */}
+                {addTaskDropdownOpen && (
+                  <div className="absolute top-full right-0 mt-1 w-48 bg-white rounded-md shadow-lg z-30 py-1 border border-gray-200">
+                    <div
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddTaskOption("template");
+                      }}
+                    >
+                      Start from template
+                    </div>
+                    <div
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddTaskOption("blank");
+                      }}
+                    >
+                      Start from blank task
+                    </div>
                   </div>
-                  <div
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      alert("Quick add: Asbestos Survey");
-                    }}
-                  >
-                    Asbestos Survey
-                  </div>
-                </div>
+                )}
               </button>
               <button
                 className="bg-white border border-gray-300 px-3 py-1.5 rounded-md text-sm font-medium"
@@ -1496,6 +1553,24 @@ export default function TaskPage() {
         isOpen={labelModalOpen}
         onClose={() => setLabelModalOpen(false)}
         onSave={handleSaveLabel}
+      />
+
+      {/* Task modal */}
+      <TaskModal
+        isOpen={taskModalOpen}
+        onClose={() => {
+          setTaskModalOpen(false);
+          setSelectedTemplate(null);
+        }}
+        onSave={handleSaveTask}
+        templateData={selectedTemplate}
+      />
+
+      {/* Task template modal */}
+      <TaskTemplateModal
+        isOpen={taskTemplateModalOpen}
+        onClose={() => setTaskTemplateModalOpen(false)}
+        onSelectTemplate={handleSelectTemplate}
       />
     </div>
   );
