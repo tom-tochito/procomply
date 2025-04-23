@@ -4,13 +4,14 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
+import TaskTemplateForm from "@/components/TaskTemplateForm";
 
 export default function TaskTemplatePage() {
   const params = useParams();
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Mock template data based on the screenshot
-  const templates = [
+  const [templateFormOpen, setTemplateFormOpen] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState(null);
+  const [templates, setTemplates] = useState([
     {
       code: "TT-661439",
       name: "6 Monthly Fire Alarm Service",
@@ -86,7 +87,7 @@ export default function TaskTemplatePage() {
       amberValue: "1",
       amberUnit: "YEARLY",
     },
-  ];
+  ]);
 
   // Filter templates based on search
   const filteredTemplates = templates.filter((template) => {
@@ -97,6 +98,27 @@ export default function TaskTemplatePage() {
       template.riskArea.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
+
+  // Handle editing a template
+  const handleEditTemplate = (template) => {
+    setEditingTemplate(template);
+    setTemplateFormOpen(true);
+  };
+
+  // Handle saving a template
+  const handleSaveTemplate = (templateData) => {
+    if (editingTemplate) {
+      // Update existing template
+      setTemplates(
+        templates.map((t) => (t.code === templateData.code ? templateData : t))
+      );
+    } else {
+      // Add new template
+      setTemplates([...templates, templateData]);
+    }
+    setTemplateFormOpen(false);
+    setEditingTemplate(null);
+  };
 
   return (
     <div className="p-3 md:p-6 space-y-6 md:space-y-8 bg-gray-50 min-h-screen">
@@ -120,6 +142,17 @@ export default function TaskTemplatePage() {
             <span>Task Template</span>
           </div>
         </div>
+
+        {/* Add template button */}
+        <button
+          className="bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+          onClick={() => {
+            setEditingTemplate(null); // Reset editing state
+            setTemplateFormOpen(true); // Open form
+          }}
+        >
+          Add Task Template
+        </button>
       </div>
 
       {/* Search and filters */}
@@ -235,13 +268,19 @@ export default function TaskTemplatePage() {
                 >
                   Amber Unit
                 </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredTemplates.map((template, index) => (
                 <tr
                   key={template.code}
-                  className="hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="hover:bg-gray-50 transition-colors"
                 >
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                     {template.code}
@@ -282,12 +321,31 @@ export default function TaskTemplatePage() {
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                     {template.amberUnit}
                   </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <button
+                      className="text-blue-600 hover:text-blue-800 mr-2"
+                      onClick={() => handleEditTemplate(template)}
+                    >
+                      Edit
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Task Template Form Modal */}
+      <TaskTemplateForm
+        isOpen={templateFormOpen}
+        onClose={() => {
+          setTemplateFormOpen(false);
+          setEditingTemplate(null);
+        }}
+        onSave={handleSaveTemplate}
+        editData={editingTemplate}
+      />
     </div>
   );
 }
