@@ -271,7 +271,9 @@ export default function TaskPage() {
 
   // Handle template selection
   const handleSelectTemplate = (template) => {
+    console.log("Selected template:", template);
     setSelectedTemplate(template);
+    // When selecting a template, automatically open the task modal with this template data
     setTaskModalOpen(true);
   };
 

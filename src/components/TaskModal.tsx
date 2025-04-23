@@ -44,7 +44,85 @@ export default function TaskModal({
   const [compliant, setCompliant] = useState("");
 
   // Field options (would normally come from API)
-  const templateOptions = ["Template 1", "Template 2", "Template 3"];
+  // List of templates matching the ones in TaskTemplateModal
+  const templates = [
+    {
+      code: "TT-661439",
+      name: "6 Monthly Fire Alarm Service",
+      observation: "6 monthly service to the fire alarm system",
+      instruction: "Inspect and test the fire alarm system",
+      riskArea: "Fire",
+      subsection: "Inspection",
+      priority: "High",
+      riskLevel: "Medium",
+      statutory: "Yes",
+      repeatValue: "6",
+      repeatUnit: "MONTHLY",
+      amberValue: "1",
+      amberUnit: "MONTHLY",
+    },
+    {
+      code: "TT-412241",
+      name: "6 Monthly Fire Extinguisher Service",
+      observation: "No records of service found",
+      instruction: "Service the fire extinguishers",
+      riskArea: "Fire",
+      subsection: "Fire Alarm System",
+      priority: "High",
+      riskLevel: "Medium",
+      statutory: "Yes",
+      repeatValue: "6",
+      repeatUnit: "MONTHLY",
+      amberValue: "2",
+      amberUnit: "WEEKLY",
+    },
+    {
+      code: "TT-395976",
+      name: "Access Door Controls",
+      observation: "The door is not closing properly",
+      instruction: "The door should be fixed",
+      riskArea: "Health & Safety",
+      subsection: "",
+      priority: "High",
+      riskLevel: "High",
+      statutory: "Yes",
+      repeatValue: "0",
+      repeatUnit: "YEARLY",
+      amberValue: "1",
+      amberUnit: "MONTHLY",
+    },
+    {
+      code: "TT-453827",
+      name: "Access to Dry Riser",
+      observation: "There is a blockage to the dry riser",
+      instruction: "Ensure clear access to the dry riser",
+      riskArea: "Fire",
+      subsection: "Fire Hazards",
+      priority: "High",
+      riskLevel: "Medium",
+      statutory: "Yes",
+      repeatValue: "0",
+      repeatUnit: "YEARLY",
+      amberValue: "1",
+      amberUnit: "MONTHLY",
+    },
+    {
+      code: "TT-363623",
+      name: "Add Cross Sectional Drawings",
+      observation: "This installation requires cross sectional drawings",
+      instruction: "Add cross sectional drawings to the installation",
+      riskArea: "Electrical",
+      subsection: "Label",
+      priority: "Medium",
+      riskLevel: "Medium",
+      statutory: "Yes",
+      repeatValue: "0",
+      repeatUnit: "",
+      amberValue: "1",
+      amberUnit: "YEARLY",
+    },
+  ];
+
   const categoryOptions = ["Category 1", "Category 2", "Category 3"];
   const typeOptions = ["Type 1", "Type 2", "Type 3"];
   const buildingOptions = ["Building A", "Building B", "Building C"];
@@ -95,6 +173,28 @@ export default function TaskModal({
     });
   };
 
+  // Function to handle template selection and auto-fill fields
+  const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedTemplateCode = e.target.value;
+    setTaskTemplate(selectedTemplateCode);
+
+    if (selectedTemplateCode) {
+      const selectedTemplate = templates.find(
+        (t) => t.code === selectedTemplateCode
+      );
+      if (selectedTemplate) {
+        // Auto-fill fields from the selected template
+        setInstruction(selectedTemplate.instruction || "");
+        setDescription(selectedTemplate.observation || "");
+        setRiskArea(selectedTemplate.riskArea || "");
+        setSubsection(selectedTemplate.subsection || "");
+        setPriority(selectedTemplate.priority || "");
+        setRiskLevel(selectedTemplate.riskLevel || "");
+        setIsStatutory(selectedTemplate.statutory === "Yes");
+      }
+    }
+  };
+
   // Render the modal with fields matching the first or second screenshot
   return (
     <Transition show={isOpen} as={Fragment}>
@@ -139,12 +239,12 @@ export default function TaskModal({
                       <select
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                         value={taskTemplate}
-                        onChange={(e) => setTaskTemplate(e.target.value)}
+                        onChange={handleTemplateChange}
                       >
                         <option value="">-</option>
-                        {templateOptions.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
+                        {templates.map((template) => (
+                          <option key={template.code} value={template.code}>
+                            {template.name}
                           </option>
                         ))}
                       </select>
