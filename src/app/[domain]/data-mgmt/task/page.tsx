@@ -6,6 +6,7 @@ import Header from "@/common/components/Header";
 import { tasks } from "@/data/tasks";
 import { useParams } from "next/navigation";
 import TaskDetailsDialog from "@/components/TaskDetailsDialog";
+import LabelModal from "@/components/LabelModal";
 
 export default function TaskPage() {
   const params = useParams();
@@ -22,6 +23,14 @@ export default function TaskPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+
+  // Label modal state
+  const [labelModalOpen, setLabelModalOpen] = useState(false);
+  const [labels, setLabels] = useState([
+    { name: "Urgent", color: "#ED1C24" },
+    { name: "Important", color: "#F7941D" },
+    { name: "Statutory", color: "#39B54A" },
+  ]);
 
   // Add this new state for responsive table
   const [visibleColumns, setVisibleColumns] = useState({
@@ -207,6 +216,11 @@ export default function TaskPage() {
     setDialogOpen(false);
   };
 
+  // Handle saving a new label
+  const handleSaveLabel = (labelData) => {
+    setLabels([...labels, labelData]);
+  };
+
   return (
     <div className="p-3 md:p-6 space-y-6 md:space-y-8 bg-gray-50 min-h-screen">
       {/* Top header with logo and user info */}
@@ -315,7 +329,7 @@ export default function TaskPage() {
                 LABELS:
                 <button
                   className="ml-1 text-blue-500 hover:text-blue-600 focus:outline-none"
-                  onClick={() => alert("Add label functionality would go here")}
+                  onClick={() => setLabelModalOpen(true)}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -336,33 +350,20 @@ export default function TaskPage() {
 
               {/* Mock labels with click functionality */}
               <div className="space-y-1 mt-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                  <span
-                    className="text-sm text-gray-700 cursor-pointer hover:text-blue-600"
-                    onClick={() => alert("Clicked on Urgent label")}
-                  >
-                    Urgent
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
-                  <span
-                    className="text-sm text-gray-700 cursor-pointer hover:text-blue-600"
-                    onClick={() => alert("Clicked on Important label")}
-                  >
-                    Important
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                  <span
-                    className="text-sm text-gray-700 cursor-pointer hover:text-blue-600"
-                    onClick={() => alert("Clicked on Statutory label")}
-                  >
-                    Statutory
-                  </span>
-                </div>
+                {labels.map((label) => (
+                  <div key={label.name} className="flex items-center gap-2">
+                    <span
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: label.color }}
+                    ></span>
+                    <span
+                      className="text-sm text-gray-700 cursor-pointer hover:text-blue-600"
+                      onClick={() => alert(`Clicked on ${label.name} label`)}
+                    >
+                      {label.name}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -1489,6 +1490,13 @@ export default function TaskPage() {
           </div>
         </div>
       </div>
+
+      {/* Label modal */}
+      <LabelModal
+        isOpen={labelModalOpen}
+        onClose={() => setLabelModalOpen(false)}
+        onSave={handleSaveLabel}
+      />
     </div>
   );
 }
