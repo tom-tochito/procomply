@@ -4,6 +4,7 @@ export type Document = {
   name: string;
   fileType: string;
   category: string;
+  docCategory?: string;
   uploadDate: string;
   uploadedBy: string;
   size: string;
@@ -23,6 +24,7 @@ export const documents: Document[] = [
     name: "Fire Safety Certificate.pdf",
     fileType: "PDF",
     category: "Certification",
+    docCategory: "Fire",
     uploadDate: "15/04/2024",
     uploadedBy: "Mark Burchall",
     size: "2.4 MB",
@@ -38,6 +40,7 @@ export const documents: Document[] = [
     name: "Asbestos Survey Report.pdf",
     fileType: "PDF",
     category: "Survey",
+    docCategory: "Asbestos",
     uploadDate: "10/03/2024",
     uploadedBy: "John Smith",
     size: "5.7 MB",
@@ -53,6 +56,7 @@ export const documents: Document[] = [
     name: "Electrical Installation Certificate.pdf",
     fileType: "PDF",
     category: "Certification",
+    docCategory: "Electrical",
     uploadDate: "22/02/2024",
     uploadedBy: "Jane Doe",
     size: "1.2 MB",
@@ -68,6 +72,7 @@ export const documents: Document[] = [
     name: "Risk Assessment Template.docx",
     fileType: "DOCX",
     category: "Template",
+    docCategory: "Health and Safety",
     uploadDate: "05/01/2024",
     uploadedBy: "Admin",
     size: "245 KB",
@@ -82,6 +87,7 @@ export const documents: Document[] = [
     name: "Monthly H&S Inspection Checklist.xlsx",
     fileType: "XLSX",
     category: "Checklist",
+    docCategory: "Health and Safety",
     uploadDate: "18/03/2024",
     uploadedBy: "Mark Burchall",
     size: "320 KB",
@@ -97,6 +103,7 @@ export const documents: Document[] = [
     name: "Fire Safety Management Plan.pdf",
     fileType: "PDF",
     category: "Management Plan",
+    docCategory: "Fire",
     uploadDate: "14/12/2023",
     uploadedBy: "Jane Doe",
     size: "3.8 MB",
@@ -112,6 +119,7 @@ export const documents: Document[] = [
     name: "Previous Asbestos Report.pdf",
     fileType: "PDF",
     category: "Survey",
+    docCategory: "Asbestos",
     uploadDate: "10/06/2023",
     uploadedBy: "Previous Contractor",
     size: "4.2 MB",
@@ -127,6 +135,7 @@ export const documents: Document[] = [
     name: "Water Hygiene Risk Assessment.pdf",
     fileType: "PDF",
     category: "Risk Assessment",
+    docCategory: "Legionella",
     uploadDate: "05/04/2024",
     uploadedBy: "John Smith",
     size: "4.1 MB",
@@ -150,6 +159,10 @@ export const getDocumentsByTaskId = (taskId: string): Document[] => {
 
 export const getDocumentsByCategory = (category: string): Document[] => {
   return documents.filter((doc) => doc.category === category);
+};
+
+export const getDocumentsByDocCategory = (docCategory: string): Document[] => {
+  return documents.filter((doc) => doc.docCategory === docCategory);
 };
 
 export const getDocumentsByStatus = (

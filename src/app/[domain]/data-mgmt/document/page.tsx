@@ -82,6 +82,9 @@ export default function DocumentPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedDocCategory, setSelectedDocCategory] = useState<string | null>(
+    null
+  );
   const [selectedFileType, setSelectedFileType] = useState<string | null>(null);
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
@@ -156,6 +159,11 @@ export default function DocumentPage() {
 
     // Category filter
     if (selectedCategory && document.category !== selectedCategory) {
+      return false;
+    }
+
+    // Doc Category filter
+    if (selectedDocCategory && document.docCategory !== selectedDocCategory) {
       return false;
     }
 
@@ -235,6 +243,23 @@ export default function DocumentPage() {
       </span>
     );
   };
+
+  // Document categories from the screenshot
+  const docCategories = [
+    "Asbestos",
+    "Electrical",
+    "Energy",
+    "Environmental",
+    "Equality / Disability",
+    "Fire",
+    "Gas",
+    "Health and Safety",
+    "Legionella",
+    "Lift",
+    "Miscellaneous",
+    "Operation",
+    "Third Party",
+  ];
 
   return (
     <div className="p-3 md:p-6 space-y-6 md:space-y-8 bg-gray-50 min-h-screen">
@@ -318,6 +343,42 @@ export default function DocumentPage() {
         {/* Left sidebar - hidden on mobile unless toggled */}
         {sidebarOpen && (
           <div className="w-full lg:w-60 bg-white rounded-md shadow-sm p-4 order-2 lg:order-1">
+            {/* Doc Categories */}
+            <div className="mb-6">
+              <h3 className="text-xs uppercase text-gray-500 font-semibold mb-3">
+                DOC CATEGORIES:
+              </h3>
+              <div className="space-y-1">
+                <button
+                  className={`w-full text-left px-3 py-2 rounded-md text-sm ${
+                    selectedDocCategory === null
+                      ? "bg-blue-100 text-blue-600"
+                      : "hover:bg-gray-100"
+                  } cursor-pointer`}
+                  onClick={() => setSelectedDocCategory(null)}
+                >
+                  All Categories
+                </button>
+                {docCategories.map((category) => (
+                  <button
+                    key={category}
+                    className={`w-full text-left px-3 py-2 rounded-md text-sm ${
+                      selectedDocCategory === category
+                        ? "bg-blue-100 text-blue-600"
+                        : "hover:bg-gray-100"
+                    } cursor-pointer flex items-center`}
+                    onClick={() =>
+                      setSelectedDocCategory(
+                        selectedDocCategory === category ? null : category
+                      )
+                    }
+                  >
+                    <span className="text-gray-700 mr-2">›</span> {category}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="mb-6">
               <h3 className="text-xs uppercase text-gray-500 font-semibold mb-3">
                 FILTERS:
@@ -520,13 +581,41 @@ export default function DocumentPage() {
                 </button>
               </div>
             )}
-            {(selectedStatus || selectedCategory || selectedFileType) && (
+            {selectedDocCategory && (
+              <div className="flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                <span>Doc Category: {selectedDocCategory}</span>
+                <button
+                  className="ml-2 text-blue-800 hover:text-blue-900"
+                  onClick={() => setSelectedDocCategory(null)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            )}
+            {(selectedStatus ||
+              selectedCategory ||
+              selectedFileType ||
+              selectedDocCategory) && (
               <button
                 className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                 onClick={() => {
                   setSelectedStatus(null);
                   setSelectedCategory(null);
                   setSelectedFileType(null);
+                  setSelectedDocCategory(null);
                 }}
               >
                 Clear All Filters

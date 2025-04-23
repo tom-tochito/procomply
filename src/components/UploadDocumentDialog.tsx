@@ -59,6 +59,7 @@ export default function UploadDocumentDialog({
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [subCategory, setSubCategory] = useState("");
+  const [docCategory, setDocCategory] = useState("");
   const [validFrom, setValidFrom] = useState("");
   const [expiry, setExpiry] = useState("");
   const [isStatutory, setIsStatutory] = useState(false);
@@ -77,6 +78,7 @@ export default function UploadDocumentDialog({
     setDescription("");
     setCategory("");
     setSubCategory("");
+    setDocCategory("");
     setValidFrom("");
     setExpiry("");
     setIsStatutory(false);
@@ -101,6 +103,7 @@ export default function UploadDocumentDialog({
       description,
       category,
       subCategory,
+      docCategory,
       validFrom: validFrom ? new Date(validFrom) : null,
       expiry: expiry ? new Date(expiry) : null,
       isStatutory,
@@ -162,6 +165,21 @@ export default function UploadDocumentDialog({
     "Operations",
   ];
   const buildings = ["Building A", "Building B", "Building C", "All buildings"];
+  const docCategories = [
+    "Asbestos",
+    "Electrical",
+    "Energy",
+    "Environmental",
+    "Equality / Disability",
+    "Fire",
+    "Gas",
+    "Health and Safety",
+    "Legionella",
+    "Lift",
+    "Miscellaneous",
+    "Operation",
+    "Third Party",
+  ];
 
   return (
     <Transition show={isOpen} as={Fragment}>
@@ -308,6 +326,26 @@ export default function UploadDocumentDialog({
                         {buildings.map((b) => (
                           <option key={b} value={b}>
                             {b}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Doc Category */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Doc Category
+                      </label>
+                      <select
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        value={docCategory}
+                        onChange={(e) => setDocCategory(e.target.value)}
+                        required
+                      >
+                        <option value="">Select Doc Category</option>
+                        {docCategories.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat}
                           </option>
                         ))}
                       </select>
