@@ -193,11 +193,11 @@ export default function UploadDocumentDialog({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/25" />
+          <div className="fixed inset-0 bg-black/40" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
+          <div className="flex min-h-full items-center justify-center p-2 sm:p-4">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -207,24 +207,25 @@ export default function UploadDocumentDialog({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-lg bg-white p-6 shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-xl transform overflow-hidden rounded-lg bg-white p-4 sm:p-6 shadow-xl transition-all">
                 <div className="flex items-center justify-between mb-4">
-                  <Dialog.Title className="text-lg font-medium text-gray-900">
+                  <Dialog.Title className="text-base sm:text-lg font-medium text-gray-900">
                     Attach Document
                   </Dialog.Title>
                   <button
                     type="button"
                     className="text-gray-400 hover:text-gray-500"
                     onClick={handleClose}
+                    aria-label="Close dialog"
                   >
-                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                    <XMarkIcon className="h-5 w-5" aria-hidden="true" />
                   </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {/* File Upload Area */}
                   <div
-                    className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer ${
+                    className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center cursor-pointer ${
                       isDragging
                         ? "border-blue-500 bg-blue-50"
                         : "border-gray-300"
@@ -240,8 +241,9 @@ export default function UploadDocumentDialog({
                       className="hidden"
                       ref={fileInputRef}
                       onChange={handleFileChange}
+                      accept=".pdf,.doc,.docx,.xls,.xlsx"
                     />
-                    <DocumentPlusIcon className="mx-auto h-12 w-12 text-gray-400" />
+                    <DocumentPlusIcon className="mx-auto h-10 w-10 text-gray-400" />
                     {file ? (
                       <div className="mt-2">
                         <p className="text-sm font-medium text-gray-900">
@@ -263,199 +265,202 @@ export default function UploadDocumentDialog({
                     )}
                   </div>
 
-                  {/* Form fields - 2 columns */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Doc Type */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Doc Type
-                      </label>
-                      <select
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        value={docType}
-                        onChange={(e) => setDocType(e.target.value)}
-                        required
-                      >
-                        <option value="">Select Doc Type</option>
-                        {docTypes.map((type) => (
-                          <option key={type} value={type}>
-                            {type}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  {/* Form fields - scrollable container for mobile */}
+                  <div className="max-h-[calc(100vh-20rem)] overflow-y-auto pr-1">
+                    {/* Form fields - 2 columns */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      {/* Doc Type */}
+                      <div>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                          Doc Type
+                        </label>
+                        <select
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          value={docType}
+                          onChange={(e) => setDocType(e.target.value)}
+                          required
+                        >
+                          <option value="">Select Doc Type</option>
+                          {docTypes.map((type) => (
+                            <option key={type} value={type}>
+                              {type}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                    {/* Code */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Code
-                      </label>
-                      <input
-                        type="text"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        value={code}
-                        onChange={(e) => setCode(e.target.value)}
-                        required
-                      />
-                    </div>
+                      {/* Code */}
+                      <div>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                          Code
+                        </label>
+                        <input
+                          type="text"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          value={code}
+                          onChange={(e) => setCode(e.target.value)}
+                          required
+                        />
+                      </div>
 
-                    {/* Reference */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Reference
-                      </label>
-                      <input
-                        type="text"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        value={reference}
-                        onChange={(e) => setReference(e.target.value)}
-                      />
-                    </div>
+                      {/* Reference */}
+                      <div>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                          Reference
+                        </label>
+                        <input
+                          type="text"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          value={reference}
+                          onChange={(e) => setReference(e.target.value)}
+                        />
+                      </div>
 
-                    {/* Building */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Building
-                      </label>
-                      <select
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        value={building}
-                        onChange={(e) => setBuilding(e.target.value)}
-                      >
-                        <option value="">Select Building</option>
-                        {buildings.map((b) => (
-                          <option key={b} value={b}>
-                            {b}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                      {/* Building */}
+                      <div>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                          Building
+                        </label>
+                        <select
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          value={building}
+                          onChange={(e) => setBuilding(e.target.value)}
+                        >
+                          <option value="">Select Building</option>
+                          {buildings.map((b) => (
+                            <option key={b} value={b}>
+                              {b}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                    {/* Doc Category */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Doc Category
-                      </label>
-                      <select
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        value={docCategory}
-                        onChange={(e) => setDocCategory(e.target.value)}
-                        required
-                      >
-                        <option value="">Select Doc Category</option>
-                        {docCategories.map((cat) => (
-                          <option key={cat} value={cat}>
-                            {cat}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                      {/* Doc Category */}
+                      <div>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                          Doc Category
+                        </label>
+                        <select
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          value={docCategory}
+                          onChange={(e) => setDocCategory(e.target.value)}
+                          required
+                        >
+                          <option value="">Select Doc Category</option>
+                          {docCategories.map((cat) => (
+                            <option key={cat} value={cat}>
+                              {cat}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                    {/* Description */}
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700">
-                        Description
-                      </label>
-                      <textarea
-                        rows={2}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        required
-                      />
-                    </div>
+                      {/* Category */}
+                      <div>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                          Category
+                        </label>
+                        <select
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          value={category}
+                          onChange={(e) => setCategory(e.target.value)}
+                          required
+                        >
+                          <option value="">Select Category</option>
+                          {categories.map((cat) => (
+                            <option key={cat} value={cat}>
+                              {cat}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                    {/* Category */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Category
-                      </label>
-                      <select
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        required
-                      >
-                        <option value="">Select Category</option>
-                        {categories.map((cat) => (
-                          <option key={cat} value={cat}>
-                            {cat}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                      {/* Sub Category */}
+                      <div>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                          Sub Category
+                        </label>
+                        <select
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          value={subCategory}
+                          onChange={(e) => setSubCategory(e.target.value)}
+                        >
+                          <option value="">Select Sub Category</option>
+                          {subCategories.map((subCat) => (
+                            <option key={subCat} value={subCat}>
+                              {subCat}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                    {/* Sub Category */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Sub Category
-                      </label>
-                      <select
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        value={subCategory}
-                        onChange={(e) => setSubCategory(e.target.value)}
-                      >
-                        <option value="">Select Sub Category</option>
-                        {subCategories.map((subCat) => (
-                          <option key={subCat} value={subCat}>
-                            {subCat}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                      {/* Valid From */}
+                      <div>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                          Valid From
+                        </label>
+                        <input
+                          type="date"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          value={validFrom}
+                          onChange={(e) => setValidFrom(e.target.value)}
+                        />
+                      </div>
 
-                    {/* Valid From */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Valid From
-                      </label>
-                      <input
-                        type="date"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        value={validFrom}
-                        onChange={(e) => setValidFrom(e.target.value)}
-                      />
-                    </div>
+                      {/* Expiry */}
+                      <div>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                          Expiry
+                        </label>
+                        <input
+                          type="date"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          value={expiry}
+                          onChange={(e) => setExpiry(e.target.value)}
+                        />
+                      </div>
 
-                    {/* Expiry */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Expiry
-                      </label>
-                      <input
-                        type="date"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        value={expiry}
-                        onChange={(e) => setExpiry(e.target.value)}
-                      />
-                    </div>
+                      {/* Description - full width */}
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                          Description
+                        </label>
+                        <textarea
+                          rows={2}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          required
+                        />
+                      </div>
 
-                    {/* Statutory */}
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        checked={isStatutory}
-                        onChange={(e) => setIsStatutory(e.target.checked)}
-                      />
-                      <label className="ml-2 block text-sm text-gray-700">
-                        Statutory
-                      </label>
+                      {/* Statutory */}
+                      <div className="flex items-center sm:col-span-2">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          checked={isStatutory}
+                          onChange={(e) => setIsStatutory(e.target.checked)}
+                        />
+                        <label className="ml-2 block text-xs sm:text-sm text-gray-700">
+                          Statutory
+                        </label>
+                      </div>
                     </div>
                   </div>
 
                   {/* Action buttons */}
-                  <div className="flex justify-end space-x-3 pt-4">
+                  <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100">
                     <button
                       type="button"
-                      className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      className="rounded-md border border-gray-300 bg-white py-1.5 px-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                       onClick={handleClose}
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-1.5 px-3 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     >
                       Upload
                     </button>

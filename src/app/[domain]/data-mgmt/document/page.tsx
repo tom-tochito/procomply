@@ -262,7 +262,7 @@ export default function DocumentPage() {
   ];
 
   return (
-    <div className="p-3 md:p-6 space-y-6 md:space-y-8 bg-gray-50 min-h-screen">
+    <div className="p-2 md:p-4 lg:p-6 space-y-4 md:space-y-6 bg-gray-50 min-h-screen max-w-full overflow-x-hidden">
       {/* Top header with logo and user info */}
       <Header />
 
@@ -285,10 +285,10 @@ export default function DocumentPage() {
       {/* Page title and breadcrumbs */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-gray-800">
+          <h1 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-800">
             Documents
           </h1>
-          <div className="flex items-center text-sm text-gray-600 mt-1">
+          <div className="flex items-center text-xs md:text-sm text-gray-600 mt-1">
             <Link
               href={`/${params.domain}/dashboard`}
               className="hover:text-blue-600"
@@ -304,6 +304,7 @@ export default function DocumentPage() {
         <button
           className="block lg:hidden rounded-md border p-2 text-gray-600 hover:bg-gray-100"
           onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label={sidebarOpen ? "Close filters" : "Open filters"}
         >
           {sidebarOpen ? (
             <svg
@@ -339,18 +340,18 @@ export default function DocumentPage() {
         </button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
         {/* Left sidebar - hidden on mobile unless toggled */}
         {sidebarOpen && (
-          <div className="w-full lg:w-60 bg-white rounded-md shadow-sm p-4 order-2 lg:order-1">
+          <div className="w-full lg:w-64 xl:w-72 bg-white rounded-md shadow-sm p-3 md:p-4 order-2 lg:order-1 max-h-[calc(100vh-12rem)] overflow-y-auto sticky top-4">
             {/* Doc Categories */}
-            <div className="mb-6">
-              <h3 className="text-xs uppercase text-gray-500 font-semibold mb-3">
+            <div className="mb-5">
+              <h3 className="text-xs uppercase text-gray-500 font-semibold mb-2">
                 DOC CATEGORIES:
               </h3>
-              <div className="space-y-1">
+              <div className="space-y-1 max-h-[250px] overflow-y-auto pr-1">
                 <button
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm ${
+                  className={`w-full text-left px-2 py-1.5 rounded-md text-sm ${
                     selectedDocCategory === null
                       ? "bg-blue-100 text-blue-600"
                       : "hover:bg-gray-100"
@@ -362,7 +363,7 @@ export default function DocumentPage() {
                 {docCategories.map((category) => (
                   <button
                     key={category}
-                    className={`w-full text-left px-3 py-2 rounded-md text-sm ${
+                    className={`w-full text-left px-2 py-1.5 rounded-md text-sm ${
                       selectedDocCategory === category
                         ? "bg-blue-100 text-blue-600"
                         : "hover:bg-gray-100"
@@ -373,19 +374,20 @@ export default function DocumentPage() {
                       )
                     }
                   >
-                    <span className="text-gray-700 mr-2">›</span> {category}
+                    <span className="text-gray-700 mr-2">›</span>
+                    <span className="truncate">{category}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="mb-6">
-              <h3 className="text-xs uppercase text-gray-500 font-semibold mb-3">
+            <div className="mb-5">
+              <h3 className="text-xs uppercase text-gray-500 font-semibold mb-2">
                 FILTERS:
               </h3>
               <div className="space-y-1">
                 <button
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm ${
+                  className={`w-full text-left px-2 py-1.5 rounded-md text-sm ${
                     selectedStatus === null
                       ? "bg-blue-100 text-blue-600"
                       : "hover:bg-gray-100"
@@ -395,7 +397,7 @@ export default function DocumentPage() {
                   All Documents
                 </button>
                 <button
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm ${
+                  className={`w-full text-left px-2 py-1.5 rounded-md text-sm ${
                     selectedStatus === "Active"
                       ? "bg-blue-100 text-blue-600"
                       : "hover:bg-gray-100"
@@ -405,7 +407,7 @@ export default function DocumentPage() {
                   <span className="text-gray-700 mr-2">›</span> Active Documents
                 </button>
                 <button
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm ${
+                  className={`w-full text-left px-2 py-1.5 rounded-md text-sm ${
                     selectedStatus === "Pending"
                       ? "bg-blue-100 text-blue-600"
                       : "hover:bg-gray-100"
@@ -415,7 +417,7 @@ export default function DocumentPage() {
                   <span className="text-gray-700 mr-2">›</span> Pending Review
                 </button>
                 <button
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm ${
+                  className={`w-full text-left px-2 py-1.5 rounded-md text-sm ${
                     selectedStatus === "Archived"
                       ? "bg-blue-100 text-blue-600"
                       : "hover:bg-gray-100"
@@ -428,15 +430,15 @@ export default function DocumentPage() {
               </div>
             </div>
 
-            <div className="mb-6">
-              <h3 className="text-xs uppercase text-gray-500 font-semibold mb-3">
+            <div className="mb-5">
+              <h3 className="text-xs uppercase text-gray-500 font-semibold mb-2">
                 CATEGORIES:
               </h3>
-              <div className="space-y-1">
+              <div className="space-y-1 max-h-[200px] overflow-y-auto pr-1">
                 {categories.map((category) => (
                   <button
                     key={category}
-                    className={`w-full text-left px-3 py-2 rounded-md text-sm ${
+                    className={`w-full text-left px-2 py-1.5 rounded-md text-sm ${
                       selectedCategory === category
                         ? "bg-blue-100 text-blue-600"
                         : "hover:bg-gray-100"
@@ -447,21 +449,22 @@ export default function DocumentPage() {
                       )
                     }
                   >
-                    <span className="text-gray-700 mr-2">›</span> {category}
+                    <span className="text-gray-700 mr-2">›</span>
+                    <span className="truncate">{category}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <h3 className="text-xs uppercase text-gray-500 font-semibold mb-3">
+              <h3 className="text-xs uppercase text-gray-500 font-semibold mb-2">
                 FILE TYPES:
               </h3>
-              <div className="space-y-1">
+              <div className="space-y-1 max-h-[150px] overflow-y-auto pr-1">
                 {fileTypes.map((fileType) => (
                   <button
                     key={fileType}
-                    className={`w-full text-left px-3 py-2 rounded-md text-sm ${
+                    className={`w-full text-left px-2 py-1.5 rounded-md text-sm ${
                       selectedFileType === fileType
                         ? "bg-blue-100 text-blue-600"
                         : "hover:bg-gray-100"
@@ -472,7 +475,8 @@ export default function DocumentPage() {
                       )
                     }
                   >
-                    <span className="text-gray-700 mr-2">›</span> {fileType}
+                    <span className="text-gray-700 mr-2">›</span>
+                    <span className="truncate">{fileType}</span>
                   </button>
                 ))}
               </div>
@@ -480,137 +484,149 @@ export default function DocumentPage() {
           </div>
         )}
 
-        <div className="flex-grow order-1 lg:order-2">
+        <div className="flex-grow order-1 lg:order-2 min-w-0">
           {/* Action Bar */}
-          <div className="bg-white rounded-md shadow-sm p-3 sm:p-4 mb-4">
+          <div className="bg-white rounded-md shadow-sm p-3 mb-3 md:mb-4">
             <div className="flex flex-col sm:flex-row gap-3">
               {/* Search */}
               <div className="relative flex-grow">
                 <input
                   type="text"
-                  placeholder="Search documents by name, description, or ID..."
-                  className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="Search documents..."
+                  className="w-full pl-9 pr-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <SearchIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               </div>
 
               {/* Upload Button */}
               <button
                 onClick={handleUploadClick}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center"
+                className="bg-blue-600 text-white px-3 py-2 text-sm rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center whitespace-nowrap"
               >
-                <UploadIcon className="h-5 w-5 mr-2" />
-                <span>Upload Document</span>
+                <UploadIcon className="h-4 w-4 mr-2" />
+                <span>Add document</span>
               </button>
             </div>
           </div>
 
-          {/* Status Badges */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {selectedStatus && (
-              <div className="flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                <span>Status: {selectedStatus}</span>
-                <button
-                  className="ml-2 text-blue-800 hover:text-blue-900"
-                  onClick={() => setSelectedStatus(null)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+          {/* Active filters */}
+          {(selectedStatus ||
+            selectedCategory ||
+            selectedFileType ||
+            selectedDocCategory) && (
+            <div className="flex flex-wrap gap-2 mb-3 md:mb-4">
+              {selectedStatus && (
+                <div className="flex items-center bg-blue-50 text-blue-800 px-2 py-1 rounded-full text-xs md:text-sm">
+                  <span className="truncate max-w-[150px]">
+                    Status: {selectedStatus}
+                  </span>
+                  <button
+                    className="ml-1 md:ml-2 text-blue-800 hover:text-blue-900"
+                    onClick={() => setSelectedStatus(null)}
+                    aria-label="Remove status filter"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-            )}
-            {selectedCategory && (
-              <div className="flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                <span>Category: {selectedCategory}</span>
-                <button
-                  className="ml-2 text-blue-800 hover:text-blue-900"
-                  onClick={() => setSelectedCategory(null)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3 w-3 md:h-4 md:w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              )}
+              {selectedCategory && (
+                <div className="flex items-center bg-blue-50 text-blue-800 px-2 py-1 rounded-full text-xs md:text-sm">
+                  <span className="truncate max-w-[150px]">
+                    Category: {selectedCategory}
+                  </span>
+                  <button
+                    className="ml-1 md:ml-2 text-blue-800 hover:text-blue-900"
+                    onClick={() => setSelectedCategory(null)}
+                    aria-label="Remove category filter"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-            )}
-            {selectedFileType && (
-              <div className="flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                <span>File Type: {selectedFileType}</span>
-                <button
-                  className="ml-2 text-blue-800 hover:text-blue-900"
-                  onClick={() => setSelectedFileType(null)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3 w-3 md:h-4 md:w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              )}
+              {selectedFileType && (
+                <div className="flex items-center bg-blue-50 text-blue-800 px-2 py-1 rounded-full text-xs md:text-sm">
+                  <span className="truncate max-w-[150px]">
+                    File Type: {selectedFileType}
+                  </span>
+                  <button
+                    className="ml-1 md:ml-2 text-blue-800 hover:text-blue-900"
+                    onClick={() => setSelectedFileType(null)}
+                    aria-label="Remove file type filter"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-            )}
-            {selectedDocCategory && (
-              <div className="flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                <span>Doc Category: {selectedDocCategory}</span>
-                <button
-                  className="ml-2 text-blue-800 hover:text-blue-900"
-                  onClick={() => setSelectedDocCategory(null)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3 w-3 md:h-4 md:w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              )}
+              {selectedDocCategory && (
+                <div className="flex items-center bg-blue-50 text-blue-800 px-2 py-1 rounded-full text-xs md:text-sm">
+                  <span className="truncate max-w-[150px]">
+                    Doc Category: {selectedDocCategory}
+                  </span>
+                  <button
+                    className="ml-1 md:ml-2 text-blue-800 hover:text-blue-900"
+                    onClick={() => setSelectedDocCategory(null)}
+                    aria-label="Remove doc category filter"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-            )}
-            {(selectedStatus ||
-              selectedCategory ||
-              selectedFileType ||
-              selectedDocCategory) && (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3 w-3 md:h-4 md:w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              )}
               <button
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                className="text-blue-600 hover:text-blue-800 text-xs md:text-sm font-medium"
                 onClick={() => {
                   setSelectedStatus(null);
                   setSelectedCategory(null);
@@ -618,13 +634,13 @@ export default function DocumentPage() {
                   setSelectedDocCategory(null);
                 }}
               >
-                Clear All Filters
+                Clear All
               </button>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Documents List */}
-          <div className="bg-white rounded-md shadow-sm">
+          <div className="bg-white rounded-md shadow-sm overflow-hidden">
             {/* Mobile and tablet view - list with cards */}
             <div className="block lg:hidden">
               {filteredDocuments.length > 0 ? (
@@ -632,31 +648,32 @@ export default function DocumentPage() {
                   {filteredDocuments.map((document) => (
                     <div
                       key={document.id}
-                      className="p-4 cursor-pointer hover:bg-gray-50"
+                      className="p-3 cursor-pointer hover:bg-gray-50"
                       onClick={() => handleDocumentClick(document)}
                     >
-                      <div className="flex items-start">
+                      <div className="flex items-start space-x-2">
                         {getFileIcon(document.fileType)}
-                        <div className="ml-3 flex-grow">
-                          <h3 className="font-medium text-gray-900 mb-1">
+                        <div className="flex-grow min-w-0">
+                          <h3 className="font-medium text-gray-900 mb-1 truncate">
                             {document.name}
                           </h3>
-                          <div className="flex flex-wrap items-center text-xs text-gray-500 gap-x-3 gap-y-1 mb-2">
+                          <div className="flex flex-wrap text-xs text-gray-500 gap-x-2 gap-y-1 mb-1">
                             <span>Uploaded: {document.uploadDate}</span>
                             <span>Size: {document.size}</span>
-                            <span>By: {document.uploadedBy}</span>
                           </div>
                           {document.description && (
-                            <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                            <p className="text-xs text-gray-600 line-clamp-2 mb-1.5">
                               {document.description}
                             </p>
                           )}
-                          <div className="flex items-center justify-between mt-2">
-                            <div>
+                          <div className="flex items-center justify-between mt-1.5">
+                            <div className="flex flex-wrap items-center gap-1.5">
                               {renderStatusBadge(document.status)}
-                              <span className="ml-2 text-xs text-gray-500">
-                                {document.category}
-                              </span>
+                              {document.docCategory && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                  {document.docCategory}
+                                </span>
+                              )}
                             </div>
                             <button
                               className="text-blue-600 hover:text-blue-800 p-1"
@@ -666,7 +683,7 @@ export default function DocumentPage() {
                                 alert(`Downloading ${document.name}`);
                               }}
                             >
-                              <DownloadIcon className="h-5 w-5" />
+                              <DownloadIcon className="h-4 w-4" />
                             </button>
                           </div>
                         </div>
@@ -675,7 +692,7 @@ export default function DocumentPage() {
                   ))}
                 </div>
               ) : (
-                <div className="p-6 text-center text-gray-500 italic">
+                <div className="p-4 text-center text-gray-500 italic text-sm">
                   No documents found matching your filters
                 </div>
               )}
@@ -689,43 +706,37 @@ export default function DocumentPage() {
                     <tr>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
                         Document
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
                         Category
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell"
+                      >
+                        Doc Category
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
                         Status
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell"
                       >
                         Upload Date
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Size
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Uploaded By
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
                         Actions
                       </th>
@@ -739,40 +750,39 @@ export default function DocumentPage() {
                           className="hover:bg-gray-50 cursor-pointer"
                           onClick={() => handleDocumentClick(document)}
                         >
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 py-3 whitespace-nowrap">
                             <div className="flex items-center">
                               {getFileIcon(document.fileType)}
-                              <div className="ml-4">
-                                <div className="text-sm font-medium text-gray-900">
+                              <div className="ml-3 max-w-[250px]">
+                                <div className="text-sm font-medium text-gray-900 truncate">
                                   {document.name}
                                 </div>
                                 {document.description && (
-                                  <div className="text-xs text-gray-500 max-w-xs truncate">
+                                  <div className="text-xs text-gray-500 truncate">
                                     {document.description}
                                   </div>
                                 )}
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            <div className="text-sm text-gray-900 truncate max-w-[150px]">
                               {document.category}
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 py-3 whitespace-nowrap hidden xl:table-cell">
+                            <div className="text-sm text-gray-900 truncate max-w-[150px]">
+                              {document.docCategory || "-"}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap">
                             {renderStatusBadge(document.status)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 hidden xl:table-cell">
                             {document.uploadDate}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {document.size}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {document.uploadedBy}
-                          </td>
                           <td
-                            className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+                            className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <button
@@ -795,8 +805,8 @@ export default function DocumentPage() {
                     ) : (
                       <tr>
                         <td
-                          colSpan={7}
-                          className="px-6 py-10 text-center text-gray-500 italic"
+                          colSpan={6}
+                          className="px-4 py-8 text-center text-gray-500 italic"
                         >
                           No documents found matching your filters
                         </td>
@@ -809,15 +819,15 @@ export default function DocumentPage() {
           </div>
 
           {/* Pagination */}
-          <div className="flex justify-between items-center mt-4 text-sm">
+          <div className="flex justify-between items-center mt-3 md:mt-4 text-xs md:text-sm">
             <div className="text-gray-500">
               Showing {filteredDocuments.length} documents
             </div>
             <div className="flex space-x-2">
-              <button className="px-3 py-1 border rounded-md bg-gray-100 hover:bg-gray-200 focus:outline-none transition-colors">
+              <button className="px-2 py-1 border rounded-md bg-gray-100 hover:bg-gray-200 focus:outline-none transition-colors text-xs md:text-sm">
                 Previous
               </button>
-              <button className="px-3 py-1 border rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none transition-colors">
+              <button className="px-2 py-1 border rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none transition-colors text-xs md:text-sm">
                 Next
               </button>
             </div>
