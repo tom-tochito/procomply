@@ -23,8 +23,8 @@ export default function BuildingsPage() {
     };
 
     handleResize(); // Initial check
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Filter buildings based on search and filters
@@ -54,9 +54,15 @@ export default function BuildingsPage() {
       // Mock filter - would need actual building use data
       if (buildingUse === "Residential" && building.id.startsWith("400")) {
         return true;
-      } else if (buildingUse === "Commercial" && !building.id.startsWith("400")) {
+      } else if (
+        buildingUse === "Commercial" &&
+        !building.id.startsWith("400")
+      ) {
         return true;
-      } else if (buildingUse !== "Residential" && buildingUse !== "Commercial") {
+      } else if (
+        buildingUse !== "Residential" &&
+        buildingUse !== "Commercial"
+      ) {
         return true;
       } else {
         return false;
@@ -79,16 +85,26 @@ export default function BuildingsPage() {
     return "text-red-600";
   };
 
+  const closeDropdowns = () => {
+    setBuildingUseOpen(false);
+    setAvailabilityOpen(false);
+  };
+
   return (
-    <div className="p-3 md:p-6 space-y-6 md:space-y-8 bg-gray-50 min-h-screen">
+    <div className="p-3 md:p-6 space-y-4 md:space-y-8 bg-gray-50 min-h-screen">
       {/* Top header with logo and user info */}
       <Header />
 
       {/* Page title and breadcrumbs */}
       <div>
-        <h1 className="text-xl md:text-2xl font-bold text-gray-800">Building</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-800">
+          Building
+        </h1>
         <div className="flex items-center text-sm text-gray-600 mt-1">
-          <Link href={`/${params.domain}/dashboard`} className="hover:text-blue-600">
+          <Link
+            href={`/${params.domain}/dashboard`}
+            className="hover:text-blue-600"
+          >
             <span>Data Mgmt</span>
           </Link>
           <span className="mx-2">/</span>
@@ -96,42 +112,35 @@ export default function BuildingsPage() {
         </div>
       </div>
 
-      {/* Filters and search */}
-      <div className="flex flex-wrap gap-3">
+      {/* Filters and search section - mobile friendly */}
+      <div className="space-y-3 md:space-y-0 md:flex md:flex-wrap md:items-center md:gap-3">
         {/* Search */}
-        <div className="relative w-full md:w-48">
+        <div className="w-full md:w-48">
           <input
             type="text"
             placeholder="search address"
-            className="border rounded-md pl-3 pr-10 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border rounded-md pl-3 pr-10 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button className="absolute right-3 top-1/2 -translate-y-1/2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </button>
         </div>
 
         {/* Building Use dropdown */}
         <div className="relative w-full md:w-48">
           <button
-            className="appearance-none w-full flex items-center justify-between border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onClick={() => setBuildingUseOpen(!buildingUseOpen)}
+            className="appearance-none w-full flex items-center justify-between border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            onClick={() => {
+              setBuildingUseOpen(!buildingUseOpen);
+              setAvailabilityOpen(false);
+            }}
           >
-            <span className={buildingUse === "Building Use" ? "text-gray-500" : "text-gray-900"}>
+            <span
+              className={
+                buildingUse === "Building Use"
+                  ? "text-gray-500"
+                  : "text-gray-900"
+              }
+            >
               {buildingUse}
             </span>
             <svg
@@ -149,56 +158,71 @@ export default function BuildingsPage() {
               ></path>
             </svg>
           </button>
-          
+
           {buildingUseOpen && (
-            <div className="absolute left-0 mt-1 w-full bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
-              <div 
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  setBuildingUse("Building Use");
-                  setBuildingUseOpen(false);
-                }}
-              >
-                All Building Uses
+            <>
+              <div
+                className="fixed inset-0 z-0"
+                onClick={() => setBuildingUseOpen(false)}
+              ></div>
+              <div className="absolute left-0 mt-1 w-full bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
+                <div
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    setBuildingUse("Building Use");
+                    setBuildingUseOpen(false);
+                  }}
+                >
+                  All Building Uses
+                </div>
+                <div
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    setBuildingUse("Residential");
+                    setBuildingUseOpen(false);
+                  }}
+                >
+                  Residential
+                </div>
+                <div
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    setBuildingUse("Commercial");
+                    setBuildingUseOpen(false);
+                  }}
+                >
+                  Commercial
+                </div>
+                <div
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    setBuildingUse("Mixed");
+                    setBuildingUseOpen(false);
+                  }}
+                >
+                  Mixed
+                </div>
               </div>
-              <div 
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  setBuildingUse("Residential");
-                  setBuildingUseOpen(false);
-                }}
-              >
-                Residential
-              </div>
-              <div 
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  setBuildingUse("Commercial");
-                  setBuildingUseOpen(false);
-                }}
-              >
-                Commercial
-              </div>
-              <div 
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  setBuildingUse("Mixed");
-                  setBuildingUseOpen(false);
-                }}
-              >
-                Mixed
-              </div>
-            </div>
+            </>
           )}
         </div>
 
         {/* Availability dropdown */}
         <div className="relative w-full md:w-48">
           <button
-            className="appearance-none w-full flex items-center justify-between border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onClick={() => setAvailabilityOpen(!availabilityOpen)}
+            className="appearance-none w-full flex items-center justify-between border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            onClick={() => {
+              setAvailabilityOpen(!availabilityOpen);
+              setBuildingUseOpen(false);
+            }}
           >
-            <span className={availability === "Availability" ? "text-gray-500" : "text-gray-900"}>
+            <span
+              className={
+                availability === "Availability"
+                  ? "text-gray-500"
+                  : "text-gray-900"
+              }
+            >
               {availability}
             </span>
             <svg
@@ -216,45 +240,53 @@ export default function BuildingsPage() {
               ></path>
             </svg>
           </button>
-          
+
           {availabilityOpen && (
-            <div className="absolute left-0 mt-1 w-full bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
-              <div 
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  setAvailability("Availability");
-                  setAvailabilityOpen(false);
-                }}
-              >
-                All Availability
+            <>
+              <div
+                className="fixed inset-0 z-0"
+                onClick={() => setAvailabilityOpen(false)}
+              ></div>
+              <div className="absolute left-0 mt-1 w-full bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
+                <div
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    setAvailability("Availability");
+                    setAvailabilityOpen(false);
+                  }}
+                >
+                  All Availability
+                </div>
+                <div
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    setAvailability("Available");
+                    setAvailabilityOpen(false);
+                  }}
+                >
+                  Available
+                </div>
+                <div
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    setAvailability("Unavailable");
+                    setAvailabilityOpen(false);
+                  }}
+                >
+                  Unavailable
+                </div>
               </div>
-              <div 
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  setAvailability("Available");
-                  setAvailabilityOpen(false);
-                }}
-              >
-                Available
-              </div>
-              <div 
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  setAvailability("Unavailable");
-                  setAvailabilityOpen(false);
-                }}
-              >
-                Unavailable
-              </div>
-            </div>
+            </>
           )}
         </div>
-        
+
         {/* Add Building button */}
-        <div className="w-full md:w-auto ml-auto">
-          <button 
+        <div className="w-full md:w-auto md:ml-auto">
+          <button
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto"
-            onClick={() => alert('Add new building functionality would go here')}
+            onClick={() =>
+              alert("Add new building functionality would go here")
+            }
           >
             Add Building
           </button>
@@ -262,11 +294,11 @@ export default function BuildingsPage() {
       </div>
 
       {/* Filter tags - scrollable on mobile */}
-      <div className="flex overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0 py-1 md:flex-wrap gap-2">
+      <div className="flex overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0 py-1 md:flex-wrap gap-2 hide-scrollbar">
         {divisions.map((division) => (
           <button
             key={division}
-            className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap ${
+            className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap flex-shrink-0 ${
               selectedDivision === division
                 ? "bg-blue-100 text-blue-800 font-medium"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -279,18 +311,19 @@ export default function BuildingsPage() {
       </div>
 
       {/* Building list */}
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         {filteredBuildings.length > 0 ? (
           filteredBuildings.map((building) => (
             <Link
               key={building.id}
               href={`/${params.domain}/buildings/${building.id}`}
               className="block hover:shadow-lg transition-shadow duration-200"
+              onClick={() => closeDropdowns()}
             >
               <div className="bg-white rounded-lg shadow overflow-hidden">
                 <div className="flex flex-col md:flex-row">
                   {/* Building image */}
-                  <div className="w-full md:w-1/5 h-48 bg-gray-100 flex items-center justify-center relative overflow-hidden">
+                  <div className="w-full md:w-1/5 h-48 md:h-auto md:min-h-[12rem] bg-gray-100 flex items-center justify-center relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
                     <img
                       src={building.image || "/placeholder-building.jpg"}
@@ -321,16 +354,18 @@ export default function BuildingsPage() {
                         >
                           {building.division}
                         </span>
-                        
+
                         {/* Mock building use badge */}
                         <span className="inline-block px-2 py-0.5 text-xs rounded bg-amber-100 text-amber-800">
-                          {building.id.startsWith("400") ? "Residential" : "Commercial"}
+                          {building.id.startsWith("400")
+                            ? "Residential"
+                            : "Commercial"}
                         </span>
                       </div>
-                      
+
                       {/* Quick action buttons on mobile */}
                       <div className="mt-3 md:hidden flex space-x-2">
-                        <button 
+                        <button
                           className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                           onClick={(e) => {
                             e.preventDefault();
@@ -339,7 +374,7 @@ export default function BuildingsPage() {
                         >
                           View Tasks
                         </button>
-                        <button 
+                        <button
                           className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200"
                           onClick={(e) => {
                             e.preventDefault();
@@ -412,11 +447,13 @@ export default function BuildingsPage() {
                           {"urgent" in building.inbox &&
                             building.inbox.urgent !== undefined &&
                             building.inbox.urgent > 0 && (
-                              <div 
+                              <div
                                 className="relative group cursor-pointer"
                                 onClick={(e) => {
                                   e.preventDefault();
-                                  alert(`${building.inbox.urgent} urgent notifications`);
+                                  alert(
+                                    `${building.inbox.urgent} urgent notifications`
+                                  );
                                 }}
                               >
                                 <svg
@@ -445,7 +482,7 @@ export default function BuildingsPage() {
                           {"warning" in building.inbox &&
                             building.inbox.warning !== undefined &&
                             building.inbox.warning > 0 && (
-                              <div 
+                              <div
                                 className="relative group cursor-pointer"
                                 onClick={(e) => {
                                   e.preventDefault();
@@ -475,33 +512,34 @@ export default function BuildingsPage() {
                               </div>
                             )}
 
-                          {"email" in building.inbox && building.inbox.email && (
-                            <div 
-                              className="relative group cursor-pointer"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                alert('New document notification');
-                              }}
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-6 w-6 text-teal-500"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
+                          {"email" in building.inbox &&
+                            building.inbox.email && (
+                              <div
+                                className="relative group cursor-pointer"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  alert("New document notification");
+                                }}
                               >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                />
-                              </svg>
-                              <div className="absolute left-1/2 bottom-full mb-2 -translate-x-1/2 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap">
-                                New document available
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-6 w-6 text-teal-500"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                  />
+                                </svg>
+                                <div className="absolute left-1/2 bottom-full mb-2 -translate-x-1/2 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap">
+                                  New document available
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
                         </div>
                       </div>
                     </div>
@@ -511,13 +549,29 @@ export default function BuildingsPage() {
             </Link>
           ))
         ) : (
-          <div className="bg-white p-8 rounded-lg shadow-sm text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          <div className="bg-white p-6 md:p-8 rounded-lg shadow-sm text-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-12 w-12 mx-auto text-gray-400 mb-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              />
             </svg>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No buildings found</h3>
-            <p className="text-gray-500 mb-6">No buildings match your current filters. Try adjusting your search criteria.</p>
-            <button 
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No buildings found
+            </h3>
+            <p className="text-gray-500 mb-6">
+              No buildings match your current filters. Try adjusting your search
+              criteria.
+            </p>
+            <button
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
               onClick={() => {
                 setSearchTerm("");
@@ -531,21 +585,23 @@ export default function BuildingsPage() {
           </div>
         )}
       </div>
-      
+
       {/* Pagination */}
       {filteredBuildings.length > 0 && (
-        <div className="flex justify-between items-center mt-4 text-sm">
-          <div className="text-gray-500">Showing {filteredBuildings.length} buildings</div>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-4 text-sm gap-3">
+          <div className="text-gray-500">
+            Showing {filteredBuildings.length} buildings
+          </div>
           <div className="flex space-x-2">
-            <button 
+            <button
               className="px-3 py-1 border rounded-md bg-gray-100 hover:bg-gray-200 focus:outline-none transition-colors"
-              onClick={() => alert('Previous page')}
+              onClick={() => alert("Previous page")}
             >
               Previous
             </button>
-            <button 
+            <button
               className="px-3 py-1 border rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none transition-colors"
-              onClick={() => alert('Next page')}
+              onClick={() => alert("Next page")}
             >
               Next
             </button>

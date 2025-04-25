@@ -177,6 +177,7 @@ export default function DashboardPage() {
             size: 12,
           },
         },
+        display: window.innerWidth > 768, // Only show legend on desktop
       },
       title: {
         display: false,
@@ -234,12 +235,12 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="p-6 space-y-8 bg-gray-50 min-h-screen">
+    <div className="p-3 md:p-6 space-y-6 md:space-y-8 bg-gray-50 min-h-screen">
       {/* Top header with logo and user info */}
       <Header />
 
       {/* Summary cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="responsive-grid">
         <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
           <h3 className="text-gray-500 text-sm">Total Tasks</h3>
           <p className="text-2xl font-bold">995</p>
@@ -263,16 +264,16 @@ export default function DashboardPage() {
       </div>
 
       {/* Main content container */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Column 1 & 2: Chart */}
-        <div className="col-span-2 rounded-lg border p-5 bg-white shadow-sm">
+        <div className="col-span-3 lg:col-span-2 rounded-lg border p-4 md:p-5 bg-white shadow-sm">
           <h2 className="text-xl font-bold mb-4">Survey Tasks Summary</h2>
 
-          {/* Filter row */}
-          <div className="flex flex-wrap gap-3 mb-4">
-            <div className="relative">
+          {/* Filter row - scrollable on mobile */}
+          <div className="flex overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 py-1 md:flex-wrap gap-3 hide-scrollbar mb-4">
+            <div className="relative flex-shrink-0">
               <select
-                className="appearance-none border rounded-md px-3 py-2 pr-8 bg-gray-50 text-gray-800 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="appearance-none border rounded-md px-3 py-2 pr-8 bg-gray-50 text-gray-800 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 whitespace-nowrap"
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value)}
               >
@@ -292,9 +293,9 @@ export default function DashboardPage() {
                 </svg>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative flex-shrink-0">
               <select
-                className="appearance-none border rounded-md px-3 py-2 pr-8 bg-white text-gray-800 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="appearance-none border rounded-md px-3 py-2 pr-8 bg-white text-gray-800 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 whitespace-nowrap"
                 value={selectedTeam}
                 onChange={(e) => setSelectedTeam(e.target.value)}
               >
@@ -314,9 +315,9 @@ export default function DashboardPage() {
                 </svg>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative flex-shrink-0">
               <select
-                className="appearance-none border rounded-md px-3 py-2 pr-8 bg-white text-gray-800 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="appearance-none border rounded-md px-3 py-2 pr-8 bg-white text-gray-800 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 whitespace-nowrap"
                 value={selectedTaskType}
                 onChange={(e) => setSelectedTaskType(e.target.value)}
               >
@@ -336,9 +337,9 @@ export default function DashboardPage() {
                 </svg>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative flex-shrink-0">
               <select
-                className="appearance-none border rounded-md px-3 py-2 pr-8 bg-white text-gray-800 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="appearance-none border rounded-md px-3 py-2 pr-8 bg-white text-gray-800 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 whitespace-nowrap"
                 value={selectedBuildingUse}
                 onChange={(e) => setSelectedBuildingUse(e.target.value)}
               >
@@ -360,7 +361,8 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="h-[400px]">
+          {/* Chart container with responsive height */}
+          <div className="h-[300px] md:h-[400px]">
             <Bar data={data} options={options} />
           </div>
           <div className="text-right text-sm text-gray-600 mt-3 font-medium">
@@ -369,7 +371,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Column 3: Activities */}
-        <div className="rounded-lg border p-5 bg-white shadow-sm">
+        <div className="col-span-3 lg:col-span-1 rounded-lg border p-4 md:p-5 bg-white shadow-sm">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold text-lg text-gray-800">Activities</h3>
             <div className="flex items-center">
@@ -410,10 +412,10 @@ export default function DashboardPage() {
           </div>
 
           <div className="border-b pb-4 mb-4">
-            <div className="flex items-center gap-1.5">
+            <div className="flex overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 py-1 hide-scrollbar">
               <button
                 onClick={() => setActiveActivityTab("Task Activity")}
-                className={`px-2.5 py-1 text-xs rounded-md ${
+                className={`px-2.5 py-1 text-xs rounded-md mr-1.5 whitespace-nowrap ${
                   activeActivityTab === "Task Activity"
                     ? "bg-gray-800 text-white"
                     : "bg-gray-100 text-gray-800 hover:bg-gray-200"
@@ -423,7 +425,7 @@ export default function DashboardPage() {
               </button>
               <button
                 onClick={() => setActiveActivityTab("Job Activity")}
-                className={`px-2.5 py-1 text-xs rounded-md ${
+                className={`px-2.5 py-1 text-xs rounded-md mr-1.5 whitespace-nowrap ${
                   activeActivityTab === "Job Activity"
                     ? "bg-gray-800 text-white"
                     : "bg-gray-100 text-gray-800 hover:bg-gray-200"
@@ -433,7 +435,7 @@ export default function DashboardPage() {
               </button>
               <button
                 onClick={() => setActiveActivityTab("Doc Activity")}
-                className={`px-2.5 py-1 text-xs rounded-md ${
+                className={`px-2.5 py-1 text-xs rounded-md whitespace-nowrap ${
                   activeActivityTab === "Doc Activity"
                     ? "bg-gray-800 text-white"
                     : "bg-gray-100 text-gray-800 hover:bg-gray-200"
@@ -464,7 +466,7 @@ export default function DashboardPage() {
             </span>
           </div>
 
-          <div className="space-y-4 text-sm max-h-[350px] overflow-y-auto pr-2">
+          <div className="space-y-4 text-sm max-h-[250px] md:max-h-[350px] overflow-y-auto pr-2">
             {activeActivityTab === "Task Activity" && (
               <>
                 {taskActivities.map((activity, index) => (
@@ -576,9 +578,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Bottom section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="responsive-grid">
         {/* Company Documents */}
-        <div className="rounded-lg border p-5 bg-white shadow-sm">
+        <div className="rounded-lg border p-4 md:p-5 bg-white shadow-sm">
           <h3 className="font-bold text-lg mb-3 text-gray-800 border-b pb-2">
             Company Documents
           </h3>
@@ -593,7 +595,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Legislation */}
-        <div className="rounded-lg border p-5 bg-white shadow-sm">
+        <div className="rounded-lg border p-4 md:p-5 bg-white shadow-sm">
           <h3 className="font-bold text-lg mb-3 text-gray-800 border-b pb-2">
             Legislation
           </h3>
@@ -619,7 +621,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="rounded-lg border p-5 bg-white shadow-sm">
+        <div className="rounded-lg border p-4 md:p-5 bg-white shadow-sm">
           <h3 className="font-bold text-lg mb-3 text-gray-800 border-b pb-2">
             Quick Actions
           </h3>
@@ -641,14 +643,26 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
+
+        {/* Fourth card for balance on mobile */}
+        <div className="mobile-only rounded-lg border p-4 bg-white shadow-sm">
+          <h3 className="font-bold text-lg mb-3 text-gray-800 border-b pb-2">
+            Recent Updates
+          </h3>
+          <div className="p-4 bg-gray-50 rounded-md">
+            <p className="text-sm text-gray-600">
+              Check back later for recent system updates
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* "Compliance Overview" Table */}
-      <div className="rounded-lg border p-5 bg-white shadow-sm">
+      <div className="rounded-lg border p-4 md:p-5 bg-white shadow-sm">
         <h3 className="font-bold text-lg mb-4 text-gray-800 border-b pb-2">
           Compliance Overview
         </h3>
-        <div className="overflow-auto">
+        <div className="responsive-table-container">
           <table className="min-w-full text-sm border-collapse">
             <thead>
               <tr className="bg-gray-100 text-gray-700">
@@ -735,7 +749,7 @@ export default function DashboardPage() {
             </tbody>
           </table>
         </div>
-        <div className="flex justify-between items-center mt-4 text-sm">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-4 text-sm gap-3">
           <div className="text-gray-500">Showing 2 of 4 properties</div>
           <div className="flex space-x-2">
             <button className="px-3 py-1 border rounded-md bg-gray-100">

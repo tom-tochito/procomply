@@ -30,7 +30,8 @@ export default function Header() {
       }
       if (
         mobileMenuRef.current &&
-        !mobileMenuRef.current.contains(event.target as Node)
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        mobileMenuOpen // Only listen for outside clicks if mobile menu is open
       ) {
         setMobileMenuOpen(false);
       }
@@ -40,7 +41,20 @@ export default function Header() {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [mobileMenuOpen]);
+
+  // Prevent scrolling when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
 
   const handleLogout = () => {
     router.push("/login");
@@ -56,15 +70,17 @@ export default function Header() {
   const toggleDataMgmtMenu = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent event bubbling
     setDataMgmtOpen(!dataMgmtOpen);
+    if (templateMgmtOpen) setTemplateMgmtOpen(false);
   };
 
   const toggleTemplateMgmtMenu = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent event bubbling
     setTemplateMgmtOpen(!templateMgmtOpen);
+    if (dataMgmtOpen) setDataMgmtOpen(false);
   };
 
   return (
-    <div className="bg-black rounded-lg shadow-sm p-4">
+    <div className="bg-black rounded-lg shadow-sm p-3 md:p-4">
       <div className="max-w-[1400px] mx-auto flex justify-between items-center">
         <div className="flex items-center gap-x-4 md:gap-x-16">
           <Link href={`/${domain}/dashboard`} className="flex-shrink-0">
@@ -73,17 +89,19 @@ export default function Header() {
               alt="ProComply"
               width={120}
               height={24}
-              className="w-auto h-6"
+              className="w-auto h-5 md:h-6"
               priority
             />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-x-8">
+          <div className="hidden md:flex items-center gap-x-4 lg:gap-x-8">
             <div className="relative" ref={dataMgmtRef}>
               <button
                 onClick={toggleDataMgmtMenu}
                 className="flex items-center text-white text-sm hover:text-gray-300 transition-colors group whitespace-nowrap"
+                aria-expanded={dataMgmtOpen}
+                aria-haspopup="true"
               >
                 <span className="inline-flex items-center justify-center mr-1.5 text-gray-400 group-hover:text-gray-300">
                   <svg
@@ -125,163 +143,175 @@ export default function Header() {
               </button>
 
               {dataMgmtOpen && (
-                <div className="absolute left-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
-                  <Link
-                    href={`/${domain}/data-mgmt/company`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                        />
-                      </svg>
-                    </span>
-                    Company
-                  </Link>
-                  <Link
-                    href={`/${domain}/data-mgmt/division`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 6h16M4 10h16M4 14h16M4 18h16"
-                        />
-                      </svg>
-                    </span>
-                    Division
-                  </Link>
-                  <Link
-                    href={`/${domain}/buildings`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                        />
-                      </svg>
-                    </span>
-                    Building
-                  </Link>
-                  <Link
-                    href={`/${domain}/data-mgmt/task`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                        />
-                      </svg>
-                    </span>
-                    Task
-                  </Link>
-                  <Link
-                    href={`/${domain}/data-mgmt/document`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                    </span>
-                    Document
-                  </Link>
-                  <Link
-                    href={`/${domain}/data-mgmt/person`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
-                    </span>
-                    Person
-                  </Link>
-                  <Link
-                    href={`/${domain}/data-mgmt/team`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                        />
-                      </svg>
-                    </span>
-                    Team
-                  </Link>
-                  <div className="border-t border-gray-100 my-1"></div>
-                </div>
+                <>
+                  <div
+                    className="fixed inset-0 z-0"
+                    onClick={() => setDataMgmtOpen(false)}
+                  ></div>
+                  <div className="absolute left-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
+                    <Link
+                      href={`/${domain}/data-mgmt/company`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      onClick={() => setDataMgmtOpen(false)}
+                    >
+                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                          />
+                        </svg>
+                      </span>
+                      Company
+                    </Link>
+                    <Link
+                      href={`/${domain}/data-mgmt/division`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      onClick={() => setDataMgmtOpen(false)}
+                    >
+                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                          />
+                        </svg>
+                      </span>
+                      Division
+                    </Link>
+                    <Link
+                      href={`/${domain}/buildings`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      onClick={() => setDataMgmtOpen(false)}
+                    >
+                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                          />
+                        </svg>
+                      </span>
+                      Building
+                    </Link>
+                    <Link
+                      href={`/${domain}/data-mgmt/task`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      onClick={() => setDataMgmtOpen(false)}
+                    >
+                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                          />
+                        </svg>
+                      </span>
+                      Task
+                    </Link>
+                    <Link
+                      href={`/${domain}/data-mgmt/document`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      onClick={() => setDataMgmtOpen(false)}
+                    >
+                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      </span>
+                      Document
+                    </Link>
+                    <Link
+                      href={`/${domain}/data-mgmt/person`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      onClick={() => setDataMgmtOpen(false)}
+                    >
+                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
+                        </svg>
+                      </span>
+                      Person
+                    </Link>
+                    <Link
+                      href={`/${domain}/data-mgmt/team`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      onClick={() => setDataMgmtOpen(false)}
+                    >
+                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                          />
+                        </svg>
+                      </span>
+                      Team
+                    </Link>
+                  </div>
+                </>
               )}
             </div>
 
@@ -289,6 +319,8 @@ export default function Header() {
               <button
                 onClick={toggleTemplateMgmtMenu}
                 className="flex items-center text-white text-sm hover:text-gray-300 transition-colors group whitespace-nowrap"
+                aria-expanded={templateMgmtOpen}
+                aria-haspopup="true"
               >
                 <span className="inline-flex items-center justify-center mr-1.5 text-gray-400 group-hover:text-gray-300">
                   <svg
@@ -324,184 +356,198 @@ export default function Header() {
               </button>
 
               {templateMgmtOpen && (
-                <div className="absolute left-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
-                  <Link
-                    href={`/${domain}/template-mgmt/task-template`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                        />
-                      </svg>
-                    </span>
-                    Task Template
-                  </Link>
-                  <Link
-                    href={`/${domain}/template-mgmt/document-type-tmpl`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                    </span>
-                    Document Type Tmpl
-                  </Link>
-                  <Link
-                    href={`/${domain}/template-mgmt/survey-type`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                        />
-                      </svg>
-                    </span>
-                    SurveyType
-                  </Link>
-                  <Link
-                    href={`/${domain}/template-mgmt/task-category`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                        />
-                      </svg>
-                    </span>
-                    Task Category
-                  </Link>
-                  <Link
-                    href={`/${domain}/template-mgmt/risk-area`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                        />
-                      </svg>
-                    </span>
-                    Risk Area
-                  </Link>
-                  <Link
-                    href={`/${domain}/template-mgmt/subsection`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 6h16M4 10h16M4 14h16M4 18h16"
-                        />
-                      </svg>
-                    </span>
-                    Subsection
-                  </Link>
-                  <Link
-                    href={`/${domain}/template-mgmt/legislation`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
-                        />
-                      </svg>
-                    </span>
-                    Legislation
-                  </Link>
-                  <Link
-                    href={`/${domain}/template-mgmt/country`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                    </span>
-                    Country
-                  </Link>
-                </div>
+                <>
+                  <div
+                    className="fixed inset-0 z-0"
+                    onClick={() => setTemplateMgmtOpen(false)}
+                  ></div>
+                  <div className="absolute left-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
+                    <Link
+                      href={`/${domain}/template-mgmt/task-template`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      onClick={() => setTemplateMgmtOpen(false)}
+                    >
+                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                          />
+                        </svg>
+                      </span>
+                      Task Template
+                    </Link>
+                    <Link
+                      href={`/${domain}/template-mgmt/document-type-tmpl`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      onClick={() => setTemplateMgmtOpen(false)}
+                    >
+                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      </span>
+                      Document Type Template
+                    </Link>
+                    <Link
+                      href={`/${domain}/template-mgmt/survey-type`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      onClick={() => setTemplateMgmtOpen(false)}
+                    >
+                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                          />
+                        </svg>
+                      </span>
+                      SurveyType
+                    </Link>
+                    <Link
+                      href={`/${domain}/template-mgmt/task-category`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      onClick={() => setTemplateMgmtOpen(false)}
+                    >
+                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                          />
+                        </svg>
+                      </span>
+                      Task Category
+                    </Link>
+                    <Link
+                      href={`/${domain}/template-mgmt/risk-area`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      onClick={() => setTemplateMgmtOpen(false)}
+                    >
+                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                          />
+                        </svg>
+                      </span>
+                      Risk Area
+                    </Link>
+                    <Link
+                      href={`/${domain}/template-mgmt/subsection`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      onClick={() => setTemplateMgmtOpen(false)}
+                    >
+                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                          />
+                        </svg>
+                      </span>
+                      Subsection
+                    </Link>
+                    <Link
+                      href={`/${domain}/template-mgmt/legislation`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      onClick={() => setTemplateMgmtOpen(false)}
+                    >
+                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
+                          />
+                        </svg>
+                      </span>
+                      Legislation
+                    </Link>
+                    <Link
+                      href={`/${domain}/template-mgmt/country`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      onClick={() => setTemplateMgmtOpen(false)}
+                    >
+                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </span>
+                      Country
+                    </Link>
+                  </div>
+                </>
               )}
             </div>
 
@@ -534,6 +580,7 @@ export default function Header() {
             className="md:hidden text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
+            aria-expanded={mobileMenuOpen}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -559,38 +606,45 @@ export default function Header() {
         {/* User Profile Icon */}
         <div className="relative" ref={dropdownRef}>
           <button
-            className="size-10 bg-black rounded-full flex items-center justify-center text-white hover:bg-orange-500 transition-colors text-base font-medium"
+            className="size-8 md:size-10 bg-black rounded-full flex items-center justify-center text-white hover:bg-orange-500 transition-colors text-sm md:text-base font-medium"
             onClick={() => setDropdownOpen(!dropdownOpen)}
             aria-label="User menu"
+            aria-expanded={dropdownOpen}
           >
             TT
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 py-1 border border-gray-200">
-              <div className="px-4 py-2 border-b border-gray-100">
-                <p className="text-sm font-medium">Admin User</p>
-                <p className="text-xs text-gray-500">admin@procomply.com</p>
+            <>
+              <div
+                className="fixed inset-0 z-10"
+                onClick={() => setDropdownOpen(false)}
+              ></div>
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 py-1 border border-gray-200">
+                <div className="px-4 py-2 border-b border-gray-100">
+                  <p className="text-sm font-medium">Admin User</p>
+                  <p className="text-xs text-gray-500">admin@procomply.com</p>
+                </div>
+                <a
+                  href="#profile"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Profile
+                </a>
+                <a
+                  href="#settings"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Settings
+                </a>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 font-medium"
+                >
+                  Logout
+                </button>
               </div>
-              <a
-                href="#profile"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                Profile
-              </a>
-              <a
-                href="#settings"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                Settings
-              </a>
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 font-medium"
-              >
-                Logout
-              </button>
-            </div>
+            </>
           )}
         </div>
       </div>
@@ -599,10 +653,10 @@ export default function Header() {
       {mobileMenuOpen && (
         <div
           ref={mobileMenuRef}
-          className="fixed inset-0 bg-black bg-opacity-95 z-10 md:hidden flex flex-col overflow-y-auto"
+          className="fixed inset-0 bg-black bg-opacity-95 z-50 md:hidden flex flex-col overflow-y-auto"
         >
           {/* Close button at the top */}
-          <div className="flex justify-between items-center px-6 pt-4 pb-2">
+          <div className="flex justify-between items-center px-4 md:px-6 pt-4 pb-2">
             <div className="flex items-center">
               <Image
                 src={logo}
@@ -635,8 +689,8 @@ export default function Header() {
             </button>
           </div>
 
-          <div className="px-6 py-6 space-y-6 flex-grow overflow-y-auto">
-            {/* Data Management Section */}
+          <div className="px-4 md:px-6 py-6 space-y-4 flex-grow overflow-y-auto">
+            {/* Mobile menu content - simplified version */}
             <div className="text-white">
               <button
                 onClick={toggleDataMgmtMenu}
@@ -690,7 +744,7 @@ export default function Header() {
               {/* Data Management Submenu */}
               <div
                 id="data-mgmt-submenu"
-                className={`pl-10 pb-4 space-y-1 overflow-hidden transition-all duration-300 ${
+                className={`pl-10 pb-2 space-y-1 overflow-hidden transition-all duration-300 ${
                   dataMgmtOpen
                     ? "max-h-[500px] opacity-100"
                     : "max-h-0 opacity-0"
@@ -699,79 +753,51 @@ export default function Header() {
                 <Link
                   href={`/${domain}/data-mgmt/company`}
                   onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                  className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
                   Company
                 </Link>
                 <Link
                   href={`/${domain}/data-mgmt/division`}
                   onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                  className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
                   Division
                 </Link>
                 <Link
                   href={`/${domain}/buildings`}
                   onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                  className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
                   Building
                 </Link>
                 <Link
                   href={`/${domain}/data-mgmt/task`}
                   onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                  className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
                   Task
                 </Link>
                 <Link
                   href={`/${domain}/data-mgmt/document`}
                   onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                  className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
                   Document
                 </Link>
                 <Link
                   href={`/${domain}/data-mgmt/person`}
                   onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                  className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
                   Person
                 </Link>
                 <Link
                   href={`/${domain}/data-mgmt/team`}
                   onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                  className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
                   Team
-                </Link>
-                <Link
-                  href={`/${domain}/data-mgmt/create-task`}
-                  onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
-                >
-                  Create Task
-                </Link>
-                <Link
-                  href={`/${domain}/data-mgmt/create-survey`}
-                  onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
-                >
-                  Create Survey
-                </Link>
-                <Link
-                  href={`/${domain}/data-mgmt/delete-task`}
-                  onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
-                >
-                  Delete Task
-                </Link>
-                <Link
-                  href={`/${domain}/data-mgmt/archive-building`}
-                  onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
-                >
-                  Archive Building
                 </Link>
               </div>
             </div>
@@ -824,7 +850,7 @@ export default function Header() {
               {/* Template Management Submenu */}
               <div
                 id="template-mgmt-submenu"
-                className={`pl-10 pb-4 space-y-1 overflow-hidden transition-all duration-300 ${
+                className={`pl-10 pb-2 space-y-1 overflow-hidden transition-all duration-300 ${
                   templateMgmtOpen
                     ? "max-h-[500px] opacity-100"
                     : "max-h-0 opacity-0"
@@ -833,58 +859,16 @@ export default function Header() {
                 <Link
                   href={`/${domain}/template-mgmt/task-template`}
                   onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                  className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
                   Task Template
                 </Link>
                 <Link
                   href={`/${domain}/template-mgmt/document-type-tmpl`}
                   onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
+                  className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
                   Document Type Template
-                </Link>
-                <Link
-                  href={`/${domain}/template-mgmt/survey-type`}
-                  onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
-                >
-                  SurveyType
-                </Link>
-                <Link
-                  href={`/${domain}/template-mgmt/task-category`}
-                  onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
-                >
-                  Task Category
-                </Link>
-                <Link
-                  href={`/${domain}/template-mgmt/risk-area`}
-                  onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
-                >
-                  Risk Area
-                </Link>
-                <Link
-                  href={`/${domain}/template-mgmt/subsection`}
-                  onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
-                >
-                  Subsection
-                </Link>
-                <Link
-                  href={`/${domain}/template-mgmt/legislation`}
-                  onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
-                >
-                  Legislation
-                </Link>
-                <Link
-                  href={`/${domain}/template-mgmt/country`}
-                  onClick={closeMobileMenu}
-                  className="block py-3 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
-                >
-                  Country
                 </Link>
               </div>
             </div>
