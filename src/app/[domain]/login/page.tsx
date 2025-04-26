@@ -36,8 +36,8 @@ export default function Page() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-sm rounded-md bg-white p-8 shadow-md">
+    <main className="flex min-h-screen items-center justify-center bg-gray-100 px-4 sm:px-0">
+      <div className="w-full max-w-sm rounded-md bg-white p-6 sm:p-8 shadow-md">
         <Image src={logo} alt="ProComply" className="w-full mb-5 block" />
         <h1 className="mb-1 text-center text-xl font-semibold">
           Welcome to ProComply

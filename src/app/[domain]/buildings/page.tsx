@@ -387,7 +387,7 @@ export default function BuildingsPage() {
                     </div>
 
                     {/* Compliance and inbox */}
-                    <div className="md:w-48 flex md:flex-col justify-between mt-4 md:mt-0">
+                    <div className="flex flex-col justify-between mt-4 md:mt-0 md:w-48">
                       <div className="text-center mb-4">
                         <h4 className="text-sm text-gray-500">Compliance:</h4>
                         <div

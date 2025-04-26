@@ -89,7 +89,7 @@ export default function Header() {
               alt="ProComply"
               width={120}
               height={24}
-              className="w-auto h-5 md:h-6"
+              className="w-auto h-6 md:h-8"
               priority
             />
           </Link>
@@ -662,8 +662,8 @@ export default function Header() {
                 src={logo}
                 alt="ProComply"
                 width={90}
-                height={20}
-                className="w-auto h-5"
+                height={18}
+                className="w-auto h-6"
                 priority
               />
             </div>
