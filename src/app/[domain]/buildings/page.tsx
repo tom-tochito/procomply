@@ -3,10 +3,17 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/common/components/Header";
-import { buildings, divisions } from "@/data/buildings";
+import {
+  buildings as initialBuildings,
+  divisions,
+  Building,
+} from "@/data/buildings";
 import { useParams } from "next/navigation";
+import AddBuildingModal from "@/components/modals/AddBuildingModal";
 
 export default function BuildingsPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [buildings, setBuildings] = useState<Building[]>(initialBuildings);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDivision, setSelectedDivision] = useState("Active Divisions");
   const [buildingUse, setBuildingUse] = useState("Building Use");
@@ -88,6 +95,15 @@ export default function BuildingsPage() {
   const closeDropdowns = () => {
     setBuildingUseOpen(false);
     setAvailabilityOpen(false);
+  };
+
+  // Function to handle saving a new building
+  const handleSaveBuilding = (newBuildingData: Building) => {
+    // Here you would typically send the data to your backend/API
+    // For now, we'll just add it to the local state
+    setBuildings((prevBuildings) => [newBuildingData, ...prevBuildings]);
+    console.log("New Building Saved:", newBuildingData);
+    // Optionally refetch data or update UI further
   };
 
   return (
@@ -284,9 +300,7 @@ export default function BuildingsPage() {
         <div className="w-full md:w-auto md:ml-auto">
           <button
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto"
-            onClick={() =>
-              alert("Add new building functionality would go here")
-            }
+            onClick={() => setIsModalOpen(true)}
           >
             Add Building
           </button>
@@ -608,6 +622,13 @@ export default function BuildingsPage() {
           </div>
         </div>
       )}
+
+      {/* Add Building Modal */}
+      <AddBuildingModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveBuilding}
+      />
     </div>
   );
 }
