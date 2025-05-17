@@ -35,13 +35,17 @@ export default function BuildingDetailsPage() {
     const newTask: Task = {
       id: `${tasks.length + 1}`,
       description: "New Task",
-      riskArea: "General",
+      risk_area: "General",
       priority: "M",
-      riskLevel: "M",
-      dueDate: new Date().toLocaleDateString("en-GB"),
+      risk_level: "M",
+      due_date: new Date().toLocaleDateString("en-GB"),
       team: "ASAP Comply Ltd",
-      buildingId: buildingId,
+      building_id: buildingId,
       progress: "Not Started",
+      assignee: "",
+      notes: [],
+      groups: [],
+      completed: false,
     };
 
     setTasks([...tasks, newTask]);
@@ -620,7 +624,7 @@ export default function BuildingDetailsPage() {
                       </div>
                     </td>
                     <td className="hidden md:table-cell px-4 py-3 text-sm">
-                      {task.riskArea}
+                      {task.risk_area}
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <span
@@ -638,17 +642,17 @@ export default function BuildingDetailsPage() {
                     <td className="px-4 py-3 text-sm">
                       <span
                         className={`inline-flex items-center justify-center size-6 rounded-full ${
-                          task.riskLevel === "H"
+                          task.risk_level === "H"
                             ? "bg-red-100 text-red-600"
-                            : task.riskLevel === "M"
+                            : task.risk_level === "M"
                             ? "bg-yellow-100 text-yellow-600"
                             : "bg-green-100 text-green-600"
                         }`}
                       >
-                        {task.riskLevel}
+                        {task.risk_level}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm">{task.dueDate}</td>
+                    <td className="px-4 py-3 text-sm">{task.due_date}</td>
                     <td className="hidden md:table-cell px-4 py-3 text-sm">
                       {task.team}
                     </td>
@@ -659,7 +663,7 @@ export default function BuildingDetailsPage() {
                       {task.progress || "—"}
                     </td>
                     <td className="hidden lg:table-cell px-4 py-3 text-sm">
-                      {task.latestNote || "—"}
+                      {task.notes.at(-1) || "—"}
                     </td>
                     <td className="hidden lg:table-cell px-4 py-3 text-sm">
                       {task.groups?.join(", ") || "—"}

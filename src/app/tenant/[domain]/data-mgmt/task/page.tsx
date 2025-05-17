@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/common/components/Header";
 import { tasks } from "@/data/tasks";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import TaskDetailsDialog from "@/components/TaskDetailsDialog";
 import LabelModal from "@/components/LabelModal";
 import TaskModal from "@/components/TaskModal";
@@ -12,7 +12,6 @@ import TaskTemplateModal from "@/components/TaskTemplateModal";
 
 export default function TaskPage() {
   const params = useParams();
-  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [selectedDivision, setSelectedDivision] = useState("Active Divisions");
@@ -46,7 +45,7 @@ export default function TaskPage() {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    function handleClickOutside(event) {
+    function handleClickOutside(event: any) {
       if (
         addTaskButtonRef.current &&
         !addTaskButtonRef.current.contains(event.target)
@@ -1110,14 +1109,14 @@ export default function TaskPage() {
                         {task.description}
                       </div>
                       <div className="text-gray-500 text-sm mb-2">
-                        Building: {task.buildingId}
+                        Building: {task.building_id}
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 text-sm mb-3">
                         {visibleColumns.riskArea && (
                           <div>
                             <span className="text-gray-500">Risk Area:</span>{" "}
-                            {task.riskArea}
+                            {task.risk_area}
                           </div>
                         )}
                         {visibleColumns.priority && (
@@ -1129,13 +1128,13 @@ export default function TaskPage() {
                         {visibleColumns.riskLevel && (
                           <div>
                             <span className="text-gray-500">Risk Level:</span>{" "}
-                            {renderBadge(task.riskLevel)}
+                            {renderBadge(task.risk_level)}
                           </div>
                         )}
                         {visibleColumns.dueDate && (
                           <div>
                             <span className="text-gray-500">Due Date:</span>{" "}
-                            {renderDateBadge(task.dueDate)}
+                            {renderDateBadge(task.due_date)}
                           </div>
                         )}
                         {visibleColumns.team && (
@@ -1377,12 +1376,12 @@ export default function TaskPage() {
                               {task.description}
                             </div>
                             <div className="text-gray-500 text-sm">
-                              Building: {task.buildingId}
+                              Building: {task.building_id}
                             </div>
                           </td>
                           {visibleColumns.riskArea && (
                             <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {task.riskArea}
+                              {task.risk_area}
                             </td>
                           )}
                           {visibleColumns.priority && (
@@ -1392,12 +1391,12 @@ export default function TaskPage() {
                           )}
                           {visibleColumns.riskLevel && (
                             <td className="px-4 py-4 whitespace-nowrap text-sm">
-                              {renderBadge(task.riskLevel)}
+                              {renderBadge(task.risk_level)}
                             </td>
                           )}
                           {visibleColumns.dueDate && (
                             <td className="px-4 py-4 whitespace-nowrap text-sm">
-                              {renderDateBadge(task.dueDate)}
+                              {renderDateBadge(task.due_date)}
                             </td>
                           )}
                           {visibleColumns.team && (
@@ -1423,7 +1422,7 @@ export default function TaskPage() {
                           )}
                           {visibleColumns.latestNote && (
                             <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {task.latestNote || "—"}
+                              {task.notes.at(-1) || "—"}
                             </td>
                           )}
                           {visibleColumns.groups && (

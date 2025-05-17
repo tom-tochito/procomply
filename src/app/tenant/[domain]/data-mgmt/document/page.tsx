@@ -163,12 +163,15 @@ export default function DocumentPage() {
     }
 
     // Doc Category filter
-    if (selectedDocCategory && document.docCategory !== selectedDocCategory) {
+    if (
+      selectedDocCategory &&
+      document.document_category !== selectedDocCategory
+    ) {
       return false;
     }
 
     // File type filter
-    if (selectedFileType && document.fileType !== selectedFileType) {
+    if (selectedFileType && document.file_type !== selectedFileType) {
       return false;
     }
 
@@ -178,7 +181,7 @@ export default function DocumentPage() {
   // Extract unique values for filters
   const statuses = Array.from(new Set(documents.map((doc) => doc.status)));
   const categories = Array.from(new Set(documents.map((doc) => doc.category)));
-  const fileTypes = Array.from(new Set(documents.map((doc) => doc.fileType)));
+  const fileTypes = Array.from(new Set(documents.map((doc) => doc.file_type)));
 
   // Get file icon based on type
   const getFileIcon = (fileType: string) => {
@@ -652,13 +655,13 @@ export default function DocumentPage() {
                       onClick={() => handleDocumentClick(document)}
                     >
                       <div className="flex items-start space-x-2">
-                        {getFileIcon(document.fileType)}
+                        {getFileIcon(document.file_type)}
                         <div className="flex-grow min-w-0">
                           <h3 className="font-medium text-gray-900 mb-1 truncate">
                             {document.name}
                           </h3>
                           <div className="flex flex-wrap text-xs text-gray-500 gap-x-2 gap-y-1 mb-1">
-                            <span>Uploaded: {document.uploadDate}</span>
+                            <span>Uploaded: {document.upload_date}</span>
                             <span>Size: {document.size}</span>
                           </div>
                           {document.description && (
@@ -669,9 +672,9 @@ export default function DocumentPage() {
                           <div className="flex items-center justify-between mt-1.5">
                             <div className="flex flex-wrap items-center gap-1.5">
                               {renderStatusBadge(document.status)}
-                              {document.docCategory && (
+                              {document.document_category && (
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                                  {document.docCategory}
+                                  {document.document_category}
                                 </span>
                               )}
                             </div>
@@ -752,7 +755,7 @@ export default function DocumentPage() {
                         >
                           <td className="px-4 py-3 whitespace-nowrap">
                             <div className="flex items-center">
-                              {getFileIcon(document.fileType)}
+                              {getFileIcon(document.file_type)}
                               <div className="ml-3 max-w-[250px]">
                                 <div className="text-sm font-medium text-gray-900 truncate">
                                   {document.name}
@@ -772,14 +775,14 @@ export default function DocumentPage() {
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap hidden xl:table-cell">
                             <div className="text-sm text-gray-900 truncate max-w-[150px]">
-                              {document.docCategory || "-"}
+                              {document.document_category || "-"}
                             </div>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             {renderStatusBadge(document.status)}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 hidden xl:table-cell">
-                            {document.uploadDate}
+                            {document.upload_date}
                           </td>
                           <td
                             className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium"

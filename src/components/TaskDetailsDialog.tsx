@@ -236,7 +236,7 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
   const [activeSidebarItem, setActiveSidebarItem] = React.useState("general");
 
   // Use passed building prop or fallbacks
-  const buildingName = building?.name || `Building ${task.buildingId}`;
+  const buildingName = building?.name || `Building ${task.building_id}`;
   const buildingImage = building?.image;
 
   if (!isOpen) return null;
@@ -365,9 +365,9 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
 
         {/* Metadata Bar */}
         <div className="bg-gray-700 text-white px-3 sm:px-5 py-1.5 flex flex-wrap items-center gap-x-2 sm:gap-x-4 gap-y-1 text-xs flex-shrink-0 border-t border-gray-600">
-          {renderDueDateBadge("Due Date", task.dueDate)}
+          {renderDueDateBadge("Due Date", task.due_date)}
           {renderMetadataBadge("Priority", task.priority)}
-          {renderMetadataBadge("Risk Level", task.riskLevel)}
+          {renderMetadataBadge("Risk Level", task.risk_level)}
           {/* Placeholder for Workflow/Assignee Text - align right */}
           <div className="hidden sm:flex flex-grow justify-end space-x-4">
             <span className="flex items-center text-gray-300">
@@ -559,7 +559,7 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                             Due Date:
                           </p>
                           <p className="font-semibold bg-blue-500 text-white px-2 py-0.5 rounded inline-block text-xs">
-                            {task.dueDate}
+                            {task.due_date}
                           </p>
                         </div>
                       </div>
@@ -587,9 +587,9 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                             Risk Level:
                           </p>
                           <p className="font-semibold bg-blue-500 text-white px-2 py-0.5 rounded inline-block text-xs">
-                            {task.riskLevel === "L"
+                            {task.risk_level === "L"
                               ? "Low"
-                              : task.riskLevel === "M"
+                              : task.risk_level === "M"
                               ? "Medium"
                               : "High"}
                           </p>

@@ -1,70 +1,123 @@
-// Define types for companies
 export type Company = {
   id: string;
   name: string;
-  category?: string;
-  ref?: string;
-  email?: string;
-  phone?: string;
-  postcode?: string;
-  numberOfEmployees?: number;
+  referral: string;
+  category: string;
+  email: string | null;
+  phone: string | null;
+  postcode: string | null;
+  number_of_employees: number | null;
 };
 
-// Sample company data based on the screenshots
 export const companies: Company[] = [
   {
     id: "1",
     name: "Akelius",
-    ref: "Akelius",
+    referral: "Akelius",
+    category: "",
+    email: null,
+    phone: null,
+    postcode: null,
+    number_of_employees: null,
   },
   {
     id: "2",
     name: "Akelius Residential Ltd",
-    ref: "Akelius Residential Ltd",
+    referral: "Akelius Residential Ltd",
+    category: "",
+    email: null,
+    phone: null,
+    postcode: null,
+    number_of_employees: null,
   },
   {
     id: "3",
     name: "ASAP Comply",
-    ref: "ASAP Comply",
+    referral: "ASAP Comply",
+    category: "",
+    email: null,
+    phone: null,
+    postcode: null,
+    number_of_employees: null,
   },
   {
     id: "4",
     name: "Property Fire Protection",
-    ref: "PFP",
+    referral: "PFP",
+    category: "",
+    email: null,
+    phone: null,
+    postcode: null,
+    number_of_employees: null,
   },
   {
     id: "5",
     name: "UK Five Ltd",
-    ref: "UK Five Ltd",
+    referral: "UK Five Ltd",
+    category: "",
+    email: null,
+    phone: null,
+    postcode: null,
+    number_of_employees: null,
   },
   {
     id: "6",
     name: "UK Four Ltd",
-    ref: "UK Four Ltd",
+    referral: "UK Four Ltd",
+    category: "",
+    email: null,
+    phone: null,
+    postcode: null,
+    number_of_employees: null,
   },
   {
     id: "7",
     name: "UK Nine Ltd",
-    ref: "UK Nine Ltd",
+    referral: "UK Nine Ltd",
+    category: "",
+    email: null,
+    phone: null,
+    postcode: null,
+    number_of_employees: null,
   },
   {
     id: "8",
     name: "UK One Ltd",
-    ref: "UK One Ltd",
+    referral: "UK One Ltd",
+    category: "",
+    email: null,
+    phone: null,
+    postcode: null,
+    number_of_employees: null,
   },
   {
     id: "9",
     name: "UK Seven Ltd",
-    ref: "UK Seven Ltd",
+    referral: "UK Seven Ltd",
+    category: "",
+    email: null,
+    phone: null,
+    postcode: null,
+    number_of_employees: null,
   },
   {
     id: "10",
     name: "UK Thirteen Ltd",
-    ref: "UK Thirteen Ltd",
+    referral: "UK Thirteen Ltd",
+    category: "",
+    email: null,
+    phone: null,
+    postcode: null,
+    number_of_employees: null,
   },
   {
     id: "11",
     name: "UK Three Ltd",
-    ref: "UK Three Ltd",
+    referral: "UK Three Ltd",
+    category: "",
+    email: null,
+    phone: null,
+    postcode: null,
+    number_of_employees: null,
   },
 ];

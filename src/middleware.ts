@@ -1,37 +1,65 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { ROOT_DOMAIN } from "@/constants";
+
+function extractSubdomain(request: NextRequest): string | null {
+  const url = request.url;
+  const host = request.headers.get("host") || "";
+  const hostname = host.split(":")[0];
+
+  // Local development environment
+  if (url.includes("localhost") || url.includes("127.0.0.1")) {
+    // Try to extract subdomain from the full URL
+    const fullUrlMatch = url.match(/http:\/\/([^.]+)\.localhost/);
+    if (fullUrlMatch && fullUrlMatch[1]) {
+      return fullUrlMatch[1];
+    }
+
+    // Fallback to host header approach
+    if (hostname.includes(".localhost")) {
+      return hostname.split(".")[0];
+    }
+
+    return null;
+  }
+
+  // Production environment
+  const rootDomainFormatted = ROOT_DOMAIN.split(":")[0];
+
+  // Handle preview deployment URLs (tenant---branch-name.vercel.app)
+  if (hostname.includes("---") && hostname.endsWith(".vercel.app")) {
+    const parts = hostname.split("---");
+    return parts.length > 0 ? parts[0] : null;
+  }
+
+  // Regular subdomain detection
+  const isSubdomain =
+    hostname !== rootDomainFormatted &&
+    hostname !== `www.${rootDomainFormatted}` &&
+    hostname.endsWith(`.${rootDomainFormatted}`);
+
+  return isSubdomain ? hostname.replace(`.${rootDomainFormatted}`, "") : null;
+}
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const subdomain = extractSubdomain(request);
+
+  if (subdomain) {
+    // Block access to admin page from subdomains
+    if (pathname.startsWith("/admin")) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    // Rewrite to tenant
+    return NextResponse.rewrite(
+      new URL(`/tenant/${subdomain}${pathname}`, request.url)
+    );
+  }
+
+  // On the root domain, allow normal access
+  return NextResponse.next();
+}
 
 export const config = {
-  matcher: ["/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)"],
+  matcher: ["/((?!api|_next|[\\w-]+\\.\\w+).*)"],
 };
-
-export default async function middleware(req: NextRequest) {
-  const url = req.nextUrl;
-
-  let hostname = req.headers
-    .get("host")!
-    .replace(".localhost:3000", `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`);
-
-  // special case for Vercel preview deployment URLs
-  if (
-    hostname.includes("---") &&
-    hostname.endsWith(`.${process.env.NEXT_PUBLIC_VERCEL_DEPLOYMENT_SUFFIX}`)
-  ) {
-    hostname = `${hostname.split("---")[0]}.${
-      process.env.NEXT_PUBLIC_ROOT_DOMAIN
-    }`;
-  }
-
-  const searchParams = req.nextUrl.searchParams.toString();
-  const path = `${url.pathname}${
-    searchParams.length ? `?${searchParams}` : ""
-  }`;
-
-  if (
-    hostname === "localhost:3000" ||
-    hostname === process.env.NEXT_PUBLIC_ROOT_DOMAIN
-  ) {
-    return NextResponse.next();
-  }
-
-  return NextResponse.rewrite(new URL(`/${hostname}${path}`, req.url));
-}

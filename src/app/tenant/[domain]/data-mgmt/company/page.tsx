@@ -13,7 +13,7 @@ export default function CompanyPage() {
     if (
       searchTerm &&
       !company.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !company.ref?.toLowerCase().includes(searchTerm.toLowerCase())
+      !company.referral?.toLowerCase().includes(searchTerm.toLowerCase())
     ) {
       return false;
     }
@@ -121,25 +121,25 @@ export default function CompanyPage() {
               {filteredCompanies.map((company) => (
                 <tr key={company.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {company.numberOfEmployees || ''}
+                    {company.number_of_employees || ""}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {company.category || ''}
+                    {company.category || ""}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {company.ref || ''}
+                    {company.referral || ""}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {company.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {company.email || ''}
+                    {company.email || ""}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {company.phone || ''}
+                    {company.phone || ""}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {company.postcode || ''}
+                    {company.postcode || ""}
                   </td>
                 </tr>
               ))}
@@ -149,4 +149,4 @@ export default function CompanyPage() {
       </div>
     </div>
   );
-} 
+}

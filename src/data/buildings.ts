@@ -1,10 +1,3 @@
-// Define types for the building data
-export type BuildingInbox = {
-  urgent?: number;
-  warning?: number;
-  email?: boolean;
-};
-
 export type Building = {
   id: string;
   name: string;
@@ -12,10 +5,13 @@ export type Building = {
   division: string;
   status: string;
   compliance: number;
-  inbox: BuildingInbox;
+  inbox: {
+    urgent: number;
+    warning: number;
+    email: boolean;
+  };
 };
 
-// Sample building data based on the screenshots
 export const buildings: Building[] = [
   {
     id: "40001",
@@ -24,7 +20,7 @@ export const buildings: Building[] = [
     division: "Camden",
     status: "Active",
     compliance: 72,
-    inbox: { urgent: 1, warning: 1 },
+    inbox: { urgent: 1, warning: 1, email: false },
   },
   {
     id: "40003",
@@ -33,7 +29,7 @@ export const buildings: Building[] = [
     division: "Leased",
     status: "Leasehold",
     compliance: 38,
-    inbox: { urgent: 2, warning: 0 },
+    inbox: { urgent: 2, warning: 0, email: false },
   },
   {
     id: "40004",
@@ -42,7 +38,7 @@ export const buildings: Building[] = [
     division: "Leased",
     status: "Leasehold",
     compliance: 75,
-    inbox: { email: true },
+    inbox: { urgent: 0, warning: 0, email: true },
   },
   {
     id: "40005",
@@ -51,7 +47,7 @@ export const buildings: Building[] = [
     division: "Hampstead",
     status: "Active",
     compliance: 70,
-    inbox: { urgent: 1, warning: 0 },
+    inbox: { urgent: 1, warning: 0, email: false },
   },
   {
     id: "40006",
@@ -60,7 +56,7 @@ export const buildings: Building[] = [
     division: "Leased",
     status: "Leasehold",
     compliance: 85,
-    inbox: { email: true },
+    inbox: { urgent: 0, warning: 0, email: true },
   },
 ];
 

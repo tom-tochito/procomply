@@ -172,7 +172,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
 
   // Get file icon based on type
   const getFileIcon = () => {
-    const type = document.fileType.toLowerCase();
+    const type = document.file_type.toLowerCase();
     if (type === "pdf") {
       return (
         <div className="bg-red-100 text-red-700 w-10 h-10 rounded flex items-center justify-center">
@@ -369,7 +369,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                     <div>
                       <p className="text-gray-500 text-xs mb-0.5">File Type:</p>
                       <p className="text-gray-800 font-medium">
-                        {document.fileType}
+                        {document.file_type}
                       </p>
                     </div>
                     <div>
@@ -399,7 +399,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                         Upload Date:
                       </p>
                       <p className="text-gray-800 font-medium">
-                        {document.uploadDate}
+                        {document.upload_date}
                       </p>
                     </div>
                     <div>
@@ -407,7 +407,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                         Uploaded By:
                       </p>
                       <p className="text-gray-800 font-medium">
-                        {document.uploadedBy}
+                        {document.uploaded_by}
                       </p>
                     </div>
                     <div>
@@ -421,7 +421,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                         Last Accessed:
                       </p>
                       <p className="text-gray-800 font-medium">
-                        {document.lastAccessed || "Unknown"}
+                        {document.last_accessed || "Unknown"}
                       </p>
                     </div>
                     <div>
@@ -470,11 +470,11 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                     <div className="border-l-2 border-blue-400 pl-4 pb-4 relative">
                       <div className="absolute w-3 h-3 bg-blue-400 rounded-full -left-[7px] top-0"></div>
                       <p className="font-medium text-gray-800">
-                        {document.uploadDate} - Version{" "}
+                        {document.upload_date} - Version{" "}
                         {document.version || "1.0"}
                       </p>
                       <p className="text-gray-600 mt-1">
-                        Uploaded by {document.uploadedBy}
+                        Uploaded by {document.uploaded_by}
                       </p>
                       <p className="text-gray-500 text-xs mt-2">
                         Current version
@@ -488,7 +488,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                           10/02/2024 - Version 0.9
                         </p>
                         <p className="text-gray-600 mt-1">
-                          Updated by {document.uploadedBy}
+                          Updated by {document.uploaded_by}
                         </p>
                         <p className="text-gray-500 text-xs mt-2">
                           Draft version
@@ -502,7 +502,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                         05/01/2024 - Version 1.0
                       </p>
                       <p className="text-gray-600 mt-1">
-                        Created by {document.uploadedBy}
+                        Created by {document.uploaded_by}
                       </p>
                       <p className="text-gray-500 text-xs mt-2">
                         Initial upload
@@ -543,11 +543,11 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                     <div>
                       <p className="text-gray-500 text-xs mb-0.5">MIME Type:</p>
                       <p className="text-gray-800 font-medium">
-                        {document.fileType === "PDF"
+                        {document.file_type === "PDF"
                           ? "application/pdf"
-                          : document.fileType === "DOCX"
+                          : document.file_type === "DOCX"
                           ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                          : document.fileType === "XLSX"
+                          : document.file_type === "XLSX"
                           ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                           : "application/octet-stream"}
                       </p>
@@ -555,7 +555,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                     <div>
                       <p className="text-gray-500 text-xs mb-0.5">Created:</p>
                       <p className="text-gray-800 font-medium">
-                        {document.uploadDate}
+                        {document.upload_date}
                       </p>
                     </div>
                     <div>
@@ -563,7 +563,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                         Last Modified:
                       </p>
                       <p className="text-gray-800 font-medium">
-                        {document.uploadDate}
+                        {document.upload_date}
                       </p>
                     </div>
                   </div>
@@ -573,7 +573,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
               {/* --- Related Section --- */}
               {activeSidebarItem === "related" && (
                 <div className="space-y-4 text-sm">
-                  {document.buildingId && (
+                  {document.building_id && (
                     <div>
                       <p className="text-gray-500 text-xs mb-2">
                         Related Building:
@@ -582,7 +582,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                         <BuildingIcon className="h-5 w-5 text-gray-500 mr-2" />
                         <div>
                           <p className="font-medium text-gray-800">
-                            Building {document.buildingId}
+                            Building {document.building_id}
                           </p>
                           <p className="text-xs text-gray-500">Fordwych Road</p>
                         </div>
@@ -590,7 +590,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                     </div>
                   )}
 
-                  {document.taskId && (
+                  {document.task_id && (
                     <div>
                       <p className="text-gray-500 text-xs mb-2 mt-4">
                         Related Task:
