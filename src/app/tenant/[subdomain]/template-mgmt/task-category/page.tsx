@@ -6,12 +6,18 @@ import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
 import TaskCategoryForm from "@/components/TaskCategoryForm";
 
+// Define the TaskCategoryData interface
+interface TaskCategoryData {
+  code: string;
+  description: string;
+}
+
 export default function TaskCategoryPage() {
-  const params = useParams();
+  const params = useParams() as { domain: string }; // Type params
   const [searchTerm, setSearchTerm] = useState("");
   const [formOpen, setFormOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [categories, setCategories] = useState([
+  const [editingItem, setEditingItem] = useState<TaskCategoryData | null>(null); // Type editingItem
+  const [categories, setCategories] = useState<TaskCategoryData[]>([
     {
       code: "Air Conditioning",
       description: "Air Conditioning",
@@ -59,7 +65,8 @@ export default function TaskCategoryPage() {
   ]);
 
   // Filter categories based on search
-  const filteredCategories = categories.filter((item) => {
+  const filteredCategories = categories.filter((item: TaskCategoryData) => {
+    // Type item
     if (!searchTerm) return true;
     return (
       item.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -68,17 +75,21 @@ export default function TaskCategoryPage() {
   });
 
   // Handle editing a category
-  const handleEdit = (item) => {
+  const handleEdit = (item: TaskCategoryData) => {
+    // Type item
     setEditingItem(item);
     setFormOpen(true);
   };
 
   // Handle saving a category
-  const handleSave = (data) => {
+  const handleSave = (data: TaskCategoryData) => {
+    // Type data
     if (editingItem) {
       // Update existing item
       setCategories(
-        categories.map((item) => (item.code === editingItem.code ? data : item))
+        categories.map((item: TaskCategoryData) =>
+          item.code === editingItem.code ? data : item
+        ) // Type item
       );
     } else {
       // Add new item
@@ -223,7 +234,7 @@ export default function TaskCategoryPage() {
           setEditingItem(null);
         }}
         onSave={handleSave}
-        editData={editingItem}
+        editData={editingItem || undefined} // Handle null for editData
       />
     </div>
   );

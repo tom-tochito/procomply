@@ -60,7 +60,7 @@ export default function TaskModal({
     templateData?.associateToSurvey || ""
   );
   const [description, setDescription] = useState(
-    templateData?.description || templateData?.observation || "" // Use templateData.description or templateData.observation for description
+    templateData?.description || ""
   );
   const [reoccurrences, setReoccurrences] = useState(
     templateData?.reoccurrences || ""

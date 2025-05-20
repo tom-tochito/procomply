@@ -6,12 +6,19 @@ import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
 import LegislationForm from "@/components/LegislationForm";
 
+// Define the LegislationData interface
+interface LegislationData {
+  code: string;
+  title: string;
+  url?: string;
+}
+
 export default function LegislationPage() {
-  const params = useParams();
+  const params = useParams() as { domain: string }; // Type params
   const [searchTerm, setSearchTerm] = useState("");
   const [formOpen, setFormOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [legislations, setLegislations] = useState([
+  const [editingItem, setEditingItem] = useState<LegislationData | null>(null); // Type editingItem
+  const [legislations, setLegislations] = useState<LegislationData[]>([
     {
       code: "ACOP L8",
       title: "Approved Code of Practice L8 Legionnaires' disease",
@@ -71,7 +78,8 @@ export default function LegislationPage() {
   ]);
 
   // Filter legislations based on search
-  const filteredLegislations = legislations.filter((item) => {
+  const filteredLegislations = legislations.filter((item: LegislationData) => {
+    // Type item
     if (!searchTerm) return true;
     return (
       item.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -80,18 +88,22 @@ export default function LegislationPage() {
   });
 
   // Handle editing a legislation
-  const handleEdit = (item) => {
+  const handleEdit = (item: LegislationData) => {
+    // Type item
     setEditingItem(item);
     setFormOpen(true);
   };
 
   // Handle saving a legislation
-  const handleSave = (data) => {
+  const handleSave = (data: LegislationData) => {
+    // Type data
     if (editingItem) {
       // Update existing item
       setLegislations(
-        legislations.map((item) =>
-          item.code === editingItem.code ? data : item
+        legislations.map(
+          (
+            item: LegislationData // Type item
+          ) => (item.code === editingItem.code ? data : item)
         )
       );
     } else {
@@ -255,7 +267,7 @@ export default function LegislationPage() {
           setEditingItem(null);
         }}
         onSave={handleSave}
-        editData={editingItem}
+        editData={editingItem || undefined} // Handle null for editData
       />
     </div>
   );

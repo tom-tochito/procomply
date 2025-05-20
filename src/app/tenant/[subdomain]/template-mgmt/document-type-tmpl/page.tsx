@@ -6,12 +6,25 @@ import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
 import DocumentTypeTemplateForm from "@/components/DocumentTypeTemplateForm";
 
+// Define the DocumentTypeTemplateData interface
+interface DocumentTypeTemplateData {
+  code: string;
+  description: string;
+  title: string;
+  statutory: string; // "Yes" or "No"
+  category: string;
+  subCategory: string;
+  repeatValue: string;
+  repeatUnit: string;
+}
+
 export default function DocumentTypeTemplatePage() {
-  const params = useParams();
+  const params = useParams() as { domain: string }; // Type params
   const [searchTerm, setSearchTerm] = useState("");
   const [templateFormOpen, setTemplateFormOpen] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState(null);
-  const [templates, setTemplates] = useState([
+  const [editingTemplate, setEditingTemplate] =
+    useState<DocumentTypeTemplateData | null>(null); // Type editingTemplate
+  const [templates, setTemplates] = useState<DocumentTypeTemplateData[]>([
     {
       code: "FDIR",
       description: "6 Monthly Fire Door Inspection",
@@ -125,28 +138,35 @@ export default function DocumentTypeTemplatePage() {
   ]);
 
   // Filter templates based on search
-  const filteredTemplates = templates.filter((template) => {
-    if (!searchTerm) return true;
-    return (
-      template.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      template.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      template.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      template.category.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  });
+  const filteredTemplates = templates.filter(
+    (template: DocumentTypeTemplateData) => {
+      // Type template
+      if (!searchTerm) return true;
+      return (
+        template.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        template.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        template.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        template.category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+  );
 
   // Handle editing a template
-  const handleEditTemplate = (template) => {
+  const handleEditTemplate = (template: DocumentTypeTemplateData) => {
+    // Type template
     setEditingTemplate(template);
     setTemplateFormOpen(true);
   };
 
   // Handle saving a template
-  const handleSaveTemplate = (templateData) => {
+  const handleSaveTemplate = (templateData: DocumentTypeTemplateData) => {
+    // Type templateData
     if (editingTemplate) {
       // Update existing template
       setTemplates(
-        templates.map((t) => (t.code === templateData.code ? templateData : t))
+        templates.map((t: DocumentTypeTemplateData) =>
+          t.code === templateData.code ? templateData : t
+        ) // Type t
       );
     } else {
       // Add new template
@@ -335,7 +355,7 @@ export default function DocumentTypeTemplatePage() {
           setEditingTemplate(null);
         }}
         onSave={handleSaveTemplate}
-        editData={editingTemplate}
+        editData={editingTemplate || undefined} // Handle null for editData
       />
     </div>
   );

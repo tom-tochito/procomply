@@ -21,6 +21,16 @@ interface DocumentTypeTemplateData {
   repeatUnit: string;
 }
 
+// Define a type for the keys of subCategoryOptions
+const subCategoryOptionsMap = {
+  Fire: ["Inspection", "Test Record"],
+  Electrical: ["Register"],
+  Miscellaneous: ["Service Record"],
+  Asbestos: ["Assessment", "Certificate", "Survey", "Management Plan"],
+} as const; // Use 'as const' for stricter typing of keys and values
+
+type CategoryKey = keyof typeof subCategoryOptionsMap;
+
 export default function DocumentTypeTemplateForm({
   isOpen,
   onClose,
@@ -34,25 +44,22 @@ export default function DocumentTypeTemplateForm({
   const [isStatutory, setIsStatutory] = useState(
     editData?.statutory === "Yes" || false
   );
-  const [category, setCategory] = useState(editData?.category || "");
+  const [category, setCategory] = useState<CategoryKey | "">(
+    (editData?.category as CategoryKey) || ""
+  ); // Typed category state
   const [subCategory, setSubCategory] = useState(editData?.subCategory || "");
   const [repeatValue, setRepeatValue] = useState(editData?.repeatValue || "");
   const [repeatUnit, setRepeatUnit] = useState(editData?.repeatUnit || "");
 
   // Field options based on the screenshot
-  const categoryOptions = ["Fire", "Electrical", "Miscellaneous", "Asbestos"];
-  const subCategoryOptions = {
-    Fire: ["Inspection", "Test Record"],
-    Electrical: ["Register"],
-    Miscellaneous: ["Service Record"],
-    Asbestos: ["Assessment", "Certificate", "Survey", "Management Plan"],
-  };
+  const categoryOptions = Object.keys(subCategoryOptionsMap) as CategoryKey[];
+  // subCategoryOptions is now subCategoryOptionsMap
   const unitOptions = ["DAILY", "WEEKLY", "MONTHLY", "QUARTERLY", "YEARLY"];
 
   // Get sub-category options based on selected category
   const getSubCategoryOptions = () => {
-    if (category && subCategoryOptions[category]) {
-      return subCategoryOptions[category];
+    if (category && category in subCategoryOptionsMap) {
+      return subCategoryOptionsMap[category as CategoryKey]; // Type assertion
     }
     return [];
   };
@@ -174,7 +181,7 @@ export default function DocumentTypeTemplateForm({
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                         value={category}
                         onChange={(e) => {
-                          setCategory(e.target.value);
+                          setCategory(e.target.value as CategoryKey);
                           setSubCategory(""); // Reset sub-category when category changes
                         }}
                         required

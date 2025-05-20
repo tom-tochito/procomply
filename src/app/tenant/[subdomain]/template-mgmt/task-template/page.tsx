@@ -6,13 +6,12 @@ import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
 import TaskTemplateForm from "@/components/TaskTemplateForm";
 
-// Assuming TaskTemplateData is defined in TaskTemplateForm and imported or defined here
-// If not, it should be defined here based on the template structure.
-// For example:
+// Updated TaskTemplateData interface to match TaskTemplateForm.tsx
 interface TaskTemplateData {
   code: string;
   name: string;
-  observation?: string; // Made optional as it was removed from TaskTemplateForm
+  taskCategory: string;
+  type: string;
   instruction: string;
   riskArea: string;
   subsection: string;
@@ -26,7 +25,7 @@ interface TaskTemplateData {
 }
 
 export default function TaskTemplatePage() {
-  const params = useParams() as { domain: string }; // Specify type for domain
+  const params = useParams() as { domain: string };
   const [searchTerm, setSearchTerm] = useState("");
   const [templateFormOpen, setTemplateFormOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] =
@@ -35,7 +34,8 @@ export default function TaskTemplatePage() {
     {
       code: "TT-661439",
       name: "6 Monthly Fire Alarm Service",
-      observation: "6 monthly service to the fire alarm system",
+      taskCategory: "Fire Safety",
+      type: "Service",
       instruction: "Inspect and test the fire alarm system",
       riskArea: "Fire",
       subsection: "Inspection",
@@ -50,7 +50,8 @@ export default function TaskTemplatePage() {
     {
       code: "TT-412241",
       name: "6 Monthly Fire Extinguisher Service",
-      observation: "No records of service found",
+      taskCategory: "Fire Safety",
+      type: "Service",
       instruction: "Service the fire extinguishers",
       riskArea: "Fire",
       subsection: "Fire Alarm System",
@@ -65,7 +66,8 @@ export default function TaskTemplatePage() {
     {
       code: "TT-395976",
       name: "Access Door Controls",
-      observation: "The door is not closing properly",
+      taskCategory: "Access Control",
+      type: "Inspection",
       instruction: "The door should be fixed",
       riskArea: "Health & Safety",
       subsection: "",
@@ -80,7 +82,8 @@ export default function TaskTemplatePage() {
     {
       code: "TT-453827",
       name: "Access to Dry Riser",
-      observation: "There is a blockage to the dry riser",
+      taskCategory: "Fire Safety",
+      type: "Inspection",
       instruction: "Ensure clear access to the dry riser",
       riskArea: "Fire",
       subsection: "Fire Hazards",
@@ -95,7 +98,8 @@ export default function TaskTemplatePage() {
     {
       code: "TT-363623",
       name: "Add Cross Sectional Drawings",
-      observation: "This installation requires cross sectional drawings",
+      taskCategory: "Documentation",
+      type: "Administrative",
       instruction: "Add cross sectional drawings to the installation",
       riskArea: "Electrical",
       subsection: "Label",
@@ -110,12 +114,14 @@ export default function TaskTemplatePage() {
   ]);
 
   // Filter templates based on search
-  const filteredTemplates = templates.filter((template) => {
+  const filteredTemplates = templates.filter((template: TaskTemplateData) => {
     if (!searchTerm) return true;
     return (
       template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       template.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      template.riskArea.toLowerCase().includes(searchTerm.toLowerCase())
+      template.riskArea.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      template.taskCategory.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      template.type.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
 
@@ -226,7 +232,13 @@ export default function TaskTemplatePage() {
                   scope="col"
                   className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  Observation
+                  Task Category
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Type
                 </th>
                 <th
                   scope="col"
@@ -308,8 +320,11 @@ export default function TaskTemplatePage() {
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                     {template.name}
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {template.observation}
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {template.taskCategory}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {template.type}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                     {template.instruction}
@@ -364,7 +379,7 @@ export default function TaskTemplatePage() {
           setEditingTemplate(null);
         }}
         onSave={handleSaveTemplate}
-        editData={editingTemplate}
+        editData={editingTemplate || undefined}
       />
     </div>
   );

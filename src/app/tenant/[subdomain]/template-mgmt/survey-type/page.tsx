@@ -6,12 +6,18 @@ import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
 import SurveyTypeForm from "@/components/SurveyTypeForm";
 
+// Define the SurveyTypeData interface
+interface SurveyTypeData {
+  name: string;
+  description: string;
+}
+
 export default function SurveyTypePage() {
-  const params = useParams();
+  const params = useParams() as { domain: string }; // Type params
   const [searchTerm, setSearchTerm] = useState("");
   const [formOpen, setFormOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [surveyTypes, setSurveyTypes] = useState([
+  const [editingItem, setEditingItem] = useState<SurveyTypeData | null>(null); // Type editingItem
+  const [surveyTypes, setSurveyTypes] = useState<SurveyTypeData[]>([
     {
       name: "ASB-DS",
       description: "Asbestos Demolition Survey",
@@ -59,7 +65,8 @@ export default function SurveyTypePage() {
   ]);
 
   // Filter survey types based on search
-  const filteredSurveyTypes = surveyTypes.filter((item) => {
+  const filteredSurveyTypes = surveyTypes.filter((item: SurveyTypeData) => {
+    // Type item
     if (!searchTerm) return true;
     return (
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -68,18 +75,22 @@ export default function SurveyTypePage() {
   });
 
   // Handle editing a survey type
-  const handleEdit = (item) => {
+  const handleEdit = (item: SurveyTypeData) => {
+    // Type item
     setEditingItem(item);
     setFormOpen(true);
   };
 
   // Handle saving a survey type
-  const handleSave = (data) => {
+  const handleSave = (data: SurveyTypeData) => {
+    // Type data
     if (editingItem) {
       // Update existing item
       setSurveyTypes(
-        surveyTypes.map((item) =>
-          item.name === editingItem.name ? data : item
+        surveyTypes.map(
+          (
+            item: SurveyTypeData // Type item
+          ) => (item.name === editingItem.name ? data : item)
         )
       );
     } else {
@@ -225,7 +236,7 @@ export default function SurveyTypePage() {
           setEditingItem(null);
         }}
         onSave={handleSave}
-        editData={editingItem}
+        editData={editingItem || undefined} // Handle null for editData
       />
     </div>
   );

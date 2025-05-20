@@ -210,7 +210,7 @@ export default function CountryPage() {
           setEditingItem(null);
         }}
         onSave={handleSave}
-        editData={editingItem}
+        editData={editingItem || undefined}
       />
     </div>
   );

@@ -6,12 +6,18 @@ import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
 import SubsectionForm from "@/components/SubsectionForm";
 
+// Define the SubsectionData interface
+interface SubsectionData {
+  code: string;
+  description: string;
+}
+
 export default function SubsectionPage() {
-  const params = useParams();
+  const params = useParams() as { domain: string }; // Type params
   const [searchTerm, setSearchTerm] = useState("");
   const [formOpen, setFormOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [subsections, setSubsections] = useState([
+  const [editingItem, setEditingItem] = useState<SubsectionData | null>(null); // Type editingItem
+  const [subsections, setSubsections] = useState<SubsectionData[]>([
     {
       code: "Access & Egress",
       description: "Access & Egress",
@@ -59,7 +65,8 @@ export default function SubsectionPage() {
   ]);
 
   // Filter subsections based on search
-  const filteredSubsections = subsections.filter((item) => {
+  const filteredSubsections = subsections.filter((item: SubsectionData) => {
+    // Type item
     if (!searchTerm) return true;
     return (
       item.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -68,18 +75,22 @@ export default function SubsectionPage() {
   });
 
   // Handle editing a subsection
-  const handleEdit = (item) => {
+  const handleEdit = (item: SubsectionData) => {
+    // Type item
     setEditingItem(item);
     setFormOpen(true);
   };
 
   // Handle saving a subsection
-  const handleSave = (data) => {
+  const handleSave = (data: SubsectionData) => {
+    // Type data
     if (editingItem) {
       // Update existing item
       setSubsections(
-        subsections.map((item) =>
-          item.code === editingItem.code ? data : item
+        subsections.map(
+          (
+            item: SubsectionData // Type item
+          ) => (item.code === editingItem.code ? data : item)
         )
       );
     } else {
@@ -225,7 +236,7 @@ export default function SubsectionPage() {
           setEditingItem(null);
         }}
         onSave={handleSave}
-        editData={editingItem}
+        editData={editingItem || undefined} // Handle null for editData
       />
     </div>
   );

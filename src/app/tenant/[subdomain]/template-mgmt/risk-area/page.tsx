@@ -6,12 +6,18 @@ import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
 import RiskAreaForm from "@/components/RiskAreaForm";
 
+// Define the RiskAreaData interface
+interface RiskAreaData {
+  code: string;
+  description: string;
+}
+
 export default function RiskAreaPage() {
-  const params = useParams();
+  const params = useParams() as { domain: string }; // Type params
   const [searchTerm, setSearchTerm] = useState("");
   const [formOpen, setFormOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [riskAreas, setRiskAreas] = useState([
+  const [editingItem, setEditingItem] = useState<RiskAreaData | null>(null); // Type editingItem
+  const [riskAreas, setRiskAreas] = useState<RiskAreaData[]>([
     {
       code: "Asbestos",
       description: "Asbestos",
@@ -59,7 +65,8 @@ export default function RiskAreaPage() {
   ]);
 
   // Filter risk areas based on search
-  const filteredRiskAreas = riskAreas.filter((item) => {
+  const filteredRiskAreas = riskAreas.filter((item: RiskAreaData) => {
+    // Type item
     if (!searchTerm) return true;
     return (
       item.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -68,17 +75,21 @@ export default function RiskAreaPage() {
   });
 
   // Handle editing a risk area
-  const handleEdit = (item) => {
+  const handleEdit = (item: RiskAreaData) => {
+    // Type item
     setEditingItem(item);
     setFormOpen(true);
   };
 
   // Handle saving a risk area
-  const handleSave = (data) => {
+  const handleSave = (data: RiskAreaData) => {
+    // Type data
     if (editingItem) {
       // Update existing item
       setRiskAreas(
-        riskAreas.map((item) => (item.code === editingItem.code ? data : item))
+        riskAreas.map((item: RiskAreaData) =>
+          item.code === editingItem.code ? data : item
+        ) // Type item
       );
     } else {
       // Add new item
@@ -223,7 +234,7 @@ export default function RiskAreaPage() {
           setEditingItem(null);
         }}
         onSave={handleSave}
-        editData={editingItem}
+        editData={editingItem || undefined} // Handle null for editData
       />
     </div>
   );
