@@ -1,13 +1,19 @@
 import React, { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 
 // Props definition
 interface LegislationFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (legislationData: any) => void;
-  editData?: any; // Optional data to pre-fill for editing
+  onSave: (legislationData: LegislationData) => void;
+  editData?: LegislationData; // Optional data to pre-fill for editing
+}
+
+// Define a type for the legislation data
+interface LegislationData {
+  code: string;
+  title: string;
+  url?: string;
 }
 
 export default function LegislationForm({

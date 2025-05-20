@@ -1,13 +1,24 @@
 import React, { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 
 // Props definition
 interface DocumentTypeTemplateFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (templateData: any) => void;
-  editData?: any; // Optional template data to pre-fill for editing
+  onSave: (templateData: DocumentTypeTemplateData) => void;
+  editData?: DocumentTypeTemplateData; // Optional template data to pre-fill for editing
+}
+
+// Define a type for the document type template data
+interface DocumentTypeTemplateData {
+  code: string;
+  description: string;
+  title: string;
+  statutory: string; // "Yes" or "No"
+  category: string;
+  subCategory: string;
+  repeatValue: string;
+  repeatUnit: string;
 }
 
 export default function DocumentTypeTemplateForm({

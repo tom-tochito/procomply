@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Task } from "@/data/tasks"; // Import Task type from data
 import Image from "next/image"; // Import next/image
 
