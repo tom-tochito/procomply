@@ -6,12 +6,18 @@ import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
 import CountryForm from "@/components/CountryForm";
 
+// Define the CountryData interface
+interface CountryData {
+  code: string;
+  description: string;
+}
+
 export default function CountryPage() {
-  const params = useParams();
+  const params = useParams() as { domain: string }; // Type params
   const [searchTerm, setSearchTerm] = useState("");
   const [formOpen, setFormOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [countries, setCountries] = useState([
+  const [editingItem, setEditingItem] = useState<CountryData | null>(null); // Type editingItem
+  const [countries, setCountries] = useState<CountryData[]>([
     {
       code: "ENG",
       description: "England",
@@ -35,7 +41,8 @@ export default function CountryPage() {
   ]);
 
   // Filter countries based on search
-  const filteredCountries = countries.filter((item) => {
+  const filteredCountries = countries.filter((item: CountryData) => {
+    // Type item
     if (!searchTerm) return true;
     return (
       item.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -44,17 +51,21 @@ export default function CountryPage() {
   });
 
   // Handle editing a country
-  const handleEdit = (item) => {
+  const handleEdit = (item: CountryData) => {
+    // Type item
     setEditingItem(item);
     setFormOpen(true);
   };
 
   // Handle saving a country
-  const handleSave = (data) => {
+  const handleSave = (data: CountryData) => {
+    // Type data
     if (editingItem) {
       // Update existing item
       setCountries(
-        countries.map((item) => (item.code === editingItem.code ? data : item))
+        countries.map((item: CountryData) =>
+          item.code === editingItem.code ? data : item
+        ) // Type item
       );
     } else {
       // Add new item
