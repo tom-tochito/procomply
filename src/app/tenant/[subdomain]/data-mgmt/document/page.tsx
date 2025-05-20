@@ -8,6 +8,23 @@ import DocumentDetailsDialog from "@/components/DocumentDetailsDialog";
 import UploadDocumentDialog from "@/components/UploadDocumentDialog";
 import { useParams } from "next/navigation";
 
+// Define the DocumentData interface if not already imported from a shared types file
+// This should match the one used in UploadDocumentDialog
+interface UploadedDocumentData {
+  file: File | null;
+  docType: string;
+  code: string;
+  reference: string;
+  building: string;
+  description: string;
+  category: string;
+  subCategory: string;
+  docCategory: string;
+  validFrom: Date | null;
+  expiry: Date | null;
+  isStatutory: boolean;
+}
+
 // Icons
 const SearchIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
   <svg
@@ -108,11 +125,15 @@ export default function DocumentPage() {
   };
 
   // Handle document upload
-  const handleUploadDocument = (documentData: any) => {
+  const handleUploadDocument = (documentData: UploadedDocumentData) => {
     console.log("Document uploaded:", documentData);
     // Here you would typically send the data to your backend
     // For now, we'll just show an alert
-    alert(`Document "${documentData.file.name}" uploaded successfully!`);
+    alert(
+      `Document "${
+        documentData.file?.name || "Unknown"
+      }" uploaded successfully!`
+    );
   };
 
   // Filter documents based on search and filters
