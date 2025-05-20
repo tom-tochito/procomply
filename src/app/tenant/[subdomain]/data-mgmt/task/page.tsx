@@ -85,7 +85,6 @@ export default function TaskPage() {
   const [teamsDropdownOpen, setTeamsDropdownOpen] = useState(false);
   const [assigneeDropdownOpen, setAssigneeDropdownOpen] = useState(false);
   const [buildingUseDropdownOpen, setBuildingUseDropdownOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
@@ -133,14 +132,10 @@ export default function TaskPage() {
 
   const [columnsMenuOpen, setColumnsMenuOpen] = useState(false);
 
-  // Check if screen is mobile size
+  // Check if screen is mobile size (only for sidebarOpen logic now)
   useEffect(() => {
     const handleResize = () => {
-      const mobileCheck = window.innerWidth < 1024;
-      setIsMobile(mobileCheck);
-      // Adjust initial latestNote/groups based on actual mobile status if needed for initial render,
-      // but handleResponsiveColumns will override this anyway.
-      if (mobileCheck) {
+      if (window.innerWidth < 1024) {
         setSidebarOpen(false);
       } else {
         setSidebarOpen(true);
