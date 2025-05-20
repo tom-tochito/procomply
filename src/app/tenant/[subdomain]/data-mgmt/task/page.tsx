@@ -1616,7 +1616,7 @@ export default function TaskPage() {
           setSelectedTemplate(null);
         }}
         onSave={handleSaveTask}
-        templateData={selectedTemplate}
+        templateData={selectedTemplate || undefined}
       />
 
       {/* Task template modal */}
