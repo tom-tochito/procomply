@@ -7,6 +7,7 @@ import { documents, Document } from "@/data/documents";
 import DocumentDetailsDialog from "@/components/DocumentDetailsDialog";
 import UploadDocumentDialog from "@/components/UploadDocumentDialog";
 import { useParams } from "next/navigation";
+import { generateTenantRedirectUrl } from "@/utils/tenant";
 
 // Define the DocumentData interface if not already imported from a shared types file
 // This should match the one used in UploadDocumentDialog
@@ -78,7 +79,8 @@ const UploadIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
 );
 
 export default function DocumentPage() {
-  const params = useParams() as { domain: string };
+  const params = useParams();
+  const subdomain = typeof params.subdomain === 'string' ? params.subdomain : (Array.isArray(params.subdomain) ? params.subdomain[0] : '');
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -291,7 +293,7 @@ export default function DocumentPage() {
           </h1>
           <div className="flex items-center text-xs md:text-sm text-gray-600 mt-1">
             <Link
-              href={`/${params.domain}/dashboard`}
+              href={generateTenantRedirectUrl(subdomain, "dashboard")}
               className="hover:text-blue-600"
             >
               <span>Data Mgmt</span>

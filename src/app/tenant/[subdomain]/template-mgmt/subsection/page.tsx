@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
 import SubsectionForm from "@/components/SubsectionForm";
+import { generateTenantRedirectUrl } from "@/utils/tenant";
 
 // Define the SubsectionData interface
 interface SubsectionData {
@@ -13,7 +14,8 @@ interface SubsectionData {
 }
 
 export default function SubsectionPage() {
-  const params = useParams() as { domain: string }; // Type params
+  const paramsHook = useParams();
+  const subdomain = typeof paramsHook.subdomain === 'string' ? paramsHook.subdomain : (Array.isArray(paramsHook.subdomain) ? paramsHook.subdomain[0] : '');
   const [searchTerm, setSearchTerm] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<SubsectionData | null>(null); // Type editingItem
@@ -114,7 +116,7 @@ export default function SubsectionPage() {
           </h1>
           <div className="flex items-center text-sm text-gray-600 mt-1">
             <Link
-              href={`/${params.domain}/dashboard`}
+              href={generateTenantRedirectUrl(subdomain, "dashboard")}
               className="hover:text-blue-600"
             >
               <span>Template Mgmt</span>

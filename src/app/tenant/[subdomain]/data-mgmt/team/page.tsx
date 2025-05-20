@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
+import { generateTenantRedirectUrl } from "@/utils/tenant";
 
 // Mock data based on the screenshot
 const mockTeams = [
@@ -24,7 +25,8 @@ const mockTeams = [
 ];
 
 export default function TeamPage() {
-  const { domain } = useParams();
+  const params = useParams();
+  const subdomain = typeof params.subdomain === 'string' ? params.subdomain : (Array.isArray(params.subdomain) ? params.subdomain[0] : '');
   const [searchTerm, setSearchTerm] = useState("");
 
   // Filter teams based on search term
@@ -48,7 +50,7 @@ export default function TeamPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-800">Team</h1>
         <div className="flex items-center text-sm text-gray-600 mt-1">
-          <Link href={`/${domain}/data-mgmt`} className="hover:text-blue-600">
+          <Link href={generateTenantRedirectUrl(subdomain, "data-mgmt")} className="hover:text-blue-600">
             <span>Data Mgmt</span>
           </Link>
           <span className="mx-2">/</span>

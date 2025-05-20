@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
 import TaskTemplateForm from "@/components/TaskTemplateForm";
+import { generateTenantRedirectUrl } from "@/utils/tenant";
 
 // Updated TaskTemplateData interface to match TaskTemplateForm.tsx
 interface TaskTemplateData {
@@ -25,7 +26,8 @@ interface TaskTemplateData {
 }
 
 export default function TaskTemplatePage() {
-  const params = useParams() as { domain: string };
+  const paramsHook = useParams();
+  const subdomain = typeof paramsHook.subdomain === 'string' ? paramsHook.subdomain : (Array.isArray(paramsHook.subdomain) ? paramsHook.subdomain[0] : '');
   const [searchTerm, setSearchTerm] = useState("");
   const [templateFormOpen, setTemplateFormOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] =
@@ -159,7 +161,7 @@ export default function TaskTemplatePage() {
           </h1>
           <div className="flex items-center text-sm text-gray-600 mt-1">
             <Link
-              href={`/${params.domain}/dashboard`}
+              href={generateTenantRedirectUrl(subdomain, "dashboard")}
               className="hover:text-blue-600"
             >
               <span>Template Mgmt</span>

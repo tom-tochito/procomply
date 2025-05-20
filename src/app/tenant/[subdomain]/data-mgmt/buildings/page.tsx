@@ -2,15 +2,18 @@
 
 import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { generateTenantRedirectUrl } from "@/utils/tenant";
 
 export default function BuildingRedirectPage() {
   const router = useRouter();
   const params = useParams();
 
   useEffect(() => {
-    // Redirect to the buildings page but keep the domain parameter
-    const domain = params.domain;
-    router.push(`/${domain}/buildings`);
+    // Redirect to the buildings page but keep the subdomain parameter
+    const subdomain = typeof params.subdomain === 'string' ? params.subdomain : (Array.isArray(params.subdomain) ? params.subdomain[0] : '');
+    if (subdomain) {
+      router.push(generateTenantRedirectUrl(subdomain, "buildings"));
+    }
   }, [router, params]);
 
   return (

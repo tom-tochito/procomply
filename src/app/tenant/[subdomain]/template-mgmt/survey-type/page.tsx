@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
 import SurveyTypeForm from "@/components/SurveyTypeForm";
+import { generateTenantRedirectUrl } from "@/utils/tenant";
 
 // Define the SurveyTypeData interface
 interface SurveyTypeData {
@@ -13,7 +14,8 @@ interface SurveyTypeData {
 }
 
 export default function SurveyTypePage() {
-  const params = useParams() as { domain: string }; // Type params
+  const paramsHook = useParams();
+  const subdomain = typeof paramsHook.subdomain === 'string' ? paramsHook.subdomain : (Array.isArray(paramsHook.subdomain) ? paramsHook.subdomain[0] : '');
   const [searchTerm, setSearchTerm] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<SurveyTypeData | null>(null); // Type editingItem
@@ -114,7 +116,7 @@ export default function SurveyTypePage() {
           </h1>
           <div className="flex items-center text-sm text-gray-600 mt-1">
             <Link
-              href={`/${params.domain}/dashboard`}
+              href={generateTenantRedirectUrl(subdomain, "dashboard")}
               className="hover:text-blue-600"
             >
               <span>Template Mgmt</span>

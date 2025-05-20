@@ -4,8 +4,12 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Header from "@/common/components/Header";
 import { companies } from "@/data/companies";
+import { useParams } from "next/navigation";
+import { generateTenantRedirectUrl } from "@/utils/tenant";
 
 export default function CompanyPage() {
+  const params = useParams();
+  const subdomain = typeof params.subdomain === 'string' ? params.subdomain : (Array.isArray(params.subdomain) ? params.subdomain[0] : '');
   const [searchTerm, setSearchTerm] = useState("");
 
   // Filter companies based on search
@@ -29,7 +33,7 @@ export default function CompanyPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-800">Company</h1>
         <div className="flex items-center text-sm text-gray-600 mt-1">
-          <Link href="/dashboard" className="hover:text-blue-600">
+          <Link href={generateTenantRedirectUrl(subdomain, "dashboard")} className="hover:text-blue-600">
             <span>Data Mgmt</span>
           </Link>
           <span className="mx-2">/</span>

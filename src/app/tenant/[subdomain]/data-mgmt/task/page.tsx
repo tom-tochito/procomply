@@ -9,6 +9,7 @@ import TaskDetailsDialog from "@/components/TaskDetailsDialog";
 import LabelModal from "@/components/LabelModal";
 import TaskModal from "@/components/TaskModal";
 import TaskTemplateModal from "@/components/TaskTemplateModal";
+import { generateTenantRedirectUrl } from "@/utils/tenant";
 
 // Assuming TaskData and TaskTemplate are defined in their respective components or a shared types file
 // For example, based on previous edits:
@@ -74,7 +75,8 @@ const initialVisibleColumns = {
 type VisibleColumnsState = typeof initialVisibleColumns;
 
 export default function TaskPage() {
-  const params = useParams() as { domain: string };
+  const params = useParams();
+  const subdomain = typeof params.subdomain === 'string' ? params.subdomain : (Array.isArray(params.subdomain) ? params.subdomain[0] : '');
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [selectedDivision, setSelectedDivision] = useState("Active Divisions");
@@ -349,7 +351,7 @@ export default function TaskPage() {
           <h1 className="text-xl md:text-2xl font-bold text-gray-800">Tasks</h1>
           <div className="flex items-center text-sm text-gray-600 mt-1">
             <Link
-              href={`/${params.domain}/dashboard`}
+              href={generateTenantRedirectUrl(subdomain, "dashboard")}
               className="hover:text-blue-600"
             >
               <span>Data Mgmt</span>

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
+import { generateTenantRedirectUrl } from "@/utils/tenant";
 
 // Mock data for buildings and compliance status
 const mockBuildings = [
@@ -86,7 +87,7 @@ const mockBuildings = [
 
 export default function ComplianceOverviewPage() {
   const params = useParams();
-  const domain = params.domain;
+  const subdomain = typeof params.subdomain === 'string' ? params.subdomain : (Array.isArray(params.subdomain) ? params.subdomain[0] : '');
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState({
     activeOnly: true,
@@ -121,7 +122,7 @@ export default function ComplianceOverviewPage() {
           Compliance Overview
         </h1>
         <div className="flex items-center text-sm text-gray-600 mt-1">
-          <Link href={`/${domain}/dashboard`} className="hover:text-blue-600">
+          <Link href={generateTenantRedirectUrl(subdomain, "dashboard")} className="hover:text-blue-600">
             <span>Home</span>
           </Link>
           <span className="mx-2">/</span>

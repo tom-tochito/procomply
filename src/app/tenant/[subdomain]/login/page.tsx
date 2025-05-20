@@ -6,10 +6,12 @@ import { notFound, useRouter } from "next/navigation";
 import { TENANTS } from "@/data/tenants";
 import logo from "@/assets/images/logo.png";
 import { useState, FormEvent } from "react";
+import { generateTenantRedirectUrl } from "@/utils/tenant";
 
 export default function Page() {
   const router = useRouter();
-  const { subdomain } = useParams();
+  const params = useParams();
+  const subdomain = typeof params.subdomain === 'string' ? params.subdomain : (Array.isArray(params.subdomain) ? params.subdomain[0] : '');
 
   // Try to match domain to known tenants
   const _tenant = subdomain?.toString().split(".")[0];
@@ -29,7 +31,7 @@ export default function Page() {
     // Simple client-side check:
     if (email === "admin@procomply.co.uk" && password === "procomply") {
       // On success, route them to the dashboard for this tenant
-      router.push(`/dashboard`);
+      router.push(generateTenantRedirectUrl(subdomain, "dashboard"));
     } else {
       alert("Invalid credentials!");
     }

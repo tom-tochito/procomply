@@ -11,6 +11,7 @@ import {
 } from "@/data/buildings";
 import { useParams } from "next/navigation";
 import AddBuildingModal from "@/components/modals/AddBuildingModal";
+import { generateTenantRedirectUrl } from "@/utils/tenant";
 
 export default function BuildingsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,7 +22,8 @@ export default function BuildingsPage() {
   const [availability, setAvailability] = useState("Availability");
   const [buildingUseOpen, setBuildingUseOpen] = useState(false);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
-  const params = useParams() as { domain: string };
+  const params = useParams();
+  const subdomain = typeof params.subdomain === 'string' ? params.subdomain : (Array.isArray(params.subdomain) ? params.subdomain[0] : '');
 
   // Check if screen is mobile size
   useEffect(() => {
@@ -118,7 +120,7 @@ export default function BuildingsPage() {
         </h1>
         <div className="flex items-center text-sm text-gray-600 mt-1">
           <Link
-            href={`/${params.domain}/dashboard`}
+            href={generateTenantRedirectUrl(subdomain, "dashboard")}
             className="hover:text-blue-600"
           >
             <span>Data Mgmt</span>
@@ -330,7 +332,7 @@ export default function BuildingsPage() {
           filteredBuildings.map((building) => (
             <Link
               key={building.id}
-              href={`/${params.domain}/buildings/${building.id}`}
+              href={generateTenantRedirectUrl(subdomain, `buildings/${building.id}`)}
               className="block hover:shadow-lg transition-shadow duration-200"
               onClick={() => closeDropdowns()}
             >

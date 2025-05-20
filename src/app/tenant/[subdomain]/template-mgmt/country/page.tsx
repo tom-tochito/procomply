@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
 import CountryForm from "@/components/CountryForm";
+import { generateTenantRedirectUrl } from "@/utils/tenant";
 
 // Define the CountryData interface
 interface CountryData {
@@ -13,7 +14,8 @@ interface CountryData {
 }
 
 export default function CountryPage() {
-  const params = useParams() as { domain: string }; // Type params
+  const paramsHook = useParams();
+  const subdomain = typeof paramsHook.subdomain === 'string' ? paramsHook.subdomain : (Array.isArray(paramsHook.subdomain) ? paramsHook.subdomain[0] : '');
   const [searchTerm, setSearchTerm] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<CountryData | null>(null); // Type editingItem
@@ -88,7 +90,7 @@ export default function CountryPage() {
           </h1>
           <div className="flex items-center text-sm text-gray-600 mt-1">
             <Link
-              href={`/${params.domain}/dashboard`}
+              href={generateTenantRedirectUrl(subdomain, "dashboard")}
               className="hover:text-blue-600"
             >
               <span>Template Mgmt</span>

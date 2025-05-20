@@ -8,9 +8,11 @@ import Header from "@/common/components/Header";
 import { getBuildingById } from "@/data/buildings";
 import { Task, getTasksByBuildingId } from "@/data/tasks";
 import TaskDetailsDialog from "@/components/TaskDetailsDialog";
+import { generateTenantRedirectUrl } from "@/utils/tenant";
 
 export default function BuildingDetailsPage() {
   const params = useParams();
+  const subdomain = typeof params.subdomain === 'string' ? params.subdomain : (Array.isArray(params.subdomain) ? params.subdomain[0] : '');
   const buildingId = params.id as string;
   const building = getBuildingById(buildingId);
   const initialTasks = getTasksByBuildingId(buildingId);
@@ -102,7 +104,7 @@ export default function BuildingDetailsPage() {
             The building with ID {buildingId} could not be found.
           </p>
           <Link
-            href="/buildings"
+            href={generateTenantRedirectUrl(subdomain, "buildings")}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             Return to Buildings
@@ -135,11 +137,11 @@ export default function BuildingDetailsPage() {
               {building.id} - {building.name}
             </h1>
             <div className="flex flex-wrap items-center text-sm text-gray-600 mt-1">
-              <Link href="/dashboard" className="hover:text-blue-600">
+              <Link href={generateTenantRedirectUrl(subdomain, "dashboard")} className="hover:text-blue-600">
                 <span>Home</span>
               </Link>
               <span className="mx-2">/</span>
-              <Link href="/buildings" className="hover:text-blue-600">
+              <Link href={generateTenantRedirectUrl(subdomain, "buildings")} className="hover:text-blue-600">
                 <span>Buildings</span>
               </Link>
               <span className="mx-2">/</span>
