@@ -16,7 +16,6 @@ interface TaskTemplateData {
   taskCategory: string;
   type: string;
   instruction: string;
-  observation: string;
   riskArea: string;
   subsection: string;
   priority: string;
@@ -42,7 +41,6 @@ export default function TaskTemplateForm({
   );
   const [type, setType] = useState(editData?.type || "");
   const [instruction, setInstruction] = useState(editData?.instruction || "");
-  const [observation, setObservation] = useState(editData?.observation || "");
   const [riskArea, setRiskArea] = useState(editData?.riskArea || "");
   const [subsection, setSubsection] = useState(editData?.subsection || "");
   const [priority, setPriority] = useState(editData?.priority || "");
@@ -88,7 +86,6 @@ export default function TaskTemplateForm({
       taskCategory,
       type,
       instruction,
-      observation,
       riskArea,
       subsection,
       priority,
@@ -197,18 +194,6 @@ export default function TaskTemplateForm({
                           </option>
                         ))}
                       </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Observation:
-                      </label>
-                      <textarea
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        rows={3}
-                        value={observation}
-                        onChange={(e) => setObservation(e.target.value)}
-                      />
                     </div>
 
                     <div>

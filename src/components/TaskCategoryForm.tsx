@@ -1,13 +1,18 @@
 import React, { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 
 // Props definition
 interface TaskCategoryFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (taskCategoryData: any) => void;
-  editData?: any; // Optional data to pre-fill for editing
+  onSave: (taskCategoryData: TaskCategoryData) => void;
+  editData?: TaskCategoryData; // Optional data to pre-fill for editing
+}
+
+// Define a type for the task category data
+interface TaskCategoryData {
+  code: string;
+  description: string;
 }
 
 export default function TaskCategoryForm({

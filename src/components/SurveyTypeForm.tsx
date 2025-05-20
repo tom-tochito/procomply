@@ -1,13 +1,18 @@
 import React, { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 
 // Props definition
 interface SurveyTypeFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (surveyTypeData: any) => void;
-  editData?: any; // Optional data to pre-fill for editing
+  onSave: (surveyTypeData: SurveyTypeData) => void;
+  editData?: SurveyTypeData; // Optional data to pre-fill for editing
+}
+
+// Define a type for the survey type data
+interface SurveyTypeData {
+  name: string;
+  description: string;
 }
 
 export default function SurveyTypeForm({
