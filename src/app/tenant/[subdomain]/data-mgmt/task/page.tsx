@@ -208,7 +208,7 @@ export default function TaskPage() {
   }, []);
 
   const toggleColumnVisibility = (column: keyof VisibleColumnsState) => {
-    setVisibleColumns((prevState) => ({
+    setVisibleColumns((prevState: VisibleColumnsState) => ({
       ...prevState,
       [column]: !prevState[column],
     }));
