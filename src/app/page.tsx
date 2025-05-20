@@ -9,16 +9,14 @@ export default function Page() {
         {TENANTS.map((tenant) => (
           <a
             key={tenant.id}
-            href={
-              ROOT_DOMAIN.includes('.vercel.app')
-                ? `${PROTOCOL}://${tenant.id}---${ROOT_DOMAIN}`
-                : `${PROTOCOL}://${tenant.id}.${ROOT_DOMAIN}`
-            }
+            href={`${PROTOCOL}://${ROOT_DOMAIN}/tenant/${tenant.id}/login`}
             target="_blank"
             rel="noopener noreferrer"
             className="group bg-white rounded-lg shadow-lg p-6 aspect-[4/3] flex flex-col items-center justify-center w-[20rem] transition-all duration-300 ease-in-out hover:shadow-xl hover:scale-105 transform"
           >
-            <h2 className="text-2xl font-semibold text-gray-700 text-center group-hover:text-[#F30] transition-colors duration-300">{tenant.name}</h2>
+            <h2 className="text-2xl font-semibold text-gray-700 text-center group-hover:text-[#F30] transition-colors duration-300">
+              {tenant.name}
+            </h2>
           </a>
         ))}
       </div>
