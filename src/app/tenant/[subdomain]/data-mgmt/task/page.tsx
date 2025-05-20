@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Header from "@/common/components/Header";
 import { tasks } from "@/data/tasks";
@@ -41,14 +41,14 @@ export default function TaskPage() {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
 
   // Reference for the dropdown
-  const addTaskButtonRef = React.useRef(null);
+  const addTaskButtonRef = React.useRef<HTMLButtonElement>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    function handleClickOutside(event: any) {
+    function handleClickOutside(event: MouseEvent) {
       if (
         addTaskButtonRef.current &&
-        !addTaskButtonRef.current.contains(event.target)
+        !addTaskButtonRef.current.contains(event.target as Node)
       ) {
         setAddTaskDropdownOpen(false);
       }
@@ -150,7 +150,7 @@ export default function TaskPage() {
     return () => window.removeEventListener("resize", handleResponsiveColumns);
   }, []);
 
-  const toggleColumnVisibility = (column) => {
+  const toggleColumnVisibility = (column: string) => {
     setVisibleColumns({
       ...visibleColumns,
       [column]: !visibleColumns[column],
@@ -196,7 +196,7 @@ export default function TaskPage() {
   });
 
   // Function to render priority and risk level badges
-  const renderBadge = (level) => {
+  const renderBadge = (level: string) => {
     const bgColor =
       level === "H"
         ? "bg-red-500"
@@ -213,7 +213,7 @@ export default function TaskPage() {
   };
 
   // Function to render date badges
-  const renderDateBadge = (date) => {
+  const renderDateBadge = (date: string) => {
     return (
       <span className="inline-block rounded-md bg-red-100 text-red-800 px-2 py-1 text-xs font-medium">
         {date}
@@ -222,7 +222,7 @@ export default function TaskPage() {
   };
 
   // Toggle a task as complete/incomplete (mock functionality)
-  const toggleTaskComplete = (taskId) => {
+  const toggleTaskComplete = (taskId: string | number) => {
     // In a real app, this would update the task status in your data store
     console.log(`Toggling completion status of task ${taskId}`);
   };
@@ -236,7 +236,7 @@ export default function TaskPage() {
   ];
 
   // Handle task click to open task details dialog
-  const handleTaskClick = (task) => {
+  const handleTaskClick = (task: any) => {
     setSelectedTask(task);
     setDialogOpen(true);
   };
@@ -247,19 +247,19 @@ export default function TaskPage() {
   };
 
   // Handle saving a new label
-  const handleSaveLabel = (labelData) => {
+  const handleSaveLabel = (labelData: { name: string; color: string }) => {
     setLabels([...labels, labelData]);
   };
 
   // Handle saving a new task
-  const handleSaveTask = (taskData) => {
+  const handleSaveTask = (taskData: any) => {
     console.log("New task created:", taskData);
     // Here you would typically send the data to your API
     setTaskModalOpen(false);
   };
 
   // Handle add task dropdown options
-  const handleAddTaskOption = (option) => {
+  const handleAddTaskOption = (option: string) => {
     if (option === "blank") {
       setTaskModalOpen(true);
     } else if (option === "template") {
@@ -269,7 +269,7 @@ export default function TaskPage() {
   };
 
   // Handle template selection
-  const handleSelectTemplate = (template) => {
+  const handleSelectTemplate = (template: any) => {
     console.log("Selected template:", template);
     setSelectedTemplate(template);
     // When selecting a template, automatically open the task modal with this template data

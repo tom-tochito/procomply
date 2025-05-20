@@ -297,7 +297,7 @@ export default function TaskTemplatePage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredTemplates.map((template, index) => (
+              {filteredTemplates.map((template) => (
                 <tr
                   key={template.code}
                   className="hover:bg-gray-50 transition-colors"

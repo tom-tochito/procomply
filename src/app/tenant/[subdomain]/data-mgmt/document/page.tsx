@@ -95,12 +95,10 @@ export default function DocumentPage() {
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(
     null
   );
-  const [isMobile, setIsMobile] = useState(false);
 
   // Check if screen is mobile size
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 1024);
       if (window.innerWidth < 1024) {
         setSidebarOpen(false);
       } else {
