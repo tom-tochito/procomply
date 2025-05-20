@@ -23,7 +23,7 @@ function extractSubdomain(request: NextRequest): string | null {
   }
 
   // Production environment
-  const rootDomainFormatted = ROOT_DOMAIN.split(":")[0];
+  const formattedRootDomain = ROOT_DOMAIN.split(":")[0];
 
   // Handle preview deployment URLs (tenant---branch-name.vercel.app)
   if (hostname.includes("---") && hostname.endsWith(".vercel.app")) {
@@ -33,11 +33,11 @@ function extractSubdomain(request: NextRequest): string | null {
 
   // Regular subdomain detection
   const isSubdomain =
-    hostname !== rootDomainFormatted &&
-    hostname !== `www.${rootDomainFormatted}` &&
-    hostname.endsWith(`.${rootDomainFormatted}`);
+    hostname !== formattedRootDomain &&
+    hostname !== `www.${formattedRootDomain}` &&
+    hostname.endsWith(`.${formattedRootDomain}`);
 
-  return isSubdomain ? hostname.replace(`.${rootDomainFormatted}`, "") : null;
+  return isSubdomain ? hostname.replace(`.${formattedRootDomain}`, "") : null;
 }
 
 export async function middleware(request: NextRequest) {
