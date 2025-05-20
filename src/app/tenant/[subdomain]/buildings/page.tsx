@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Header from "@/common/components/Header";
 import {
   buildings as initialBuildings,
@@ -20,13 +21,12 @@ export default function BuildingsPage() {
   const [availability, setAvailability] = useState("Availability");
   const [buildingUseOpen, setBuildingUseOpen] = useState(false);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const params = useParams();
+  const params = useParams() as { domain: string };
 
   // Check if screen is mobile size
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      // setIsMobile(window.innerWidth < 768);
     };
 
     handleResize(); // Initial check
@@ -339,10 +339,12 @@ export default function BuildingsPage() {
                   {/* Building image */}
                   <div className="w-full md:w-1/5 h-48 md:h-auto md:min-h-[12rem] bg-gray-100 flex items-center justify-center relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
-                    <img
+                    <Image
                       src={building.image || "/placeholder-building.jpg"}
                       alt={building.name}
-                      className="w-full h-full object-cover"
+                      layout="fill"
+                      objectFit="cover"
+                      className="w-full h-full"
                     />
                   </div>
 

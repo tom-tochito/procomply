@@ -3,15 +3,62 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Header from "@/common/components/Header";
-import { tasks } from "@/data/tasks";
+import { tasks, Task } from "@/data/tasks";
 import { useParams } from "next/navigation";
 import TaskDetailsDialog from "@/components/TaskDetailsDialog";
 import LabelModal from "@/components/LabelModal";
 import TaskModal from "@/components/TaskModal";
 import TaskTemplateModal from "@/components/TaskTemplateModal";
 
+// Assuming TaskData and TaskTemplate are defined in their respective components or a shared types file
+// For example, based on previous edits:
+interface TaskModalTaskData {
+  taskTemplate?: string;
+  taskCategory?: string;
+  type?: string;
+  instruction?: string;
+  building?: string;
+  associateToSurvey?: string;
+  description?: string;
+  reoccurrences?: string;
+  inbox?: string;
+  riskArea?: string;
+  subsection?: string;
+  priority?: string;
+  riskLevel?: string;
+  lastCompleted?: string;
+  lastCompletedBy?: string;
+  dueDate?: string;
+  isStatutory?: boolean;
+  compliant?: string;
+  code?: string;
+  name?: string;
+  statutory?: string;
+  repeatValue?: string;
+  repeatUnit?: string;
+  amberValue?: string;
+  amberUnit?: string;
+  observation?: string; // Ensure this matches what TaskModal provides
+}
+
+interface TaskTemplateModalData {
+  code: string;
+  name: string;
+  observation: string;
+  instruction: string;
+  riskArea: string;
+  subsection: string;
+  priority: string;
+  riskLevel: string;
+  statutory: string;
+  repeatValue: string;
+  repeatUnit: string;
+  amberValue: string;
+  amberUnit: string;
+}
+
 export default function TaskPage() {
-  const params = useParams();
+  const params = useParams() as { domain: string };
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [selectedDivision, setSelectedDivision] = useState("Active Divisions");
@@ -24,7 +71,7 @@ export default function TaskPage() {
   const [buildingUseDropdownOpen, setBuildingUseDropdownOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   // Label modal state
   const [labelModalOpen, setLabelModalOpen] = useState(false);
@@ -38,10 +85,11 @@ export default function TaskPage() {
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [taskTemplateModalOpen, setTaskTemplateModalOpen] = useState(false);
   const [addTaskDropdownOpen, setAddTaskDropdownOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<TaskTemplateModalData | null>(null);
 
   // Reference for the dropdown
-  const addTaskButtonRef = React.useRef<HTMLButtonElement>(null);
+  const addTaskButtonRef = useRef<HTMLButtonElement>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -236,7 +284,7 @@ export default function TaskPage() {
   ];
 
   // Handle task click to open task details dialog
-  const handleTaskClick = (task: any) => {
+  const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
     setDialogOpen(true);
   };
@@ -252,7 +300,7 @@ export default function TaskPage() {
   };
 
   // Handle saving a new task
-  const handleSaveTask = (taskData: any) => {
+  const handleSaveTask = (taskData: TaskModalTaskData) => {
     console.log("New task created:", taskData);
     // Here you would typically send the data to your API
     setTaskModalOpen(false);
@@ -269,7 +317,7 @@ export default function TaskPage() {
   };
 
   // Handle template selection
-  const handleSelectTemplate = (template: any) => {
+  const handleSelectTemplate = (template: TaskTemplateModalData) => {
     console.log("Selected template:", template);
     setSelectedTemplate(template);
     // When selecting a template, automatically open the task modal with this template data
