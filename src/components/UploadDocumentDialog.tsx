@@ -7,43 +7,24 @@ import { XMarkIcon, DocumentPlusIcon } from "@heroicons/react/24/outline";
 interface UploadDocumentDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpload: (documentData: any) => void;
+  onUpload: (documentData: DocumentData) => void;
 }
 
-// Icons
-const CloseIcon = ({ className = "h-6 w-6" }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M6 18L18 6M6 6l12 12"
-    />
-  </svg>
-);
-
-const UploadIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-    />
-  </svg>
-);
+// Define a type for the document data
+interface DocumentData {
+  file: File | null;
+  docType: string;
+  code: string;
+  reference: string;
+  building: string;
+  description: string;
+  category: string;
+  subCategory: string;
+  docCategory: string;
+  validFrom: Date | null;
+  expiry: Date | null;
+  isStatutory: boolean;
+}
 
 export default function UploadDocumentDialog({
   isOpen,

@@ -6,7 +6,24 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 interface TaskTemplateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectTemplate: (template: any) => void;
+  onSelectTemplate: (template: TaskTemplate) => void;
+}
+
+// Define a type for the template data
+interface TaskTemplate {
+  code: string;
+  name: string;
+  observation: string;
+  instruction: string;
+  riskArea: string;
+  subsection: string;
+  priority: string;
+  riskLevel: string;
+  statutory: string;
+  repeatValue: string;
+  repeatUnit: string;
+  amberValue: string;
+  amberUnit: string;
 }
 
 export default function TaskTemplateModal({
@@ -105,7 +122,7 @@ export default function TaskTemplateModal({
     );
   });
 
-  const handleSelectTemplate = (template) => {
+  const handleSelectTemplate = (template: TaskTemplate) => {
     onSelectTemplate(template);
     onClose();
   };

@@ -1,13 +1,31 @@
 import React, { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 
 // Props definition
 interface TaskTemplateFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (templateData: any) => void;
-  editData?: any; // Optional template data to pre-fill for editing
+  onSave: (templateData: TaskTemplateData) => void;
+  editData?: TaskTemplateData; // Optional template data to pre-fill for editing
+}
+
+// Define a type for the template data
+interface TaskTemplateData {
+  code: string;
+  name: string;
+  taskCategory: string;
+  type: string;
+  instruction: string;
+  observation: string;
+  riskArea: string;
+  subsection: string;
+  priority: string;
+  riskLevel: string;
+  statutory: string; // "Yes" or "No"
+  repeatValue: string; // Should be number, but form state is string
+  repeatUnit: string;
+  amberValue: string; // Should be number, but form state is string
+  amberUnit: string;
 }
 
 export default function TaskTemplateForm({

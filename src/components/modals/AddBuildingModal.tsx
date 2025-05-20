@@ -6,7 +6,18 @@ import { divisions } from "@/data/buildings"; // Assuming divisions are exported
 interface AddBuildingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newBuildingData: any) => void; // Define a more specific type later
+  onSave: (newBuildingData: NewBuildingData) => void;
+}
+
+// Define a type for the new building data
+interface NewBuildingData {
+  id: string;
+  name: string;
+  image: string;
+  division: string;
+  status: string;
+  compliance: number;
+  inbox: object; // Can be more specific if the structure of inbox is known
 }
 
 export default function AddBuildingModal({
