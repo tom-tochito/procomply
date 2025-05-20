@@ -17,7 +17,11 @@ interface NewBuildingData {
   division: string;
   status: string;
   compliance: number;
-  inbox: object; // Can be more specific if the structure of inbox is known
+  inbox: {
+    urgent: number;
+    warning: number;
+    email: boolean;
+  };
 }
 
 export default function AddBuildingModal({
@@ -50,15 +54,18 @@ export default function AddBuildingModal({
       return;
     }
 
-    const newBuildingData = {
+    const newBuildingData: NewBuildingData = {
       id: buildingId,
       name: buildingName,
       image: imageUrl || "/placeholder-building.jpg", // Default placeholder
       division: selectedDivision,
       status: status,
-      // Default compliance and inbox - these likely get updated later
-      compliance: 0,
-      inbox: {},
+      compliance: 0, // Default compliance
+      inbox: {
+        urgent: 0, // Default value for urgent notifications
+        warning: 0, // Default value for warnings
+        email: false, // Default value for email notifications
+      },
     };
     onSave(newBuildingData);
     onClose(); // Close modal after save
