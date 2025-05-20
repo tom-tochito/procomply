@@ -61,7 +61,7 @@ const UploadIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
 );
 
 export default function DocumentPage() {
-  const params = useParams();
+  const params = useParams() as { domain: string };
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -157,7 +157,6 @@ export default function DocumentPage() {
   });
 
   // Extract unique values for filters
-  const statuses = Array.from(new Set(documents.map((doc) => doc.status)));
   const categories = Array.from(new Set(documents.map((doc) => doc.category)));
   const fileTypes = Array.from(new Set(documents.map((doc) => doc.file_type)));
 

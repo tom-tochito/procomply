@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image"; // Import next/image
 import Header from "@/common/components/Header";
 import { getBuildingById } from "@/data/buildings";
 import { Task, getTasksByBuildingId } from "@/data/tasks";
@@ -120,10 +121,11 @@ export default function BuildingDetailsPage() {
         {/* Building image */}
         <div className="relative h-48 w-full md:w-64 rounded-lg overflow-hidden md:flex-shrink-0">
           <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent z-10" />
-          <img
-            src={building.image}
+          <Image
+            src={building.image} // Assuming building.image is a valid path or URL
             alt={building.name}
-            className="h-full w-full object-cover"
+            layout="fill"
+            objectFit="cover"
           />
         </div>
 
@@ -1964,10 +1966,11 @@ export default function BuildingDetailsPage() {
                       <td className="px-4 py-3 text-sm">
                         <div className="flex items-center">
                           <div className="h-10 w-10 mr-3 border bg-gray-100 flex-shrink-0 overflow-hidden">
-                            <img
+                            <Image
                               src="/doc-thumbnail.png"
                               alt=""
-                              className="h-full w-full object-cover"
+                              layout="fill"
+                              objectFit="cover"
                             />
                           </div>
                           <span>Fire Risk Assessment</span>
@@ -1988,10 +1991,11 @@ export default function BuildingDetailsPage() {
                       <td className="px-4 py-3 text-sm">
                         <div className="flex items-center">
                           <div className="h-10 w-10 mr-3 border bg-gray-100 flex-shrink-0 overflow-hidden">
-                            <img
+                            <Image
                               src="/doc-thumbnail.png"
                               alt=""
-                              className="h-full w-full object-cover"
+                              layout="fill"
+                              objectFit="cover"
                             />
                           </div>
                           <span>Fire Risk Assessment</span>
@@ -2012,10 +2016,11 @@ export default function BuildingDetailsPage() {
                       <td className="px-4 py-3 text-sm">
                         <div className="flex items-center">
                           <div className="h-10 w-10 mr-3 border bg-gray-100 flex-shrink-0 overflow-hidden">
-                            <img
+                            <Image
                               src="/doc-thumbnail.png"
                               alt=""
-                              className="h-full w-full object-cover"
+                              layout="fill"
+                              objectFit="cover"
                             />
                           </div>
                           <span>Fire Strategy Document</span>
@@ -2036,10 +2041,11 @@ export default function BuildingDetailsPage() {
                       <td className="px-4 py-3 text-sm">
                         <div className="flex items-center">
                           <div className="h-10 w-10 mr-3 border bg-gray-100 flex-shrink-0 overflow-hidden">
-                            <img
+                            <Image
                               src="/doc-thumbnail.png"
                               alt=""
-                              className="h-full w-full object-cover"
+                              layout="fill"
+                              objectFit="cover"
                             />
                           </div>
                           <span>Health & Safety Risk Assessment</span>
@@ -2060,10 +2066,11 @@ export default function BuildingDetailsPage() {
                       <td className="px-4 py-3 text-sm">
                         <div className="flex items-center">
                           <div className="h-10 w-10 mr-3 border bg-gray-100 flex-shrink-0 overflow-hidden">
-                            <img
+                            <Image
                               src="/doc-thumbnail.png"
                               alt=""
-                              className="h-full w-full object-cover"
+                              layout="fill"
+                              objectFit="cover"
                             />
                           </div>
                           <span>Inspection Log/Report</span>
@@ -2084,10 +2091,11 @@ export default function BuildingDetailsPage() {
                       <td className="px-4 py-3 text-sm">
                         <div className="flex items-center">
                           <div className="h-10 w-10 mr-3 border bg-gray-100 flex-shrink-0 overflow-hidden">
-                            <img
+                            <Image
                               src="/doc-thumbnail.png"
                               alt=""
-                              className="h-full w-full object-cover"
+                              layout="fill"
+                              objectFit="cover"
                             />
                           </div>
                           <span>Legionella Risk Assessment</span>
@@ -2108,10 +2116,11 @@ export default function BuildingDetailsPage() {
                       <td className="px-4 py-3 text-sm">
                         <div className="flex items-center">
                           <div className="h-10 w-10 mr-3 border bg-gray-100 flex-shrink-0 overflow-hidden">
-                            <img
+                            <Image
                               src="/doc-thumbnail.png"
                               alt=""
-                              className="h-full w-full object-cover"
+                              layout="fill"
+                              objectFit="cover"
                             />
                           </div>
                           <span>Photograph</span>
@@ -2399,7 +2408,6 @@ export default function BuildingDetailsPage() {
                     <td className="px-0 py-3 text-center border-r"></td>
                     <td className="px-0 py-3 text-center border-r"></td>
                     <td className="px-0 py-3 text-center border-r"></td>
-                    <td className="px-0 py-3 text-center border-r"></td>
                     <td className="px-0 py-3 text-center"></td>
                   </tr>
 
@@ -2443,7 +2451,6 @@ export default function BuildingDetailsPage() {
                     <td className="px-0 py-3 text-center border-r"></td>
                     <td className="px-0 py-3 text-center border-r"></td>
                     <td className="px-0 py-3 text-center border-r"></td>
-                    <td className="px-0 py-3 text-center border-r"></td>
                     <td className="px-0 py-3 text-center"></td>
                   </tr>
 
@@ -2468,7 +2475,6 @@ export default function BuildingDetailsPage() {
                     </td>
 
                     {/* Calendar cells - Dec to May */}
-                    <td className="px-0 py-3 text-center border-r"></td>
                     <td className="px-0 py-3 text-center border-r"></td>
                     <td className="px-0 py-3 text-center border-r"></td>
                     <td className="px-0 py-3 text-center border-r"></td>
