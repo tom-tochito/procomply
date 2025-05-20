@@ -339,7 +339,7 @@ export default function TaskPage() {
           isOpen={dialogOpen}
           onClose={handleDialogClose}
           task={selectedTask}
-          building={{ name: `Building ${selectedTask.buildingId}` }}
+          building={{ name: `Building ${selectedTask.building_id}` }}
         />
       )}
 
