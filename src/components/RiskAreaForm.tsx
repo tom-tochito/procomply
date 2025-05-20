@@ -1,13 +1,18 @@
 import React, { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 
 // Props definition
 interface RiskAreaFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (riskAreaData: any) => void;
-  editData?: any; // Optional data to pre-fill for editing
+  onSave: (riskAreaData: RiskAreaData) => void;
+  editData?: RiskAreaData; // Optional data to pre-fill for editing
+}
+
+// Define a type for the risk area data
+interface RiskAreaData {
+  code: string;
+  description: string;
 }
 
 export default function RiskAreaForm({

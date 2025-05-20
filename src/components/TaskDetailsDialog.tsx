@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Task } from "@/data/tasks"; // Import Task type from data
+import Image from "next/image"; // Import next/image
 
 // Props definition
 interface TaskDetailsDialogProps {
@@ -499,9 +500,11 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                           </p>
                           {buildingImage && (
                             <div className="mt-2">
-                              <img
+                              <Image
                                 src={buildingImage}
                                 alt={buildingName}
+                                width={320}
+                                height={180}
                                 className="w-full max-w-xs rounded-md border border-gray-200"
                               />
                             </div>

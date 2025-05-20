@@ -1,13 +1,18 @@
 import React, { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 
 // Props definition
 interface SubsectionFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (subsectionData: any) => void;
-  editData?: any; // Optional data to pre-fill for editing
+  onSave: (subsectionData: SubsectionData) => void;
+  editData?: SubsectionData; // Optional data to pre-fill for editing
+}
+
+// Define a type for the subsection data
+interface SubsectionData {
+  code: string;
+  description: string;
 }
 
 export default function SubsectionForm({

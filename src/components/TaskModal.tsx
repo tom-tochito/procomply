@@ -1,13 +1,43 @@
 import React, { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 
 // Props definition
 interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (taskData: any) => void;
-  templateData?: any; // Optional template data to pre-fill the form
+  onSave: (taskData: TaskData) => void;
+  templateData?: TaskData; // Optional template data to pre-fill the form
+}
+
+// Define a type for the task data
+interface TaskData {
+  taskTemplate?: string;
+  taskCategory?: string;
+  type?: string;
+  instruction?: string;
+  building?: string;
+  associateToSurvey?: string;
+  description?: string; // This seems to take templateData.observation
+  reoccurrences?: string;
+  // observation?: string; // Removed as setObservation is unused
+  inbox?: string;
+  riskArea?: string;
+  subsection?: string;
+  priority?: string;
+  riskLevel?: string;
+  lastCompleted?: string;
+  lastCompletedBy?: string;
+  dueDate?: string;
+  isStatutory?: boolean;
+  compliant?: string;
+  // Template-specific fields that might be part of templateData but not direct task state
+  code?: string; // From template
+  name?: string; // From template
+  statutory?: string; // From template, maps to isStatutory
+  repeatValue?: string; // From template
+  repeatUnit?: string; // From template
+  amberValue?: string; // From template
+  amberUnit?: string; // From template
 }
 
 export default function TaskModal({
@@ -18,19 +48,25 @@ export default function TaskModal({
 }: TaskModalProps) {
   // Form state for all fields in the modal
   const [taskTemplate, setTaskTemplate] = useState(templateData?.code || "");
-  const [taskCategory, setTaskCategory] = useState("");
-  const [type, setType] = useState("");
+  const [taskCategory, setTaskCategory] = useState(
+    templateData?.taskCategory || ""
+  );
+  const [type, setType] = useState(templateData?.type || "");
   const [instruction, setInstruction] = useState(
     templateData?.instruction || ""
   );
-  const [building, setBuilding] = useState("");
-  const [associateToSurvey, setAssociateToSurvey] = useState("");
-  const [description, setDescription] = useState(
-    templateData?.observation || ""
+  const [building, setBuilding] = useState(templateData?.building || "");
+  const [associateToSurvey, setAssociateToSurvey] = useState(
+    templateData?.associateToSurvey || ""
   );
-  const [reoccurrences, setReoccurrences] = useState("");
-  const [observation, setObservation] = useState("");
-  const [inbox, setInbox] = useState("");
+  const [description, setDescription] = useState(
+    templateData?.description || templateData?.observation || "" // Use templateData.description or templateData.observation for description
+  );
+  const [reoccurrences, setReoccurrences] = useState(
+    templateData?.reoccurrences || ""
+  );
+  // const [observation, setObservation] = useState(""); // Removed as setObservation is unused (error 32:23)
+  const [inbox, setInbox] = useState(templateData?.inbox || "");
   const [riskArea, setRiskArea] = useState(templateData?.riskArea || "");
   const [subsection, setSubsection] = useState(templateData?.subsection || "");
   const [priority, setPriority] = useState(templateData?.priority || "");
@@ -159,7 +195,6 @@ export default function TaskModal({
       associateToSurvey,
       description,
       reoccurrences,
-      observation,
       inbox,
       riskArea,
       subsection,
@@ -356,39 +391,6 @@ export default function TaskModal({
                         value={reoccurrences}
                         onChange={(e) => setReoccurrences(e.target.value)}
                       />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Observation:
-                      </label>
-                      <div className="relative">
-                        <div className="border border-gray-300 rounded-lg p-4 min-h-32">
-                          <div className="flex flex-col items-center justify-center h-full text-center">
-                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-500 mb-2">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            </div>
-                            <div className="text-sm text-blue-500">
-                              Choose a task photo or
-                              <br />
-                              <span className="text-blue-600 font-semibold">
-                                drag it here
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
                     </div>
 
                     <div>
