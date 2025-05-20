@@ -57,6 +57,22 @@ interface TaskTemplateModalData {
   amberUnit: string;
 }
 
+const initialVisibleColumns = {
+  description: true,
+  riskArea: true,
+  priority: true,
+  riskLevel: true,
+  dueDate: true,
+  team: true,
+  assignee: true,
+  progress: true,
+  latestNote: true, // Default to true as initial isMobile is false
+  groups: true, // Default to true as initial isMobile is false
+  actions: true,
+};
+
+type VisibleColumnsState = typeof initialVisibleColumns;
+
 export default function TaskPage() {
   const params = useParams() as { domain: string };
   const [searchTerm, setSearchTerm] = useState("");
@@ -111,27 +127,20 @@ export default function TaskPage() {
   }, []);
 
   // Add this new state for responsive table
-  const [visibleColumns, setVisibleColumns] = useState({
-    description: true,
-    riskArea: true,
-    priority: true,
-    riskLevel: true,
-    dueDate: true,
-    team: true,
-    assignee: true,
-    progress: true,
-    latestNote: !isMobile, // Hide on mobile by default
-    groups: !isMobile, // Hide on mobile by default
-    actions: true,
-  });
+  const [visibleColumns, setVisibleColumns] = useState<VisibleColumnsState>(
+    initialVisibleColumns
+  );
 
   const [columnsMenuOpen, setColumnsMenuOpen] = useState(false);
 
   // Check if screen is mobile size
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 1024);
-      if (window.innerWidth < 1024) {
+      const mobileCheck = window.innerWidth < 1024;
+      setIsMobile(mobileCheck);
+      // Adjust initial latestNote/groups based on actual mobile status if needed for initial render,
+      // but handleResponsiveColumns will override this anyway.
+      if (mobileCheck) {
         setSidebarOpen(false);
       } else {
         setSidebarOpen(true);
@@ -198,11 +207,11 @@ export default function TaskPage() {
     return () => window.removeEventListener("resize", handleResponsiveColumns);
   }, []);
 
-  const toggleColumnVisibility = (column: string) => {
-    setVisibleColumns({
-      ...visibleColumns,
-      [column]: !visibleColumns[column],
-    });
+  const toggleColumnVisibility = (column: keyof VisibleColumnsState) => {
+    setVisibleColumns((prevState) => ({
+      ...prevState,
+      [column]: !prevState[column],
+    }));
   };
 
   // Filter tasks based on search and filters

@@ -27,7 +27,7 @@ export default function Page() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     // Simple client-side check:
-    if (email === "admin@procomply.co.uk" && password === "password") {
+    if (email === "admin@procomply.co.uk" && password === "procomply") {
       // On success, route them to the dashboard for this tenant
       router.push(`/dashboard`);
     } else {
