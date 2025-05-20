@@ -6,12 +6,32 @@ import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
 import TaskTemplateForm from "@/components/TaskTemplateForm";
 
+// Assuming TaskTemplateData is defined in TaskTemplateForm and imported or defined here
+// If not, it should be defined here based on the template structure.
+// For example:
+interface TaskTemplateData {
+  code: string;
+  name: string;
+  observation?: string; // Made optional as it was removed from TaskTemplateForm
+  instruction: string;
+  riskArea: string;
+  subsection: string;
+  priority: string;
+  riskLevel: string;
+  statutory: string; // "Yes" or "No"
+  repeatValue: string;
+  repeatUnit: string;
+  amberValue: string;
+  amberUnit: string;
+}
+
 export default function TaskTemplatePage() {
-  const params = useParams();
+  const params = useParams() as { domain: string }; // Specify type for domain
   const [searchTerm, setSearchTerm] = useState("");
   const [templateFormOpen, setTemplateFormOpen] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState(null);
-  const [templates, setTemplates] = useState([
+  const [editingTemplate, setEditingTemplate] =
+    useState<TaskTemplateData | null>(null);
+  const [templates, setTemplates] = useState<TaskTemplateData[]>([
     {
       code: "TT-661439",
       name: "6 Monthly Fire Alarm Service",
@@ -100,13 +120,13 @@ export default function TaskTemplatePage() {
   });
 
   // Handle editing a template
-  const handleEditTemplate = (template) => {
+  const handleEditTemplate = (template: TaskTemplateData) => {
     setEditingTemplate(template);
     setTemplateFormOpen(true);
   };
 
   // Handle saving a template
-  const handleSaveTemplate = (templateData) => {
+  const handleSaveTemplate = (templateData: TaskTemplateData) => {
     if (editingTemplate) {
       // Update existing template
       setTemplates(

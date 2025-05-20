@@ -1,13 +1,18 @@
 import React, { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 
 // Props definition
 interface CountryFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (countryData: any) => void;
-  editData?: any; // Optional data to pre-fill for editing
+  onSave: (countryData: CountryData) => void;
+  editData?: CountryData; // Optional data to pre-fill for editing
+}
+
+// Define a type for the country data
+interface CountryData {
+  code: string;
+  description: string;
 }
 
 export default function CountryForm({

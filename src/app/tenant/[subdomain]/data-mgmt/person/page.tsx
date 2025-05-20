@@ -107,9 +107,8 @@ const mockPersons = [
 ];
 
 export default function PersonPage() {
-  const { domain } = useParams();
+  const { domain } = useParams() as { domain: string };
   const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState("");
 
   // Filter persons based on search term
   const filteredPersons = mockPersons.filter((person) => {
