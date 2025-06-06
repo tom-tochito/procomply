@@ -8,6 +8,7 @@ import DocumentDetailsDialog from "@/components/DocumentDetailsDialog";
 import UploadDocumentDialog from "@/components/UploadDocumentDialog";
 import { useParams } from "next/navigation";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
+import { Search, Download, Upload } from "lucide-react";
 
 // Define the DocumentData interface if not already imported from a shared types file
 // This should match the one used in UploadDocumentDialog
@@ -27,56 +28,11 @@ interface UploadedDocumentData {
 }
 
 // Icons
-const SearchIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-    />
-  </svg>
-);
+const SearchIcon = Search;
 
-const DownloadIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-    />
-  </svg>
-);
+const DownloadIcon = Download;
 
-const UploadIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-    />
-  </svg>
-);
+const UploadIcon = Upload;
 
 export default function DocumentPage() {
   const params = useParams();

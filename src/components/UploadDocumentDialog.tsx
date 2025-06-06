@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import { XMarkIcon, DocumentPlusIcon } from "@heroicons/react/24/outline";
+import { X, FilePlus } from "lucide-react";
 
 // Props definition
 interface UploadDocumentDialogProps {
@@ -199,7 +199,7 @@ export default function UploadDocumentDialog({
                     onClick={handleClose}
                     aria-label="Close dialog"
                   >
-                    <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+                    <X className="h-5 w-5" aria-hidden="true" />
                   </button>
                 </div>
 
@@ -224,7 +224,7 @@ export default function UploadDocumentDialog({
                       onChange={handleFileChange}
                       accept=".pdf,.doc,.docx,.xls,.xlsx"
                     />
-                    <DocumentPlusIcon className="mx-auto h-10 w-10 text-gray-400" />
+                    <FilePlus className="mx-auto h-10 w-10 text-gray-400" />
                     {file ? (
                       <div className="mt-2">
                         <p className="text-sm font-medium text-gray-900">

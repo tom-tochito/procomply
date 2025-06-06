@@ -1,6 +1,6 @@
 import React, { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { X } from "lucide-react";
 
 // Props definition
 interface LabelModalProps {
@@ -78,7 +78,7 @@ export default function LabelModal({
                     className="text-gray-400 hover:text-gray-500"
                     onClick={handleClose}
                   >
-                    <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+                    <X className="h-5 w-5" aria-hidden="true" />
                   </button>
                 </div>
 
