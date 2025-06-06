@@ -76,7 +76,7 @@ type VisibleColumnsState = typeof initialVisibleColumns;
 
 export default function TaskPage() {
   const params = useParams();
-  const subdomain = typeof params.subdomain === 'string' ? params.subdomain : (Array.isArray(params.subdomain) ? params.subdomain[0] : '');
+  const subdomain = typeof params.tenant === 'string' ? params.tenant : (Array.isArray(params.tenant) ? params.tenant[0] : '');
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [selectedDivision, setSelectedDivision] = useState("Active Divisions");

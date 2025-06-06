@@ -11,7 +11,7 @@ import { generateTenantRedirectUrl } from "@/utils/tenant";
 export default function Page() {
   const router = useRouter();
   const params = useParams();
-  const subdomain = typeof params.subdomain === 'string' ? params.subdomain : (Array.isArray(params.subdomain) ? params.subdomain[0] : '');
+  const subdomain = typeof params.tenant === 'string' ? params.tenant : (Array.isArray(params.tenant) ? params.tenant[0] : '');
 
   // Try to match domain to known tenants
   const _tenant = subdomain?.toString().split(".")[0];
