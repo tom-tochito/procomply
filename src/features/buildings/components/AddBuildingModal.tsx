@@ -1,27 +1,12 @@
 "use client";
 
 import React, { useState, FormEvent, useEffect } from "react";
-import { divisions } from "@/data/buildings"; // Assuming divisions are exported
+import { divisions, Building } from "@/data/buildings"; // Assuming divisions are exported
 
 interface AddBuildingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newBuildingData: NewBuildingData) => void;
-}
-
-// Define a type for the new building data
-interface NewBuildingData {
-  id: string;
-  name: string;
-  image: string;
-  division: string;
-  status: string;
-  compliance: number;
-  inbox: {
-    urgent: number;
-    warning: number;
-    email: boolean;
-  };
+  onSave: (newBuildingData: Building) => void;
 }
 
 export default function AddBuildingModal({
@@ -54,7 +39,7 @@ export default function AddBuildingModal({
       return;
     }
 
-    const newBuildingData: NewBuildingData = {
+    const newBuildingData: Building = {
       id: buildingId,
       name: buildingName,
       image: imageUrl || "/placeholder-building.jpg", // Default placeholder
