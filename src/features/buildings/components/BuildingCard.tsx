@@ -11,7 +11,7 @@ interface BuildingCardProps {
   tenant: string;
 }
 
-export default function BuildingCardSimple({ building, tenant }: BuildingCardProps) {
+export default function BuildingCard({ building, tenant }: BuildingCardProps) {
   const getComplianceColor = (compliance: number) => {
     if (compliance >= 75) return "text-green-600";
     if (compliance >= 50) return "text-yellow-600";

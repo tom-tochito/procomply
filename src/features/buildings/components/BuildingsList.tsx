@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import BuildingCard from "./BuildingCardSimple";
+import BuildingCard from "./BuildingCard";
 import BuildingFilters from "./BuildingFilters";
 import BuildingSearch from "./BuildingSearch";
 import AddBuildingModal from "./AddBuildingModal";
