@@ -89,11 +89,11 @@ export default function BuildingsList({
     <>
       {/* Filters and search section */}
       <div className="flex flex-col lg:flex-row gap-4 mb-6">
-        <div className="w-full lg:max-w-xs">
+        <div className="w-full lg:w-96">
           <BuildingSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+        <div className="flex flex-col sm:flex-row gap-4 w-full lg:flex-1">
           <BuildingFilters
             buildingUse={buildingUse}
             setBuildingUse={setBuildingUse}
@@ -103,9 +103,9 @@ export default function BuildingsList({
         </div>
 
         {/* Add Building button */}
-        <div className="lg:ml-auto flex items-center mt-4 lg:mt-0">
+        <div className="lg:ml-4 flex items-center mt-4 lg:mt-0">
           <button
-            className="bg-[#F30] hover:bg-[#E20] text-white px-8 py-3 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#F30] focus:ring-offset-2 w-full lg:w-auto"
+            className="bg-[#F30] hover:bg-[#E20] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#F30] focus:ring-offset-2 w-full lg:w-auto whitespace-nowrap"
             onClick={() => setIsModalOpen(true)}
           >
             Add Building

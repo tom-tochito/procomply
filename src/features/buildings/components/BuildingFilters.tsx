@@ -21,7 +21,7 @@ export default function BuildingFilters({
   return (
     <>
       {/* Building Use dropdown */}
-      <div className="relative w-full sm:max-w-xs">
+      <div className="relative w-full lg:w-48">
         <button
           className="w-full flex items-center justify-between px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           onClick={() => {
@@ -103,7 +103,7 @@ export default function BuildingFilters({
       </div>
 
       {/* Availability dropdown */}
-      <div className="relative w-full sm:max-w-xs">
+      <div className="relative w-full lg:w-48">
         <button
           className="w-full flex items-center justify-between px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           onClick={() => {
