@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import Header from "@/common/components/Header";
+import Header from "@/common/components/Header/Header";
 import SubsectionForm from "@/components/SubsectionForm";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
 import SubsectionTable from "@/components/SubsectionTable";
@@ -16,7 +16,12 @@ interface SubsectionData {
 
 export default function SubsectionPage() {
   const paramsHook = useParams();
-  const subdomain = typeof paramsHook.subdomain === 'string' ? paramsHook.subdomain : (Array.isArray(paramsHook.subdomain) ? paramsHook.subdomain[0] : '');
+  const subdomain =
+    typeof paramsHook.subdomain === "string"
+      ? paramsHook.subdomain
+      : Array.isArray(paramsHook.subdomain)
+      ? paramsHook.subdomain[0]
+      : "";
   const [searchTerm, setSearchTerm] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<SubsectionData | null>(null); // Type editingItem
@@ -169,10 +174,7 @@ export default function SubsectionPage() {
       </div>
 
       {/* Table */}
-      <SubsectionTable
-        subsections={filteredSubsections}
-        onEdit={handleEdit}
-      />
+      <SubsectionTable subsections={filteredSubsections} onEdit={handleEdit} />
 
       {/* Form Modal */}
       <SubsectionForm

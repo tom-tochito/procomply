@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import Header from "@/common/components/Header";
+import Header from "@/common/components/Header/Header";
 import { documents, Document } from "@/data/documents";
 import DocumentDetailsDialog from "@/components/DocumentDetailsDialog";
 import UploadDocumentDialog from "@/components/UploadDocumentDialog";
@@ -35,7 +35,12 @@ const UploadIcon = Upload;
 
 export default function DocumentPage() {
   const params = useParams();
-  const subdomain = typeof params.tenant === 'string' ? params.tenant : (Array.isArray(params.tenant) ? params.tenant[0] : '');
+  const subdomain =
+    typeof params.tenant === "string"
+      ? params.tenant
+      : Array.isArray(params.tenant)
+      ? params.tenant[0]
+      : "";
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -137,7 +142,6 @@ export default function DocumentPage() {
   // Extract unique values for filters
   const categories = Array.from(new Set(documents.map((doc) => doc.category)));
   const fileTypes = Array.from(new Set(documents.map((doc) => doc.file_type)));
-
 
   // Document categories from the screenshot
   const docCategories = [

@@ -12,7 +12,7 @@ import {
 } from "chart.js";
 import React, { useState } from "react";
 import Link from "next/link";
-import Header from "@/common/components/Header";
+import Header from "@/common/components/Header/Header";
 import { useParams } from "next/navigation";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
 
@@ -27,7 +27,12 @@ ChartJS.register(
 
 export default function DashboardPage() {
   const params = useParams();
-  const subdomain = typeof params.tenant === 'string' ? params.tenant : (Array.isArray(params.tenant) ? params.tenant[0] : '');
+  const subdomain =
+    typeof params.tenant === "string"
+      ? params.tenant
+      : Array.isArray(params.tenant)
+      ? params.tenant[0]
+      : "";
   // Filter state variables
   const [dateRange, setDateRange] = useState("21-04-2024 - 21-04-2025");
   const [selectedTeam, setSelectedTeam] = useState("Team");
@@ -705,7 +710,10 @@ export default function DashboardPage() {
               <tr className="border-t hover:bg-gray-50">
                 <td className="p-3 font-medium">
                   <Link
-                    href={generateTenantRedirectUrl(subdomain, "buildings/40001")}
+                    href={generateTenantRedirectUrl(
+                      subdomain,
+                      "buildings/40001"
+                    )}
                     className="text-blue-600 hover:underline"
                   >
                     40001 Viney Court
@@ -729,7 +737,10 @@ export default function DashboardPage() {
               <tr className="border-t hover:bg-gray-50">
                 <td className="p-3 font-medium">
                   <Link
-                    href={generateTenantRedirectUrl(subdomain, "buildings/40002")}
+                    href={generateTenantRedirectUrl(
+                      subdomain,
+                      "buildings/40002"
+                    )}
                     className="text-blue-600 hover:underline"
                   >
                     40002 Maple House

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import Header from "@/common/components/Header";
+import Header from "@/common/components/Header/Header";
 import DocumentTypeTemplateForm from "@/components/DocumentTypeTemplateForm";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
 import DocumentTypeTemplateTable from "@/components/DocumentTypeTemplateTable";
@@ -22,7 +22,12 @@ interface DocumentTypeTemplateData {
 
 export default function DocumentTypeTemplatePage() {
   const paramsHook = useParams();
-  const subdomain = typeof paramsHook.subdomain === 'string' ? paramsHook.subdomain : (Array.isArray(paramsHook.subdomain) ? paramsHook.subdomain[0] : '');
+  const subdomain =
+    typeof paramsHook.subdomain === "string"
+      ? paramsHook.subdomain
+      : Array.isArray(paramsHook.subdomain)
+      ? paramsHook.subdomain[0]
+      : "";
   const [searchTerm, setSearchTerm] = useState("");
   const [templateFormOpen, setTemplateFormOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] =

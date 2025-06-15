@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import Header from "@/common/components/Header";
+import Header from "@/common/components/Header/Header";
 import SurveyTypeForm from "@/components/SurveyTypeForm";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
 import SurveyTypeTable from "@/components/SurveyTypeTable";
@@ -16,7 +16,12 @@ interface SurveyTypeData {
 
 export default function SurveyTypePage() {
   const paramsHook = useParams();
-  const subdomain = typeof paramsHook.subdomain === 'string' ? paramsHook.subdomain : (Array.isArray(paramsHook.subdomain) ? paramsHook.subdomain[0] : '');
+  const subdomain =
+    typeof paramsHook.subdomain === "string"
+      ? paramsHook.subdomain
+      : Array.isArray(paramsHook.subdomain)
+      ? paramsHook.subdomain[0]
+      : "";
   const [searchTerm, setSearchTerm] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<SurveyTypeData | null>(null); // Type editingItem
@@ -169,10 +174,7 @@ export default function SurveyTypePage() {
       </div>
 
       {/* Table */}
-      <SurveyTypeTable
-        surveyTypes={filteredSurveyTypes}
-        onEdit={handleEdit}
-      />
+      <SurveyTypeTable surveyTypes={filteredSurveyTypes} onEdit={handleEdit} />
 
       {/* Form Modal */}
       <SurveyTypeForm

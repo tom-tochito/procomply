@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import Header from "@/common/components/Header";
+import Header from "@/common/components/Header/Header";
 import CountryForm from "@/components/CountryForm";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
 import CountryTable from "@/components/CountryTable";
@@ -16,7 +16,12 @@ interface CountryData {
 
 export default function CountryPage() {
   const paramsHook = useParams();
-  const subdomain = typeof paramsHook.subdomain === 'string' ? paramsHook.subdomain : (Array.isArray(paramsHook.subdomain) ? paramsHook.subdomain[0] : '');
+  const subdomain =
+    typeof paramsHook.subdomain === "string"
+      ? paramsHook.subdomain
+      : Array.isArray(paramsHook.subdomain)
+      ? paramsHook.subdomain[0]
+      : "";
   const [searchTerm, setSearchTerm] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<CountryData | null>(null); // Type editingItem

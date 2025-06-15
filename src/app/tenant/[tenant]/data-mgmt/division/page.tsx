@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import Header from "@/common/components/Header";
+import Header from "@/common/components/Header/Header";
 import { divisions } from "@/data/buildings";
 import { useParams } from "next/navigation";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
@@ -10,7 +10,12 @@ import DivisionTable from "@/features/division/components/DivisionTable";
 
 export default function DivisionPage() {
   const params = useParams();
-  const subdomain = typeof params.tenant === 'string' ? params.tenant : (Array.isArray(params.tenant) ? params.tenant[0] : '');
+  const subdomain =
+    typeof params.tenant === "string"
+      ? params.tenant
+      : Array.isArray(params.tenant)
+      ? params.tenant[0]
+      : "";
   const [searchTerm, setSearchTerm] = useState("");
 
   // Filter divisions based on search
@@ -33,7 +38,10 @@ export default function DivisionPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-800">Division</h1>
         <div className="flex items-center text-sm text-gray-600 mt-1">
-          <Link href={generateTenantRedirectUrl(subdomain, "dashboard")} className="hover:text-blue-600">
+          <Link
+            href={generateTenantRedirectUrl(subdomain, "dashboard")}
+            className="hover:text-blue-600"
+          >
             <span>Data Mgmt</span>
           </Link>
           <span className="mx-2">/</span>
@@ -75,4 +83,4 @@ export default function DivisionPage() {
       <DivisionTable divisions={filteredDivisions} searchTerm={searchTerm} />
     </div>
   );
-} 
+}

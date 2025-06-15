@@ -1,4 +1,4 @@
-import Header from "@/common/components/Header";
+import Header from "@/common/components/Header/Header";
 import { getBuildingById } from "@/data/buildings";
 import { getTasksByBuildingId } from "@/data/tasks";
 import BuildingDetails from "@/features/buildings/components/BuildingDetails";
@@ -13,7 +13,9 @@ interface BuildingDetailsPageProps {
   }>;
 }
 
-export default async function BuildingDetailsPage({ params }: BuildingDetailsPageProps) {
+export default async function BuildingDetailsPage({
+  params,
+}: BuildingDetailsPageProps) {
   const { tenant, id } = await params;
   const building = getBuildingById(id);
   const initialTasks = getTasksByBuildingId(id);
@@ -24,7 +26,9 @@ export default async function BuildingDetailsPage({ params }: BuildingDetailsPag
         <Header />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">Building not found</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Building not found
+            </h1>
             <Link
               href={generateTenantRedirectUrl(tenant, "buildings")}
               className="mt-4 inline-block text-blue-600 hover:text-blue-800"
@@ -41,7 +45,7 @@ export default async function BuildingDetailsPage({ params }: BuildingDetailsPag
     <div className="min-h-screen bg-gray-50">
       {/* Top header with logo and user info */}
       <Header />
-      
+
       <div className="px-3 md:px-6 py-4 md:py-6 space-y-4 md:space-y-6">
         {/* Building header with image */}
         <div className="max-w-7xl mx-auto">
@@ -63,15 +67,15 @@ export default async function BuildingDetailsPage({ params }: BuildingDetailsPag
                   {building.id} - {building.name}
                 </h1>
                 <div className="flex flex-wrap items-center text-sm text-gray-600 mt-1">
-                  <Link 
-                    href={generateTenantRedirectUrl(tenant, "dashboard")} 
+                  <Link
+                    href={generateTenantRedirectUrl(tenant, "dashboard")}
                     className="hover:text-blue-600"
                   >
                     <span>Home</span>
                   </Link>
                   <span className="mx-2">/</span>
-                  <Link 
-                    href={generateTenantRedirectUrl(tenant, "buildings")} 
+                  <Link
+                    href={generateTenantRedirectUrl(tenant, "buildings")}
                     className="hover:text-blue-600"
                   >
                     <span>Buildings</span>

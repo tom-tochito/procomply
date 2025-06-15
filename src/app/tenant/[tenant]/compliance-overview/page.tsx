@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import Header from "@/common/components/Header";
+import Header from "@/common/components/Header/Header";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
 import ComplianceTable from "@/features/compliance/components/ComplianceTable";
 
@@ -88,7 +88,12 @@ const mockBuildings = [
 
 export default function ComplianceOverviewPage() {
   const params = useParams();
-  const subdomain = typeof params.tenant === 'string' ? params.tenant : (Array.isArray(params.tenant) ? params.tenant[0] : '');
+  const subdomain =
+    typeof params.tenant === "string"
+      ? params.tenant
+      : Array.isArray(params.tenant)
+      ? params.tenant[0]
+      : "";
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState({
     activeOnly: true,
@@ -123,7 +128,10 @@ export default function ComplianceOverviewPage() {
           Compliance Overview
         </h1>
         <div className="flex items-center text-sm text-gray-600 mt-1">
-          <Link href={generateTenantRedirectUrl(subdomain, "dashboard")} className="hover:text-blue-600">
+          <Link
+            href={generateTenantRedirectUrl(subdomain, "dashboard")}
+            className="hover:text-blue-600"
+          >
             <span>Home</span>
           </Link>
           <span className="mx-2">/</span>

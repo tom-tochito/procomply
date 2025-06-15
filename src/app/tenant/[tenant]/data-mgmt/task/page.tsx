@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import Header from "@/common/components/Header";
+import Header from "@/common/components/Header/Header";
 import { tasks, Task } from "@/data/tasks";
 import { useParams } from "next/navigation";
 import TaskDetailsDialog from "@/components/TaskDetailsDialog";
@@ -76,7 +76,12 @@ type VisibleColumnsState = typeof initialVisibleColumns;
 
 export default function TaskPage() {
   const params = useParams();
-  const subdomain = typeof params.tenant === 'string' ? params.tenant : (Array.isArray(params.tenant) ? params.tenant[0] : '');
+  const subdomain =
+    typeof params.tenant === "string"
+      ? params.tenant
+      : Array.isArray(params.tenant)
+      ? params.tenant[0]
+      : "";
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [selectedDivision, setSelectedDivision] = useState("Active Divisions");

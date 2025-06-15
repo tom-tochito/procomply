@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import Header from "@/common/components/Header";
+import Header from "@/common/components/Header/Header";
 import RiskAreaForm from "@/components/RiskAreaForm";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
 import RiskAreaTable from "@/features/template-mgmt/components/RiskAreaTable";
@@ -16,7 +16,12 @@ interface RiskAreaData {
 
 export default function RiskAreaPage() {
   const paramsHook = useParams();
-  const subdomain = typeof paramsHook.tenant === 'string' ? paramsHook.tenant : (Array.isArray(paramsHook.tenant) ? paramsHook.tenant[0] : '');
+  const subdomain =
+    typeof paramsHook.tenant === "string"
+      ? paramsHook.tenant
+      : Array.isArray(paramsHook.tenant)
+      ? paramsHook.tenant[0]
+      : "";
   const [searchTerm, setSearchTerm] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<RiskAreaData | null>(null); // Type editingItem

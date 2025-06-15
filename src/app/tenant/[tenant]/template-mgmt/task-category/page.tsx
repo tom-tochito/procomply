@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import Header from "@/common/components/Header";
+import Header from "@/common/components/Header/Header";
 import TaskCategoryForm from "@/components/TaskCategoryForm";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
 import TaskCategoryTable from "@/components/TaskCategoryTable";
@@ -16,7 +16,12 @@ interface TaskCategoryData {
 
 export default function TaskCategoryPage() {
   const paramsHook = useParams();
-  const subdomain = typeof paramsHook.subdomain === 'string' ? paramsHook.subdomain : (Array.isArray(paramsHook.subdomain) ? paramsHook.subdomain[0] : '');
+  const subdomain =
+    typeof paramsHook.subdomain === "string"
+      ? paramsHook.subdomain
+      : Array.isArray(paramsHook.subdomain)
+      ? paramsHook.subdomain[0]
+      : "";
   const [searchTerm, setSearchTerm] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<TaskCategoryData | null>(null); // Type editingItem
@@ -167,10 +172,7 @@ export default function TaskCategoryPage() {
       </div>
 
       {/* Table */}
-      <TaskCategoryTable
-        categories={filteredCategories}
-        onEdit={handleEdit}
-      />
+      <TaskCategoryTable categories={filteredCategories} onEdit={handleEdit} />
 
       {/* Form Modal */}
       <TaskCategoryForm
