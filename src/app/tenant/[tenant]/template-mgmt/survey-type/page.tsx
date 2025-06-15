@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
 import SurveyTypeForm from "@/components/SurveyTypeForm";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
+import SurveyTypeTable from "@/components/SurveyTypeTable";
 
 // Define the SurveyTypeData interface
 interface SurveyTypeData {
@@ -168,67 +169,10 @@ export default function SurveyTypePage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-md shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Name
-                </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Description
-                </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredSurveyTypes.map((item) => (
-                <tr
-                  key={item.name}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {item.name}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {item.description}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <button
-                      className="text-blue-600 hover:text-blue-800 mr-2"
-                      onClick={() => handleEdit(item)}
-                    >
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {filteredSurveyTypes.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={3}
-                    className="px-4 py-6 text-center text-sm text-gray-500 italic"
-                  >
-                    No survey types found matching your search
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <SurveyTypeTable
+        surveyTypes={filteredSurveyTypes}
+        onEdit={handleEdit}
+      />
 
       {/* Form Modal */}
       <SurveyTypeForm

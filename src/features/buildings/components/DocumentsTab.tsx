@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { FileText, Download, Eye, Search, Filter, Upload } from "lucide-react";
+import { FileText, Download, Eye, Search, Upload } from "lucide-react";
 
 interface Document {
   id: string;
@@ -18,7 +18,7 @@ interface DocumentsTabProps {
   buildingId: string;
 }
 
-export default function DocumentsTab({ buildingId }: DocumentsTabProps) {
+export default function DocumentsTab({ }: DocumentsTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [documents] = useState<Document[]>([

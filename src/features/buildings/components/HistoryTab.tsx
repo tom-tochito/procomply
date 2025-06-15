@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Clock, User, FileText, CheckCircle, AlertTriangle, Info, Filter } from "lucide-react";
+import { Clock, User, CheckCircle, AlertTriangle, Info } from "lucide-react";
 
 interface HistoryEvent {
   id: string;
@@ -10,7 +10,7 @@ interface HistoryEvent {
   description: string;
   user: string;
   timestamp: string;
-  details?: any;
+  details?: Record<string, unknown>;
   severity: "info" | "success" | "warning" | "error";
 }
 
@@ -18,7 +18,7 @@ interface HistoryTabProps {
   buildingId: string;
 }
 
-export default function HistoryTab({ buildingId }: HistoryTabProps) {
+export default function HistoryTab({ }: HistoryTabProps) {
   const [filterType, setFilterType] = useState("all");
   const [dateRange, setDateRange] = useState("week");
   const [history] = useState<HistoryEvent[]>([

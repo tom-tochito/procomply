@@ -8,7 +8,8 @@ import DocumentDetailsDialog from "@/components/DocumentDetailsDialog";
 import UploadDocumentDialog from "@/components/UploadDocumentDialog";
 import { useParams } from "next/navigation";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
-import { Search, Download, Upload } from "lucide-react";
+import { Search, Upload } from "lucide-react";
+import DocumentTable from "@/components/DocumentTable";
 
 // Define the DocumentData interface if not already imported from a shared types file
 // This should match the one used in UploadDocumentDialog
@@ -29,8 +30,6 @@ interface UploadedDocumentData {
 
 // Icons
 const SearchIcon = Search;
-
-const DownloadIcon = Download;
 
 const UploadIcon = Upload;
 
@@ -139,69 +138,6 @@ export default function DocumentPage() {
   const categories = Array.from(new Set(documents.map((doc) => doc.category)));
   const fileTypes = Array.from(new Set(documents.map((doc) => doc.file_type)));
 
-  // Get file icon based on type
-  const getFileIcon = (fileType: string) => {
-    const type = fileType.toLowerCase();
-    if (type === "pdf") {
-      return (
-        <div className="bg-red-100 text-red-700 w-8 h-8 rounded flex items-center justify-center">
-          <span className="text-xs font-bold">PDF</span>
-        </div>
-      );
-    } else if (type === "docx" || type === "doc") {
-      return (
-        <div className="bg-blue-100 text-blue-700 w-8 h-8 rounded flex items-center justify-center">
-          <span className="text-xs font-bold">DOC</span>
-        </div>
-      );
-    } else if (type === "xlsx" || type === "xls") {
-      return (
-        <div className="bg-green-100 text-green-700 w-8 h-8 rounded flex items-center justify-center">
-          <span className="text-xs font-bold">XLS</span>
-        </div>
-      );
-    } else {
-      return (
-        <div className="bg-gray-100 text-gray-700 w-8 h-8 rounded flex items-center justify-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-        </div>
-      );
-    }
-  };
-
-  // Status badge
-  const renderStatusBadge = (status: string) => {
-    let bgColor = "bg-gray-100 text-gray-800";
-
-    if (status === "Active") {
-      bgColor = "bg-green-100 text-green-800";
-    } else if (status === "Archived") {
-      bgColor = "bg-gray-100 text-gray-800";
-    } else if (status === "Pending") {
-      bgColor = "bg-yellow-100 text-yellow-800";
-    }
-
-    return (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${bgColor}`}
-      >
-        {status}
-      </span>
-    );
-  };
 
   // Document categories from the screenshot
   const docCategories = [
@@ -599,198 +535,11 @@ export default function DocumentPage() {
           )}
 
           {/* Documents List */}
-          <div className="bg-white rounded-md shadow-sm overflow-hidden">
-            {/* Mobile and tablet view - list with cards */}
-            <div className="block lg:hidden">
-              {filteredDocuments.length > 0 ? (
-                <div className="divide-y divide-gray-200">
-                  {filteredDocuments.map((document) => (
-                    <div
-                      key={document.id}
-                      className="p-3 cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleDocumentClick(document)}
-                    >
-                      <div className="flex items-start space-x-2">
-                        {getFileIcon(document.file_type)}
-                        <div className="flex-grow min-w-0">
-                          <h3 className="font-medium text-gray-900 mb-1 truncate">
-                            {document.name}
-                          </h3>
-                          <div className="flex flex-wrap text-xs text-gray-500 gap-x-2 gap-y-1 mb-1">
-                            <span>Uploaded: {document.upload_date}</span>
-                            <span>Size: {document.size}</span>
-                          </div>
-                          {document.description && (
-                            <p className="text-xs text-gray-600 line-clamp-2 mb-1.5">
-                              {document.description}
-                            </p>
-                          )}
-                          <div className="flex items-center justify-between mt-1.5">
-                            <div className="flex flex-wrap items-center gap-1.5">
-                              {renderStatusBadge(document.status)}
-                              {document.document_category && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                                  {document.document_category}
-                                </span>
-                              )}
-                            </div>
-                            <button
-                              className="text-blue-600 hover:text-blue-800 p-1"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                // Download action would go here
-                                alert(`Downloading ${document.name}`);
-                              }}
-                            >
-                              <DownloadIcon className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-4 text-center text-gray-500 italic text-sm">
-                  No documents found matching your filters
-                </div>
-              )}
-            </div>
-
-            {/* Desktop view - table */}
-            <div className="hidden lg:block">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Document
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Category
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell"
-                      >
-                        Doc Category
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Status
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell"
-                      >
-                        Upload Date
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredDocuments.length > 0 ? (
-                      filteredDocuments.map((document) => (
-                        <tr
-                          key={document.id}
-                          className="hover:bg-gray-50 cursor-pointer"
-                          onClick={() => handleDocumentClick(document)}
-                        >
-                          <td className="px-4 py-3 whitespace-nowrap">
-                            <div className="flex items-center">
-                              {getFileIcon(document.file_type)}
-                              <div className="ml-3 max-w-[250px]">
-                                <div className="text-sm font-medium text-gray-900 truncate">
-                                  {document.name}
-                                </div>
-                                {document.description && (
-                                  <div className="text-xs text-gray-500 truncate">
-                                    {document.description}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap">
-                            <div className="text-sm text-gray-900 truncate max-w-[150px]">
-                              {document.category}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap hidden xl:table-cell">
-                            <div className="text-sm text-gray-900 truncate max-w-[150px]">
-                              {document.document_category || "-"}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap">
-                            {renderStatusBadge(document.status)}
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 hidden xl:table-cell">
-                            {document.upload_date}
-                          </td>
-                          <td
-                            className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <button
-                              className="text-blue-600 hover:text-blue-900 mr-3"
-                              onClick={() => handleDocumentClick(document)}
-                            >
-                              View
-                            </button>
-                            <button
-                              className="text-blue-600 hover:text-blue-900"
-                              onClick={() =>
-                                alert(`Downloading ${document.name}`)
-                              }
-                            >
-                              Download
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan={6}
-                          className="px-4 py-8 text-center text-gray-500 italic"
-                        >
-                          No documents found matching your filters
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          {/* Pagination */}
-          <div className="flex justify-between items-center mt-3 md:mt-4 text-xs md:text-sm">
-            <div className="text-gray-500">
-              Showing {filteredDocuments.length} documents
-            </div>
-            <div className="flex space-x-2">
-              <button className="px-2 py-1 border rounded-md bg-gray-100 hover:bg-gray-200 focus:outline-none transition-colors text-xs md:text-sm">
-                Previous
-              </button>
-              <button className="px-2 py-1 border rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none transition-colors text-xs md:text-sm">
-                Next
-              </button>
-            </div>
-          </div>
+          <DocumentTable
+            documents={filteredDocuments}
+            onRowClick={handleDocumentClick}
+            onDownload={(document) => alert(`Downloading ${document.name}`)}
+          />
         </div>
       </div>
     </div>

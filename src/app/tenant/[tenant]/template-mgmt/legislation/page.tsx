@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import Header from "@/common/components/Header";
 import LegislationForm from "@/components/LegislationForm";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
+import LegislationTable from "@/components/LegislationTable";
 
 // Define the LegislationData interface
 interface LegislationData {
@@ -181,85 +182,10 @@ export default function LegislationPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-md shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Code
-                </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Title
-                </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  URL
-                </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredLegislations.map((item) => (
-                <tr
-                  key={item.code}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {item.code}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {item.title}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 max-w-xs truncate">
-                    {item.url && (
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 hover:underline"
-                      >
-                        {item.url}
-                      </a>
-                    )}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <button
-                      className="text-blue-600 hover:text-blue-800 mr-2"
-                      onClick={() => handleEdit(item)}
-                    >
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {filteredLegislations.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="px-4 py-6 text-center text-sm text-gray-500 italic"
-                  >
-                    No legislation found matching your search
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <LegislationTable
+        legislations={filteredLegislations}
+        onEdit={handleEdit}
+      />
 
       {/* Form Modal */}
       <LegislationForm

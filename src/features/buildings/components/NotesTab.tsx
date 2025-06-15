@@ -19,7 +19,7 @@ interface NotesTabProps {
   buildingId: string;
 }
 
-export default function NotesTab({ buildingId }: NotesTabProps) {
+export default function NotesTab({ }: NotesTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [notes] = useState<Note[]>([

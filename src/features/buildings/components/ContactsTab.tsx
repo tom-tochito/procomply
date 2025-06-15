@@ -20,7 +20,7 @@ interface ContactsTabProps {
   buildingId: string;
 }
 
-export default function ContactsTab({ buildingId }: ContactsTabProps) {
+export default function ContactsTab({ }: ContactsTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [contacts] = useState<Contact[]>([

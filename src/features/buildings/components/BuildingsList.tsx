@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import BuildingCard from "./BuildingCard";
+import BuildingsTable from "./BuildingsTable";
 import BuildingFilters from "./BuildingFilters";
 import BuildingSearch from "./BuildingSearch";
 import AddBuildingModal from "./AddBuildingModal";
@@ -24,6 +25,7 @@ export default function BuildingsList({
   const [selectedDivision, setSelectedDivision] = useState("Active Divisions");
   const [buildingUse, setBuildingUse] = useState("Building Use");
   const [availability, setAvailability] = useState("Availability");
+  const [viewMode, setViewMode] = useState<"cards" | "table">("table");
 
   // Filter buildings based on search and filters
   const filteredBuildings = buildings.filter((building) => {
@@ -102,10 +104,36 @@ export default function BuildingsList({
           />
         </div>
 
-        {/* Add Building button */}
-        <div className="lg:ml-4 flex items-center mt-4 lg:mt-0">
+        {/* View mode toggle and Add Building button */}
+        <div className="lg:ml-4 flex items-center gap-2 mt-4 lg:mt-0">
+          <div className="bg-gray-100 rounded-lg p-1 flex">
+            <button
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                viewMode === "table"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+              onClick={() => setViewMode("table")}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </button>
+            <button
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                viewMode === "cards"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+              onClick={() => setViewMode("cards")}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+            </button>
+          </div>
           <button
-            className="bg-[#F30] hover:bg-[#E20] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#F30] focus:ring-offset-2 w-full lg:w-auto whitespace-nowrap"
+            className="bg-[#F30] hover:bg-[#E20] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#F30] focus:ring-offset-2 whitespace-nowrap"
             onClick={() => setIsModalOpen(true)}
           >
             Add Building
@@ -131,55 +159,59 @@ export default function BuildingsList({
       </div>
 
       {/* Building list */}
-      <div className="space-y-4">
-        {filteredBuildings.length > 0 ? (
-          filteredBuildings.map((building) => (
-            <BuildingCard
-              key={building.id}
-              building={building}
-              tenant={tenant}
-            />
-          ))
-        ) : (
-          <div className="bg-white p-8 rounded-lg shadow-sm text-center border border-gray-200">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-12 w-12 mx-auto text-gray-400 mb-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+      {viewMode === "table" ? (
+        <BuildingsTable buildings={filteredBuildings} tenant={tenant} searchTerm={searchTerm} />
+      ) : (
+        <div className="space-y-4">
+          {filteredBuildings.length > 0 ? (
+            filteredBuildings.map((building) => (
+              <BuildingCard
+                key={building.id}
+                building={building}
+                tenant={tenant}
               />
-            </svg>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No buildings found
-            </h3>
-            <p className="text-gray-500 mb-6">
-              No buildings match your current filters. Try adjusting your search
-              criteria.
-            </p>
-            <button
-              className="px-4 py-2 bg-[#F30] text-white rounded-md hover:bg-[#E20] transition-colors"
-              onClick={() => {
-                setSearchTerm("");
-                setSelectedDivision("Active Divisions");
-                setBuildingUse("Building Use");
-                setAvailability("Availability");
-              }}
-            >
-              Clear filters
-            </button>
-          </div>
-        )}
-      </div>
+            ))
+          ) : (
+            <div className="bg-white p-8 rounded-lg shadow-sm text-center border border-gray-200">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-12 w-12 mx-auto text-gray-400 mb-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                />
+              </svg>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No buildings found
+              </h3>
+              <p className="text-gray-500 mb-6">
+                No buildings match your current filters. Try adjusting your search
+                criteria.
+              </p>
+              <button
+                className="px-4 py-2 bg-[#F30] text-white rounded-md hover:bg-[#E20] transition-colors"
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedDivision("Active Divisions");
+                  setBuildingUse("Building Use");
+                  setAvailability("Availability");
+                }}
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* Pagination */}
-      {filteredBuildings.length > 0 && (
+      {/* Pagination for card view */}
+      {viewMode === "cards" && filteredBuildings.length > 0 && (
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-4 text-sm gap-3">
           <div className="text-gray-500">
             Showing {filteredBuildings.length} buildings

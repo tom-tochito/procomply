@@ -16,8 +16,8 @@ interface PlannerTask {
   weekPositions: { [key: string]: boolean };
 }
 
-export default function YearPlannerTab({ buildingId }: YearPlannerTabProps) {
-  const [selectedYear, setSelectedYear] = useState(2025);
+export default function YearPlannerTab({ }: YearPlannerTabProps) {
+  const [selectedYear] = useState(2025);
   const [searchTerm, setSearchTerm] = useState("");
 
   // Mock tasks data
@@ -167,7 +167,7 @@ export default function YearPlannerTab({ buildingId }: YearPlannerTabProps) {
 
                 {/* Week dates */}
                 {months.map((month) => 
-                  month.weeks.map((week, idx) => (
+                  month.weeks.map((week) => (
                     <th key={week.key} className="px-1 py-2 text-center text-xs font-medium text-gray-700 border-r w-[40px]">
                       {week.date}
                     </th>
