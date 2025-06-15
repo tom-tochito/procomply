@@ -1,13 +1,8 @@
-"use client";
-
-import React, { useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import Header from "@/common/components/Header/Header";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
-import ComplianceTable from "@/features/compliance/components/ComplianceTable";
+import ComplianceOverview from "@/features/compliance/components/ComplianceOverview";
 
-// Mock data for buildings and compliance status
 const mockBuildings = [
   {
     id: "40003",
@@ -86,183 +81,43 @@ const mockBuildings = [
   },
 ];
 
-export default function ComplianceOverviewPage() {
-  const params = useParams();
-  const subdomain =
-    typeof params.tenant === "string"
-      ? params.tenant
-      : Array.isArray(params.tenant)
-      ? params.tenant[0]
-      : "";
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeFilters, setActiveFilters] = useState({
-    activeOnly: true,
-    hampstead: true,
-    ealing: true,
-    camden: true,
-    leased: true,
-    archived: false,
-    complex: false,
-  });
+interface ComplianceOverviewPageProps {
+  params: Promise<{
+    tenant: string;
+  }>;
+}
 
-  // Filter buildings based on search
-  const filteredBuildings = mockBuildings.filter((building) => {
-    if (
-      searchTerm &&
-      !building.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !building.location.toLowerCase().includes(searchTerm.toLowerCase())
-    ) {
-      return false;
-    }
-    return true;
-  });
+export default async function ComplianceOverviewPage({
+  params,
+}: ComplianceOverviewPageProps) {
+  const { tenant } = await params;
 
   return (
-    <div className="p-3 md:p-6 space-y-6 md:space-y-8 bg-gray-50 min-h-screen">
-      {/* Top header with logo and user info */}
+    <div className="min-h-screen bg-gray-50">
       <Header />
 
-      {/* Page title and breadcrumbs */}
-      <div>
-        <h1 className="text-xl md:text-2xl font-bold text-gray-800">
-          Compliance Overview
-        </h1>
-        <div className="flex items-center text-sm text-gray-600 mt-1">
-          <Link
-            href={generateTenantRedirectUrl(subdomain, "dashboard")}
-            className="hover:text-blue-600"
-          >
-            <span>Home</span>
-          </Link>
-          <span className="mx-2">/</span>
-          <span>Compliance Overview</span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Compliance Overview
+          </h1>
+          <div className="flex items-center text-sm text-gray-600 mt-2">
+            <Link
+              href={generateTenantRedirectUrl(tenant, "dashboard")}
+              className="hover:text-blue-600"
+            >
+              <span>Home</span>
+            </Link>
+            <span className="mx-2">/</span>
+            <span>Compliance Overview</span>
+          </div>
         </div>
+
+        <ComplianceOverview
+          initialBuildings={mockBuildings}
+          tenant={tenant}
+        />
       </div>
-
-      {/* Filters and search */}
-      <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
-        <div className="w-full md:w-64">
-          <input
-            type="text"
-            placeholder="search buildings"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <button
-            className={`text-sm px-3 py-1.5 rounded-md ${
-              activeFilters.activeOnly
-                ? "bg-blue-100 text-blue-700"
-                : "bg-gray-100 text-gray-700"
-            }`}
-            onClick={() =>
-              setActiveFilters((prev) => ({
-                ...prev,
-                activeOnly: !prev.activeOnly,
-              }))
-            }
-          >
-            Active Divisions
-          </button>
-          <button
-            className={`text-sm px-3 py-1.5 rounded-md ${
-              activeFilters.hampstead
-                ? "bg-blue-100 text-blue-700"
-                : "bg-gray-100 text-gray-700"
-            }`}
-            onClick={() =>
-              setActiveFilters((prev) => ({
-                ...prev,
-                hampstead: !prev.hampstead,
-              }))
-            }
-          >
-            Hampstead
-          </button>
-          <button
-            className={`text-sm px-3 py-1.5 rounded-md ${
-              activeFilters.ealing
-                ? "bg-blue-100 text-blue-700"
-                : "bg-gray-100 text-gray-700"
-            }`}
-            onClick={() =>
-              setActiveFilters((prev) => ({ ...prev, ealing: !prev.ealing }))
-            }
-          >
-            Ealing
-          </button>
-          <button
-            className={`text-sm px-3 py-1.5 rounded-md ${
-              activeFilters.camden
-                ? "bg-blue-100 text-blue-700"
-                : "bg-gray-100 text-gray-700"
-            }`}
-            onClick={() =>
-              setActiveFilters((prev) => ({ ...prev, camden: !prev.camden }))
-            }
-          >
-            Camden
-          </button>
-          <button
-            className={`text-sm px-3 py-1.5 rounded-md ${
-              activeFilters.leased
-                ? "bg-blue-100 text-blue-700"
-                : "bg-gray-100 text-gray-700"
-            }`}
-            onClick={() =>
-              setActiveFilters((prev) => ({ ...prev, leased: !prev.leased }))
-            }
-          >
-            Leased
-          </button>
-          <button
-            className={`text-sm px-3 py-1.5 rounded-md ${
-              activeFilters.archived
-                ? "bg-blue-100 text-blue-700"
-                : "bg-gray-100 text-gray-700"
-            }`}
-            onClick={() =>
-              setActiveFilters((prev) => ({
-                ...prev,
-                archived: !prev.archived,
-              }))
-            }
-          >
-            Archived
-          </button>
-        </div>
-
-        <div className="flex gap-2 ml-auto">
-          <select className="text-sm px-3 py-2 border border-gray-300 rounded-md bg-white appearance-none pr-8 w-36">
-            <option>Building Use</option>
-            <option>Residential</option>
-            <option>Commercial</option>
-            <option>Mixed</option>
-          </select>
-
-          <select className="text-sm px-3 py-2 border border-gray-300 rounded-md bg-white appearance-none pr-8 w-36">
-            <option>Room Use</option>
-            <option>Office</option>
-            <option>Apartment</option>
-            <option>Common Area</option>
-          </select>
-
-          <select className="text-sm px-3 py-2 border border-gray-300 rounded-md bg-white appearance-none pr-8 w-40">
-            <option>Building Managers</option>
-            <option>All Managers</option>
-            <option>Active Managers</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Table */}
-      <ComplianceTable data={filteredBuildings} searchTerm={searchTerm} />
-
-      {/* Footer info */}
-      <div className="text-sm text-gray-600">961 tasks</div>
     </div>
   );
 }

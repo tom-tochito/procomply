@@ -1,87 +1,41 @@
-"use client";
-
-import React, { useState } from "react";
 import Link from "next/link";
 import Header from "@/common/components/Header/Header";
 import { companies } from "@/data/companies";
-import { useParams } from "next/navigation";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
-import CompanyTable from "@/features/company/components/CompanyTable";
+import CompanyManagement from "@/features/data-mgmt/components/CompanyManagement";
 
-export default function CompanyPage() {
-  const params = useParams();
-  const subdomain =
-    typeof params.tenant === "string"
-      ? params.tenant
-      : Array.isArray(params.tenant)
-      ? params.tenant[0]
-      : "";
-  const [searchTerm, setSearchTerm] = useState("");
+interface CompanyPageProps {
+  params: Promise<{
+    tenant: string;
+  }>;
+}
 
-  // Filter companies based on search
-  const filteredCompanies = companies.filter((company) => {
-    if (
-      searchTerm &&
-      !company.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !company.referral?.toLowerCase().includes(searchTerm.toLowerCase())
-    ) {
-      return false;
-    }
-    return true;
-  });
+export default async function CompanyPage({ params }: CompanyPageProps) {
+  const { tenant } = await params;
 
   return (
-    <div className="p-6 space-y-8 bg-gray-50 min-h-screen">
-      {/* Top header with logo and user info */}
+    <div className="min-h-screen bg-gray-50">
       <Header />
 
-      {/* Page title and breadcrumbs */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800">Company</h1>
-        <div className="flex items-center text-sm text-gray-600 mt-1">
-          <Link
-            href={generateTenantRedirectUrl(subdomain, "dashboard")}
-            className="hover:text-blue-600"
-          >
-            <span>Data Mgmt</span>
-          </Link>
-          <span className="mx-2">/</span>
-          <span>Company</span>
-        </div>
-      </div>
-
-      {/* Filters and search */}
-      <div className="flex flex-wrap gap-3">
-        {/* Search */}
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="search"
-            className="border rounded-md pl-3 pr-10 py-2 w-48 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <button className="absolute right-3 top-1/2 -translate-y-1/2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Company
+          </h1>
+          <div className="flex items-center text-sm text-gray-600 mt-2">
+            <Link
+              href={generateTenantRedirectUrl(tenant, "dashboard")}
+              className="hover:text-blue-600"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </button>
+              <span>Data Mgmt</span>
+            </Link>
+            <span className="mx-2">/</span>
+            <span>Company</span>
+          </div>
         </div>
-      </div>
 
-      {/* Companies table */}
-      <CompanyTable companies={filteredCompanies} searchTerm={searchTerm} />
+        <CompanyManagement initialCompanies={companies} tenant={tenant} />
+      </div>
     </div>
   );
 }

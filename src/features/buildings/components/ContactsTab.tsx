@@ -1,20 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Phone, Mail, MapPin, User, Building, Plus, Search } from "lucide-react";
-
-interface Contact {
-  id: string;
-  name: string;
-  role: string;
-  company: string;
-  email: string;
-  phone: string;
-  mobile?: string;
-  address?: string;
-  isPrimary: boolean;
-  category: "internal" | "contractor" | "emergency" | "supplier" | "other";
-}
+import { Plus, Search, User } from "lucide-react";
+import ContactCard, { Contact } from "@/features/common/components/ContactCard";
 
 interface ContactsTabProps {
   buildingId: string;
@@ -86,22 +74,13 @@ export default function ContactsTab({ }: ContactsTabProps) {
   const filteredContacts = contacts.filter(contact => {
     const matchesSearch = 
       contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.email.toLowerCase().includes(searchTerm.toLowerCase());
+      (contact.role && contact.role.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (contact.company && contact.company.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (contact.email && contact.email.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = categoryFilter === "all" || contact.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
-  const getCategoryBadgeClass = (category: string) => {
-    switch (category) {
-      case "internal": return "bg-blue-100 text-blue-800";
-      case "contractor": return "bg-green-100 text-green-800";
-      case "emergency": return "bg-red-100 text-red-800";
-      case "supplier": return "bg-purple-100 text-purple-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
 
   return (
     <div>
@@ -143,63 +122,7 @@ export default function ContactsTab({ }: ContactsTabProps) {
       {/* Contacts grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {filteredContacts.map((contact) => (
-          <div key={contact.id} className="bg-white shadow rounded-lg p-6 hover:shadow-lg transition-shadow">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center">
-                <div className="h-12 w-12 bg-gray-200 rounded-full flex items-center justify-center">
-                  <User className="h-6 w-6 text-gray-600" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-lg font-medium text-gray-900">{contact.name}</h3>
-                  <p className="text-sm text-gray-500">{contact.role}</p>
-                </div>
-              </div>
-              {contact.isPrimary && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F30] text-white">
-                  Primary
-                </span>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center text-sm">
-                <Building className="h-4 w-4 text-gray-400 mr-2" />
-                <span className="text-gray-600">{contact.company}</span>
-              </div>
-              
-              <div className="flex items-center text-sm">
-                <Mail className="h-4 w-4 text-gray-400 mr-2" />
-                <a href={`mailto:${contact.email}`} className="text-[#F30] hover:text-[#E62E00]">
-                  {contact.email}
-                </a>
-              </div>
-              
-              <div className="flex items-center text-sm">
-                <Phone className="h-4 w-4 text-gray-400 mr-2" />
-                <span className="text-gray-600">{contact.phone}</span>
-              </div>
-              
-              {contact.mobile && (
-                <div className="flex items-center text-sm">
-                  <Phone className="h-4 w-4 text-gray-400 mr-2" />
-                  <span className="text-gray-600">{contact.mobile} (Mobile)</span>
-                </div>
-              )}
-              
-              {contact.address && (
-                <div className="flex items-start text-sm">
-                  <MapPin className="h-4 w-4 text-gray-400 mr-2 mt-0.5" />
-                  <span className="text-gray-600">{contact.address}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryBadgeClass(contact.category)}`}>
-                {contact.category.charAt(0).toUpperCase() + contact.category.slice(1)}
-              </span>
-            </div>
-          </div>
+          <ContactCard key={contact.id} contact={contact} />
         ))}
       </div>
 

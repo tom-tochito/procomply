@@ -1,13 +1,8 @@
-"use client";
-
-import React, { useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import Header from "@/common/components/Header/Header";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
-import TeamTable from "@/features/team/components/TeamTable";
+import TeamManagement from "@/features/data-mgmt/components/TeamManagement";
 
-// Mock data based on the screenshot
 const mockTeams = [
   {
     id: 1,
@@ -25,97 +20,37 @@ const mockTeams = [
   },
 ];
 
-export default function TeamPage() {
-  const params = useParams();
-  const subdomain =
-    typeof params.tenant === "string"
-      ? params.tenant
-      : Array.isArray(params.tenant)
-      ? params.tenant[0]
-      : "";
-  const [searchTerm, setSearchTerm] = useState("");
+interface TeamPageProps {
+  params: Promise<{
+    tenant: string;
+  }>;
+}
 
-  // Filter teams based on search term
-  const filteredTeams = mockTeams.filter((team) => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      (team.code && team.code.toLowerCase().includes(searchLower)) ||
-      (team.description &&
-        team.description.toLowerCase().includes(searchLower)) ||
-      (team.company && team.company.toLowerCase().includes(searchLower)) ||
-      (team.supervisor && team.supervisor.toLowerCase().includes(searchLower))
-    );
-  });
+export default async function TeamPage({ params }: TeamPageProps) {
+  const { tenant } = await params;
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
-      {/* Top header with logo and user info */}
+    <div className="min-h-screen bg-gray-50">
       <Header />
 
-      {/* Page title and breadcrumbs */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800">Team</h1>
-        <div className="flex items-center text-sm text-gray-600 mt-1">
-          <Link
-            href={generateTenantRedirectUrl(subdomain, "data-mgmt")}
-            className="hover:text-blue-600"
-          >
-            <span>Data Mgmt</span>
-          </Link>
-          <span className="mx-2">/</span>
-          <span>Team</span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Team
+          </h1>
+          <div className="flex items-center text-sm text-gray-600 mt-2">
+            <Link
+              href={generateTenantRedirectUrl(tenant, "data-mgmt")}
+              className="hover:text-blue-600"
+            >
+              <span>Data Mgmt</span>
+            </Link>
+            <span className="mx-2">/</span>
+            <span>Team</span>
+          </div>
         </div>
-      </div>
 
-      {/* Search field */}
-      <div className="relative w-full sm:w-64">
-        <input
-          type="text"
-          placeholder="search"
-          className="border rounded-md pl-3 pr-10 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <button className="absolute right-3 top-1/2 -translate-y-1/2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-gray-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-        </button>
-      </div>
-
-      {/* Teams table */}
-      <TeamTable teams={filteredTeams} searchTerm={searchTerm} />
-
-      {/* Add button at bottom right */}
-      <div className="flex justify-end">
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 mr-1"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-          Add Team
-        </button>
+        <TeamManagement initialTeams={mockTeams} tenant={tenant} />
       </div>
     </div>
   );
