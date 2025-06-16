@@ -24,7 +24,7 @@ export default async function TaskPage({ params }: TaskPageProps) {
           </h1>
           <div className="flex items-center text-sm text-gray-600 mt-2">
             <Link
-              href={generateTenantRedirectUrl(tenant, "dashboard")}
+              href={generateTenantRedirectUrl(tenant, "/dashboard")}
               className="hover:text-blue-600"
             >
               <span>Data Mgmt</span>

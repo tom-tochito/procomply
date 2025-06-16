@@ -123,7 +123,7 @@ export default async function PersonPage({ params }: PersonPageProps) {
           </h1>
           <div className="flex items-center text-sm text-gray-600 mt-2">
             <Link
-              href={generateTenantRedirectUrl(tenant, "data-mgmt")}
+              href={generateTenantRedirectUrl(tenant, "/data-mgmt")}
               className="hover:text-blue-600"
             >
               <span>Data Mgmt</span>

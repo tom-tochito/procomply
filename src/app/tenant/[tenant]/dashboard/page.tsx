@@ -712,7 +712,7 @@ export default function DashboardPage() {
                   <Link
                     href={generateTenantRedirectUrl(
                       subdomain,
-                      "buildings/40001"
+                      "/buildings/40001"
                     )}
                     className="text-blue-600 hover:underline"
                   >
@@ -739,7 +739,7 @@ export default function DashboardPage() {
                   <Link
                     href={generateTenantRedirectUrl(
                       subdomain,
-                      "buildings/40002"
+                      "/buildings/40002"
                     )}
                     className="text-blue-600 hover:underline"
                   >

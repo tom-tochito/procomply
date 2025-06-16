@@ -11,7 +11,12 @@ import { generateTenantRedirectUrl } from "@/utils/tenant";
 export default function Page() {
   const router = useRouter();
   const params = useParams();
-  const subdomain = typeof params.tenant === 'string' ? params.tenant : (Array.isArray(params.tenant) ? params.tenant[0] : '');
+  const subdomain =
+    typeof params.tenant === "string"
+      ? params.tenant
+      : Array.isArray(params.tenant)
+      ? params.tenant[0]
+      : "";
 
   // Try to match domain to known tenants
   const _tenant = subdomain?.toString().split(".")[0];
@@ -31,7 +36,7 @@ export default function Page() {
     // Simple client-side check:
     if (email === "admin@procomply.co.uk" && password === "procomply") {
       // On success, route them to the dashboard for this tenant
-      router.push(generateTenantRedirectUrl(subdomain, "dashboard"));
+      router.push(generateTenantRedirectUrl(subdomain, "/dashboard"));
     } else {
       alert("Invalid credentials!");
     }

@@ -103,7 +103,7 @@ export default async function ComplianceOverviewPage({
           </h1>
           <div className="flex items-center text-sm text-gray-600 mt-2">
             <Link
-              href={generateTenantRedirectUrl(tenant, "dashboard")}
+              href={generateTenantRedirectUrl(tenant, "/dashboard")}
               className="hover:text-blue-600"
             >
               <span>Home</span>
@@ -113,10 +113,7 @@ export default async function ComplianceOverviewPage({
           </div>
         </div>
 
-        <ComplianceOverview
-          initialBuildings={mockBuildings}
-          tenant={tenant}
-        />
+        <ComplianceOverview initialBuildings={mockBuildings} tenant={tenant} />
       </div>
     </div>
   );

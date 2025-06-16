@@ -10,5 +10,5 @@ export default async function Page({ params }: Props) {
 
   if (!subdomain) notFound();
 
-  redirect(generateTenantRedirectUrl(subdomain, "login"));
+  redirect(generateTenantRedirectUrl(subdomain, "/login"));
 }

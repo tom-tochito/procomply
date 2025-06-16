@@ -30,7 +30,7 @@ export default async function BuildingDetailsPage({
               Building not found
             </h1>
             <Link
-              href={generateTenantRedirectUrl(tenant, "buildings")}
+              href={generateTenantRedirectUrl(tenant, "/buildings")}
               className="mt-4 inline-block text-blue-600 hover:text-blue-800"
             >
               Back to Buildings
@@ -68,14 +68,14 @@ export default async function BuildingDetailsPage({
                 </h1>
                 <div className="flex flex-wrap items-center text-sm text-gray-600 mt-1">
                   <Link
-                    href={generateTenantRedirectUrl(tenant, "dashboard")}
+                    href={generateTenantRedirectUrl(tenant, "/dashboard")}
                     className="hover:text-blue-600"
                   >
                     <span>Home</span>
                   </Link>
                   <span className="mx-2">/</span>
                   <Link
-                    href={generateTenantRedirectUrl(tenant, "buildings")}
+                    href={generateTenantRedirectUrl(tenant, "/buildings")}
                     className="hover:text-blue-600"
                   >
                     <span>Buildings</span>

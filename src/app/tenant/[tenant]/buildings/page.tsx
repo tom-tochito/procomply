@@ -26,7 +26,7 @@ export default async function BuildingsPage({ params }: BuildingsPageProps) {
           </h1>
           <div className="flex items-center text-sm text-gray-600 mt-2">
             <Link
-              href={generateTenantRedirectUrl(tenant, "dashboard")}
+              href={generateTenantRedirectUrl(tenant, "/dashboard")}
               className="hover:text-blue-600"
             >
               <span>Data Management</span>

@@ -13,7 +13,11 @@ interface BuildingsTableProps {
   searchTerm?: string;
 }
 
-export default function BuildingsTable({ buildings, tenant, searchTerm = "" }: BuildingsTableProps) {
+export default function BuildingsTable({
+  buildings,
+  tenant,
+  searchTerm = "",
+}: BuildingsTableProps) {
   const router = useRouter();
 
   const columns = useMemo<ColumnDef<Building>[]>(
@@ -155,9 +159,7 @@ export default function BuildingsTable({ buildings, tenant, searchTerm = "" }: B
   );
 
   const handleRowClick = (building: Building) => {
-    router.push(
-      generateTenantRedirectUrl(tenant, `buildings/${building.id}`)
-    );
+    router.push(generateTenantRedirectUrl(tenant, `/buildings/${building.id}`));
   };
 
   return (

@@ -103,7 +103,7 @@ export default function Header() {
       <div className="max-w-[1400px] mx-auto flex justify-between items-center">
         <div className="flex items-center gap-x-4 md:gap-x-16">
           <Link
-            href={generateTenantRedirectUrl(tenant, "dashboard")}
+            href={generateTenantRedirectUrl(tenant, "/dashboard")}
             className="flex-shrink-0"
           >
             <Image
@@ -142,7 +142,7 @@ export default function Header() {
                     <Link
                       href={generateTenantRedirectUrl(
                         tenant,
-                        "data-mgmt/company"
+                        "/data-mgmt/company"
                       )}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       onClick={() => setDataMgmtOpen(false)}
@@ -155,7 +155,7 @@ export default function Header() {
                     <Link
                       href={generateTenantRedirectUrl(
                         tenant,
-                        "data-mgmt/division"
+                        "/data-mgmt/division"
                       )}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       onClick={() => setDataMgmtOpen(false)}
@@ -168,7 +168,7 @@ export default function Header() {
                     <Link
                       href={generateTenantRedirectUrl(
                         tenant,
-                        "data-mgmt/buildings"
+                        "/data-mgmt/buildings"
                       )}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       onClick={() => setDataMgmtOpen(false)}
@@ -179,7 +179,10 @@ export default function Header() {
                       Building
                     </Link>
                     <Link
-                      href={generateTenantRedirectUrl(tenant, "data-mgmt/task")}
+                      href={generateTenantRedirectUrl(
+                        tenant,
+                        "/data-mgmt/task"
+                      )}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       onClick={() => setDataMgmtOpen(false)}
                     >
@@ -191,7 +194,7 @@ export default function Header() {
                     <Link
                       href={generateTenantRedirectUrl(
                         tenant,
-                        "data-mgmt/document"
+                        "/data-mgmt/document"
                       )}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       onClick={() => setDataMgmtOpen(false)}
@@ -204,7 +207,7 @@ export default function Header() {
                     <Link
                       href={generateTenantRedirectUrl(
                         tenant,
-                        "data-mgmt/person"
+                        "/data-mgmt/person"
                       )}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       onClick={() => setDataMgmtOpen(false)}
@@ -215,7 +218,10 @@ export default function Header() {
                       Person
                     </Link>
                     <Link
-                      href={generateTenantRedirectUrl(tenant, "data-mgmt/team")}
+                      href={generateTenantRedirectUrl(
+                        tenant,
+                        "/data-mgmt/team"
+                      )}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       onClick={() => setDataMgmtOpen(false)}
                     >
@@ -253,7 +259,7 @@ export default function Header() {
                     <Link
                       href={generateTenantRedirectUrl(
                         tenant,
-                        "template-mgmt/task-template"
+                        "/template-mgmt/task-template"
                       )}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       onClick={() => setTemplateMgmtOpen(false)}
@@ -266,7 +272,7 @@ export default function Header() {
                     <Link
                       href={generateTenantRedirectUrl(
                         tenant,
-                        "template-mgmt/document-type-tmpl"
+                        "/template-mgmt/document-type-tmpl"
                       )}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       onClick={() => setTemplateMgmtOpen(false)}
@@ -279,7 +285,7 @@ export default function Header() {
                     <Link
                       href={generateTenantRedirectUrl(
                         tenant,
-                        "template-mgmt/survey-type"
+                        "/template-mgmt/survey-type"
                       )}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       onClick={() => setTemplateMgmtOpen(false)}
@@ -292,7 +298,7 @@ export default function Header() {
                     <Link
                       href={generateTenantRedirectUrl(
                         tenant,
-                        "template-mgmt/task-category"
+                        "/template-mgmt/task-category"
                       )}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       onClick={() => setTemplateMgmtOpen(false)}
@@ -305,7 +311,7 @@ export default function Header() {
                     <Link
                       href={generateTenantRedirectUrl(
                         tenant,
-                        "template-mgmt/risk-area"
+                        "/template-mgmt/risk-area"
                       )}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       onClick={() => setTemplateMgmtOpen(false)}
@@ -318,7 +324,7 @@ export default function Header() {
                     <Link
                       href={generateTenantRedirectUrl(
                         tenant,
-                        "template-mgmt/subsection"
+                        "/template-mgmt/subsection"
                       )}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       onClick={() => setTemplateMgmtOpen(false)}
@@ -331,7 +337,7 @@ export default function Header() {
                     <Link
                       href={generateTenantRedirectUrl(
                         tenant,
-                        "template-mgmt/legislation"
+                        "/template-mgmt/legislation"
                       )}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       onClick={() => setTemplateMgmtOpen(false)}
@@ -344,7 +350,7 @@ export default function Header() {
                     <Link
                       href={generateTenantRedirectUrl(
                         tenant,
-                        "template-mgmt/country"
+                        "/template-mgmt/country"
                       )}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                       onClick={() => setTemplateMgmtOpen(false)}
@@ -360,7 +366,7 @@ export default function Header() {
             </div>
 
             <Link
-              href={generateTenantRedirectUrl(tenant, "compliance-overview")}
+              href={generateTenantRedirectUrl(tenant, "/compliance-overview")}
               className="flex items-center text-white text-sm hover:text-gray-300 transition-colors group whitespace-nowrap"
             >
               <span className="inline-flex items-center justify-center mr-1.5 text-gray-400 group-hover:text-gray-300">
@@ -490,14 +496,17 @@ export default function Header() {
                 }`}
               >
                 <Link
-                  href={generateTenantRedirectUrl(tenant, "data-mgmt/company")}
+                  href={generateTenantRedirectUrl(tenant, "/data-mgmt/company")}
                   onClick={closeMobileMenu}
                   className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
                   Company
                 </Link>
                 <Link
-                  href={generateTenantRedirectUrl(tenant, "data-mgmt/division")}
+                  href={generateTenantRedirectUrl(
+                    tenant,
+                    "/data-mgmt/division"
+                  )}
                   onClick={closeMobileMenu}
                   className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
@@ -506,7 +515,7 @@ export default function Header() {
                 <Link
                   href={generateTenantRedirectUrl(
                     tenant,
-                    "data-mgmt/buildings"
+                    "/data-mgmt/buildings"
                   )}
                   onClick={closeMobileMenu}
                   className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
@@ -514,28 +523,31 @@ export default function Header() {
                   Building
                 </Link>
                 <Link
-                  href={generateTenantRedirectUrl(tenant, "data-mgmt/task")}
+                  href={generateTenantRedirectUrl(tenant, "/data-mgmt/task")}
                   onClick={closeMobileMenu}
                   className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
                   Task
                 </Link>
                 <Link
-                  href={generateTenantRedirectUrl(tenant, "data-mgmt/document")}
+                  href={generateTenantRedirectUrl(
+                    tenant,
+                    "/data-mgmt/document"
+                  )}
                   onClick={closeMobileMenu}
                   className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
                   Document
                 </Link>
                 <Link
-                  href={generateTenantRedirectUrl(tenant, "data-mgmt/person")}
+                  href={generateTenantRedirectUrl(tenant, "/data-mgmt/person")}
                   onClick={closeMobileMenu}
                   className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
                   Person
                 </Link>
                 <Link
-                  href={generateTenantRedirectUrl(tenant, "data-mgmt/team")}
+                  href={generateTenantRedirectUrl(tenant, "/data-mgmt/team")}
                   onClick={closeMobileMenu}
                   className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
@@ -588,7 +600,7 @@ export default function Header() {
                 <Link
                   href={generateTenantRedirectUrl(
                     tenant,
-                    "template-mgmt/task-template"
+                    "/template-mgmt/task-template"
                   )}
                   onClick={closeMobileMenu}
                   className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
@@ -598,7 +610,7 @@ export default function Header() {
                 <Link
                   href={generateTenantRedirectUrl(
                     tenant,
-                    "template-mgmt/document-type-tmpl"
+                    "/template-mgmt/document-type-tmpl"
                   )}
                   onClick={closeMobileMenu}
                   className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
@@ -610,7 +622,7 @@ export default function Header() {
 
             {/* Direct links */}
             <Link
-              href={generateTenantRedirectUrl(tenant, "compliance-overview")}
+              href={generateTenantRedirectUrl(tenant, "/compliance-overview")}
               onClick={closeMobileMenu}
               className="flex items-center py-3 px-3 my-2 rounded hover:bg-gray-800 active:bg-gray-700 text-white border-b border-gray-700"
             >
@@ -621,7 +633,7 @@ export default function Header() {
             </Link>
 
             <Link
-              href={generateTenantRedirectUrl(tenant, "dashboard")}
+              href={generateTenantRedirectUrl(tenant, "/dashboard")}
               onClick={closeMobileMenu}
               className="flex items-center py-3 px-3 my-2 rounded hover:bg-gray-800 active:bg-gray-700 text-white border-b border-gray-700"
             >

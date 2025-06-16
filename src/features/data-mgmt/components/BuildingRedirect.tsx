@@ -13,7 +13,7 @@ export default function BuildingRedirect({ tenant }: BuildingRedirectProps) {
 
   useEffect(() => {
     if (tenant) {
-      router.push(generateTenantRedirectUrl(tenant, "buildings"));
+      router.push(generateTenantRedirectUrl(tenant, "/buildings"));
     }
   }, [router, tenant]);
 
