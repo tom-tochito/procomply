@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Header from "@/common/components/Header/Header";
 import { buildings as initialBuildings, divisions } from "@/data/buildings";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
 import BuildingsList from "@/features/buildings/components/BuildingsList";
@@ -15,9 +14,6 @@ export default async function BuildingsPage({ params }: BuildingsPageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Top header with logo and user info */}
-      <Header />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page title and breadcrumbs */}
         <div className="mb-8">

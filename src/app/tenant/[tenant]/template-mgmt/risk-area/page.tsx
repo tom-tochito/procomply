@@ -1,4 +1,3 @@
-import Header from "@/common/components/Header/Header";
 import RiskAreaManagement from "@/features/template-mgmt/components/RiskAreaManagement";
 import { initialRiskAreas } from "@/data/template-mgmt/riskAreas";
 
@@ -11,7 +10,6 @@ export default async function RiskAreaPage({ params }: RiskAreaPageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <RiskAreaManagement initialRiskAreas={initialRiskAreas} />
       </div>

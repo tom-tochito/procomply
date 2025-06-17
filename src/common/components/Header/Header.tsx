@@ -99,7 +99,7 @@ export default function Header() {
   };
 
   return (
-    <div className="bg-black rounded-lg shadow-sm p-3 md:p-4">
+    <div className="bg-black shadow-sm p-3 md:p-4">
       <div className="max-w-[1400px] mx-auto flex justify-between items-center">
         <div className="flex items-center gap-x-4 md:gap-x-16">
           <Link

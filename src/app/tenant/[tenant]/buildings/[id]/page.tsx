@@ -1,4 +1,3 @@
-import Header from "@/common/components/Header/Header";
 import { getBuildingById } from "@/data/buildings";
 import { getTasksByBuildingId } from "@/data/tasks";
 import BuildingDetails from "@/features/buildings/components/BuildingDetails";
@@ -23,7 +22,6 @@ export default async function BuildingDetailsPage({
   if (!building) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900">
@@ -43,9 +41,6 @@ export default async function BuildingDetailsPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Top header with logo and user info */}
-      <Header />
-
       <div className="px-3 md:px-6 py-4 md:py-6 space-y-4 md:space-y-6">
         {/* Building header with image */}
         <div className="max-w-7xl mx-auto">

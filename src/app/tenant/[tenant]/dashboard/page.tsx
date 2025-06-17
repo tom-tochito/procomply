@@ -1,4 +1,3 @@
-import Header from "@/common/components/Header/Header";
 import SummaryCard from "@/features/dashboard/components/SummaryCard";
 import TaskChart from "@/features/dashboard/components/TaskChart";
 import ActivityFeed from "@/features/dashboard/components/ActivityFeed";
@@ -180,8 +179,6 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Summary cards - horizontal on desktop, stacked on mobile */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

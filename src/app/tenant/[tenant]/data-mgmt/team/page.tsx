@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Header from "@/common/components/Header/Header";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
 import TeamManagement from "@/features/data-mgmt/components/TeamManagement";
 
@@ -31,8 +30,6 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Team</h1>
