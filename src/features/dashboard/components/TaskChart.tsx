@@ -9,6 +9,8 @@ import {
   Title,
   Tooltip,
   Legend,
+  ChartData,
+  ChartOptions,
 } from "chart.js";
 import { useState } from "react";
 
@@ -22,8 +24,8 @@ ChartJS.register(
 );
 
 interface TaskChartProps {
-  data: any;
-  options: any;
+  data: ChartData<"bar">;
+  options: ChartOptions<"bar">;
 }
 
 export default function TaskChart({ data, options }: TaskChartProps) {

@@ -4,6 +4,7 @@ import ActivityFeed from "@/features/dashboard/components/ActivityFeed";
 import CompanyDocuments from "@/features/dashboard/components/CompanyDocuments";
 import LegislationSection from "@/features/dashboard/components/LegislationSection";
 import QuickActions from "@/features/dashboard/components/QuickActions";
+import { requireAuth } from "@/features/auth";
 
 interface DashboardPageProps {
   params: Promise<{
@@ -13,6 +14,7 @@ interface DashboardPageProps {
 
 export default async function DashboardPage({ params }: DashboardPageProps) {
   const { tenant } = await params;
+  await requireAuth(tenant);
 
   // Sample activities data
   const taskActivities = [

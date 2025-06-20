@@ -1,22 +1,23 @@
-"use client";
-
-import { useParams } from "next/navigation";
 import Image from "next/image";
-import { notFound, useRouter } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { TENANTS } from "@/data/tenants";
 import logo from "@/assets/images/logo.png";
-import { useState, FormEvent } from "react";
+import { LoginForm } from "@/features/auth/components/LoginForm";
+import { checkAuth, getTenantIdBySubdomain } from "@/features/auth/utils/check-auth";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
 
-export default function Page() {
-  const router = useRouter();
-  const params = useParams();
-  const subdomain =
-    typeof params.tenant === "string"
-      ? params.tenant
-      : Array.isArray(params.tenant)
-      ? params.tenant[0]
-      : "";
+interface PageProps {
+  params: Promise<{ tenant: string }>;
+}
+
+export default async function LoginPage({ params }: PageProps) {
+  const { tenant: subdomain } = await params;
+  
+  // Check if already authenticated
+  const auth = await checkAuth();
+  if (auth) {
+    redirect(generateTenantRedirectUrl(subdomain, "/dashboard"));
+  }
 
   // Try to match domain to known tenants
   const _tenant = subdomain?.toString().split(".")[0];
@@ -27,20 +28,9 @@ export default function Page() {
     notFound();
   }
 
-  // Controlled form fields
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    // Simple client-side check:
-    if (email === "admin@procomply.co.uk" && password === "procomply") {
-      // On success, route them to the dashboard for this tenant
-      router.push(generateTenantRedirectUrl(subdomain, "/dashboard"));
-    } else {
-      alert("Invalid credentials!");
-    }
-  }
+  // Get the actual tenant ID from the database
+  // For now, we'll use the subdomain as the tenant ID
+  const tenantId = await getTenantIdBySubdomain(_tenant) || _tenant;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100 px-4 sm:px-0">
@@ -54,51 +44,8 @@ export default function Page() {
           <span className="font-semibold capitalize">{tenant?.name}</span>
         </p>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label
-              htmlFor="email"
-              className="mb-1 block text-sm font-medium text-gray-700"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-[#F30] focus:outline-none focus:ring-1 focus:ring-[#F30]"
-              placeholder="Enter your email"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="password"
-              className="mb-1 block text-sm font-medium text-gray-700"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-[#F30] focus:outline-none focus:ring-1 focus:ring-[#F30]"
-              placeholder="Enter your password"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full rounded bg-[#F30] py-2 text-sm font-semibold text-white hover:bg-[#E02D00] focus:outline-none focus:ring-2 focus:ring-[#F30] focus:ring-offset-2"
-          >
-            Login
-          </button>
-        </form>
+        <LoginForm tenantId={tenantId} tenantSubdomain={subdomain} />
+        
         <p className="mt-6 text-center text-xs text-black/60">
           ProComply © 2025
         </p>
