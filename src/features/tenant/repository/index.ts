@@ -1,7 +1,7 @@
 export {
   findTenantById,
-  findTenantBySubdomain,
+  findTenantBySlug,
   createTenant,
   updateTenant,
-  findAllTenants
+  findAllTenants,
 } from "./tenant.repository";

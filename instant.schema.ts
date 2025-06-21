@@ -12,6 +12,7 @@ const _schema = i.schema({
     }),
     tenants: i.entity({
       name: i.string(),
+      slug: i.string().unique().indexed(),
       description: i.string(),
       createdAt: i.date().indexed(),
       updatedAt: i.date().indexed(),

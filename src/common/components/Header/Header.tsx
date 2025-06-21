@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import logo from "@/assets/images/logo-white.png";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
 import {
@@ -26,8 +26,8 @@ import {
 } from "lucide-react";
 
 export default function Header() {
-  const router = useRouter();
   const paramsHook = useParams();
+  const pathname = usePathname();
   const tenant = paramsHook.tenant as string;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [dataMgmtOpen, setDataMgmtOpen] = useState(false);
@@ -75,8 +75,9 @@ export default function Header() {
     };
   }, [mobileMenuOpen]);
 
-  const handleLogout = () => {
-    router.push("/login");
+  const handleLogout = async () => {
+    const { logoutAction } = await import("@/features/auth");
+    await logoutAction(tenant);
   };
 
   const closeMobileMenu = () => {
@@ -97,6 +98,9 @@ export default function Header() {
     setTemplateMgmtOpen(!templateMgmtOpen);
     if (dataMgmtOpen) setDataMgmtOpen(false);
   };
+
+  const isLoginPage = pathname.includes("/login");
+  if (isLoginPage) return null;
 
   return (
     <div className="bg-black shadow-sm p-3 md:p-4">

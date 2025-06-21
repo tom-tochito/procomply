@@ -5,48 +5,30 @@ import { id } from "@instantdb/admin";
 import type { InstaQLEntity } from "@instantdb/react";
 import type { AppSchema } from "~/instant.schema";
 
-type User = InstaQLEntity<AppSchema, "$users">;
-type UserProfile = InstaQLEntity<AppSchema, "userProfiles">;
-type UserWithProfile = User & { profile?: UserProfile };
+export type User = InstaQLEntity<AppSchema, "$users">;
+export type UserProfile = InstaQLEntity<AppSchema, "userProfiles">;
+export type Tenant = InstaQLEntity<AppSchema, "tenants">;
+export type FullUser = User & { 
+  profile?: UserProfile;
+  tenant?: Tenant;
+};
 
-/**
- * Find a user by email and tenant
- */
-export async function findUserByEmailAndTenant(email: string, tenantId: string): Promise<UserWithProfile | null> {
-  try {
-    const result = await dbAdmin.query({
-      $users: {
-        $: {
-          where: {
-            email,
-            "tenant.id": tenantId
-          }
-        },
-        tenant: {},
-        profile: {}
-      }
-    });
-
-    return result.$users?.[0] || null;
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    return null;
-  }
-}
 
 /**
  * Find a user by email (regardless of tenant)
  */
-export async function findUserByEmail(email: string): Promise<UserWithProfile | null> {
+export async function findUserByEmail(
+  email: string
+): Promise<FullUser | null> {
   try {
     const result = await dbAdmin.query({
       $users: {
         $: {
-          where: { email }
+          where: { email },
         },
         tenant: {},
-        profile: {}
-      }
+        profile: {},
+      },
     });
 
     return result.$users?.[0] || null;
@@ -63,12 +45,12 @@ export async function createUser(data: {
   email: string;
   role: string;
   tenantId: string;
-}): Promise<UserWithProfile | null> {
+}): Promise<FullUser | null> {
   try {
     const userId = id();
     const profileId = id();
     const now = new Date().toISOString();
-    
+
     await dbAdmin.transact([
       // Create user
       dbAdmin.tx.$users[userId]
@@ -87,7 +69,7 @@ export async function createUser(data: {
     ]);
 
     // Fetch and return the created user
-    return findUserByEmailAndTenant(data.email, data.tenantId);
+    return findUserByEmail(data.email);
   } catch (error) {
     console.error("Error creating user:", error);
     return null;
@@ -97,45 +79,48 @@ export async function createUser(data: {
 /**
  * Update a user
  */
-export async function updateUser(userId: string, data: Partial<{
-  email: string;
-  role: string;
-}>): Promise<boolean> {
+export async function updateUser(
+  userId: string,
+  data: Partial<{
+    email: string;
+    role: string;
+  }>
+): Promise<boolean> {
   try {
     const transactions = [];
-    
+
     // Update email if provided
     if (data.email) {
       transactions.push(
         dbAdmin.tx.$users[userId].update({ email: data.email })
       );
     }
-    
+
     // Update role if provided
     if (data.role) {
       // First, get the user's profile
       const result = await dbAdmin.query({
         $users: {
           $: { where: { id: userId } },
-          profile: {}
-        }
+          profile: {},
+        },
       });
-      
+
       const userProfile = result.$users?.[0]?.profile;
       if (userProfile) {
         transactions.push(
           dbAdmin.tx.userProfiles[userProfile.id].update({
             role: data.role,
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
           })
         );
       }
     }
-    
+
     if (transactions.length > 0) {
       await dbAdmin.transact(transactions);
     }
-    
+
     return true;
   } catch (error) {
     console.error("Error updating user:", error);
@@ -148,9 +133,7 @@ export async function updateUser(userId: string, data: Partial<{
  */
 export async function deleteUser(userId: string): Promise<boolean> {
   try {
-    await dbAdmin.transact([
-      dbAdmin.tx.$users[userId].delete()
-    ]);
+    await dbAdmin.transact([dbAdmin.tx.$users[userId].delete()]);
     return true;
   } catch (error) {
     console.error("Error deleting user:", error);
@@ -161,18 +144,20 @@ export async function deleteUser(userId: string): Promise<boolean> {
 /**
  * Get all users for a tenant
  */
-export async function findUsersByTenant(tenantId: string): Promise<UserWithProfile[]> {
+export async function findUsersByTenant(
+  tenantId: string
+): Promise<FullUser[]> {
   try {
     const result = await dbAdmin.query({
       $users: {
         $: {
           where: {
-            "tenant.id": tenantId
-          }
+            "tenant.id": tenantId,
+          },
         },
         tenant: {},
-        profile: {}
-      }
+        profile: {},
+      },
     });
 
     return result.$users || [];

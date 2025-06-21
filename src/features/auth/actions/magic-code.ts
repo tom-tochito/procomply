@@ -1,6 +1,6 @@
 "use server";
 
-import { findUserByEmailAndTenant } from "@/features/user/repository";
+import { findUserByEmail } from "@/features/user/repository";
 import { setAuthCookies } from "../repository";
 
 export interface CheckUserResult {
@@ -23,18 +23,29 @@ export async function checkUserExistsAction(
   tenantId: string
 ): Promise<CheckUserResult> {
   try {
-    const user = await findUserByEmailAndTenant(email, tenantId);
+    const user = await findUserByEmail(email);
     
-    return { 
+    if (!user) {
+      return {
+        success: true,
+        exists: false,
+      };
+    }
+
+    // Check if user belongs to the tenant or is an admin
+    const belongsToTenant = user.tenant?.id === tenantId;
+    const isAdmin = user.profile?.role === "admin";
+    
+    return {
       success: true,
-      exists: !!user
+      exists: belongsToTenant || isAdmin,
     };
   } catch (error) {
     console.error("Error checking user:", error);
-    return { 
-      success: false, 
+    return {
+      success: false,
       exists: false,
-      error: "Failed to check user existence" 
+      error: "Failed to check user existence",
     };
   }
 }
@@ -48,25 +59,35 @@ export async function setAuthCookiesAction(
   tenantId: string
 ): Promise<SetAuthCookiesResult> {
   try {
-    // Get the user to ensure they still exist
-    const user = await findUserByEmailAndTenant(email, tenantId);
+    const user = await findUserByEmail(email);
     
     if (!user) {
-      return { 
-        success: false, 
-        error: "User not found" 
+      return {
+        success: false,
+        error: "User not found",
       };
     }
 
-    // Set auth cookies
-    await setAuthCookies(user, tenantId);
+    // Check if user belongs to the tenant or is an admin
+    const belongsToTenant = user.tenant?.id === tenantId;
+    const isAdmin = user.profile?.role === "admin";
     
+    if (!belongsToTenant && !isAdmin) {
+      return {
+        success: false,
+        error: "User not authorized for this tenant",
+      };
+    }
+
+    // Set auth cookies with full user object
+    await setAuthCookies(user);
+
     return { success: true };
   } catch (error) {
     console.error("Error setting auth cookies:", error);
-    return { 
-      success: false, 
-      error: "Failed to complete authentication" 
+    return {
+      success: false,
+      error: "Failed to complete authentication",
     };
   }
 }

@@ -1,36 +1,23 @@
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
-import { TENANTS } from "@/data/tenants";
 import logo from "@/assets/images/logo.png";
 import { LoginForm } from "@/features/auth/components/LoginForm";
-import { checkAuth, getTenantIdBySubdomain } from "@/features/auth/utils/check-auth";
+import { checkAuth } from "@/features/auth/utils/check-auth";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
+import { findTenantBySlug } from "@/features/tenant/repository";
 
 interface PageProps {
   params: Promise<{ tenant: string }>;
 }
 
 export default async function LoginPage({ params }: PageProps) {
-  const { tenant: subdomain } = await params;
-  
-  // Check if already authenticated
+  const { tenant: slug } = await params;
+
   const auth = await checkAuth();
-  if (auth) {
-    redirect(generateTenantRedirectUrl(subdomain, "/dashboard"));
-  }
+  if (auth) redirect(generateTenantRedirectUrl(slug, "/dashboard"));
 
-  // Try to match domain to known tenants
-  const _tenant = subdomain?.toString().split(".")[0];
-  const tenant = TENANTS.find((t) => t.id === _tenant);
-
-  if (!tenant) {
-    // If tenant not found, show 404
-    notFound();
-  }
-
-  // Get the actual tenant ID from the database
-  // For now, we'll use the subdomain as the tenant ID
-  const tenantId = await getTenantIdBySubdomain(_tenant) || _tenant;
+  const tenant = await findTenantBySlug(slug);
+  if (!tenant) notFound();
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100 px-4 sm:px-0">
@@ -43,9 +30,7 @@ export default async function LoginPage({ params }: PageProps) {
           Log in to{" "}
           <span className="font-semibold capitalize">{tenant?.name}</span>
         </p>
-
-        <LoginForm tenantId={tenantId} tenantSubdomain={subdomain} />
-        
+        <LoginForm tenant={tenant} />
         <p className="mt-6 text-center text-xs text-black/60">
           ProComply © 2025
         </p>

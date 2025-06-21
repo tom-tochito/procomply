@@ -3,7 +3,6 @@ export {
   getAuthCookies,
   clearAuthCookies,
   isAuthenticated,
-  requireAuth,
-  getCurrentTenantId
+  requireAuth
 } from "./auth.repository";
 export type { AuthCookieData } from "./auth.repository";

@@ -5,15 +5,18 @@ import { useRouter } from "next/navigation";
 import { db } from "~/lib/db";
 import { checkUserExistsAction, setAuthCookiesAction } from "../actions/magic-code";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
+import type { InstaQLEntity } from "@instantdb/react";
+import type { AppSchema } from "~/instant.schema";
+
+type Tenant = InstaQLEntity<AppSchema, "tenants">;
 
 interface LoginFormProps {
-  tenantId: string;
-  tenantSubdomain: string;
+  tenant: Tenant;
 }
 
 type Step = "email" | "code";
 
-export function LoginForm({ tenantId, tenantSubdomain }: LoginFormProps) {
+export function LoginForm({ tenant }: LoginFormProps) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
@@ -28,7 +31,7 @@ export function LoginForm({ tenantId, tenantSubdomain }: LoginFormProps) {
 
     try {
       // Check if user exists in our database
-      const checkResult = await checkUserExistsAction(email, tenantId);
+      const checkResult = await checkUserExistsAction(email, tenant.id);
       
       if (!checkResult.success) {
         setError(checkResult.error || "Failed to verify email");
@@ -65,7 +68,7 @@ export function LoginForm({ tenantId, tenantSubdomain }: LoginFormProps) {
       await db.auth.signInWithMagicCode({ email, code });
       
       // Set server-side auth cookies
-      const cookieResult = await setAuthCookiesAction(email, tenantId);
+      const cookieResult = await setAuthCookiesAction(email, tenant.id);
       
       if (!cookieResult.success) {
         setError(cookieResult.error || "Failed to complete login");
@@ -73,7 +76,7 @@ export function LoginForm({ tenantId, tenantSubdomain }: LoginFormProps) {
       }
 
       // Redirect to dashboard
-      router.push(generateTenantRedirectUrl(tenantSubdomain, "/dashboard"));
+      router.push(generateTenantRedirectUrl(tenant.slug, "/dashboard"));
     } catch (err) {
       const error = err as { body?: { message?: string } };
       setError(error.body?.message || "Invalid verification code");

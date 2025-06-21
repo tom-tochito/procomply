@@ -2,13 +2,13 @@ import { generateTenantRedirectUrl } from "@/utils/tenant";
 import { notFound, redirect } from "next/navigation";
 
 interface Props {
-  params: Promise<{ subdomain: string }>;
+  params: Promise<{ tenant: string }>;
 }
 
 export default async function Page({ params }: Props) {
-  const { subdomain } = await params;
+  const { tenant: slug } = await params;
 
-  if (!subdomain) notFound();
+  if (!slug) notFound();
 
-  redirect(generateTenantRedirectUrl(subdomain, "/login"));
+  redirect(generateTenantRedirectUrl(slug, "/login"));
 }

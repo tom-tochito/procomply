@@ -40,16 +40,19 @@ async function seed() {
       {
         id: id(),
         name: "ASAP",
+        slug: "asap",
         description: "ASAP",
       },
       {
         id: id(),
         name: "Play",
+        slug: "play",
         description: "Playground",
       },
       {
         id: id(),
         name: "Akelius",
+        slug: "akelius",
         description: "Akelius",
       },
     ];
@@ -59,6 +62,7 @@ async function seed() {
     const tenantTransactions = tenants.map((tenant) =>
       db.tx.tenants[tenant.id].update({
         name: tenant.name,
+        slug: tenant.slug,
         description: tenant.description,
         createdAt: dateString,
         updatedAt: dateString,

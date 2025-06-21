@@ -28,12 +28,23 @@ export async function findTenantById(tenantId: string): Promise<Tenant | null> {
 }
 
 /**
- * Find a tenant by subdomain (assuming subdomain matches id for now)
+ * Find a tenant by slug
  */
-export async function findTenantBySubdomain(subdomain: string): Promise<Tenant | null> {
-  // In a real app, you might have a separate subdomain field
-  // For now, using ID as subdomain
-  return findTenantById(subdomain);
+export async function findTenantBySlug(slug: string): Promise<Tenant | null> {
+  try {
+    const result = await dbAdmin.query({
+      tenants: {
+        $: {
+          where: { slug },
+        },
+      },
+    });
+
+    return result.tenants?.[0] || null;
+  } catch (error) {
+    console.error("Error fetching tenant by slug:", error);
+    return null;
+  }
 }
 
 /**
@@ -41,6 +52,7 @@ export async function findTenantBySubdomain(subdomain: string): Promise<Tenant |
  */
 export async function createTenant(data: {
   name: string;
+  slug: string;
   description: string;
 }): Promise<Tenant | null> {
   try {
@@ -48,6 +60,7 @@ export async function createTenant(data: {
     await dbAdmin.transact([
       dbAdmin.tx.tenants[tenantId].update({
         name: data.name,
+        slug: data.slug,
         description: data.description,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -68,6 +81,7 @@ export async function updateTenant(
   tenantId: string,
   data: Partial<{
     name: string;
+    slug: string;
     description: string;
   }>
 ): Promise<boolean> {

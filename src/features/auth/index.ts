@@ -7,8 +7,7 @@ export {
   getAuthCookies,
   clearAuthCookies,
   isAuthenticated,
-  requireAuth as requireAuthFromRepo,
-  getCurrentTenantId
+  requireAuth as requireAuthFromRepo
 } from "./repository";
 export type { AuthCookieData } from "./repository";
 export type { CheckUserResult, SetAuthCookiesResult } from "./actions/magic-code";
