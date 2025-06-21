@@ -37,6 +37,16 @@ Component filenames must be descriptive of their function (e.g., BuildingCard.ts
 
 All repository files must use the "use server" directive at the top of the file. When using "use server" directive, you must use export function syntax. Classes with "use server" are not allowed. All server actions and repository methods must be exported as individual functions, not as static methods on a class.
 
+## 9. File Storage Service
+
+All file uploads and downloads must use the storage service located at src/common/services/storage/storage.service.ts. When implementing file upload/download functionality:
+- Use `uploadFile(path, file)` for uploading files to Cloudflare storage
+- Use `downloadFile(path)` for retrieving files from storage
+- Use `deleteFile(path)` for removing files from storage
+- Store the file path (returned from uploadFile) in the database for reference
+- The path parameter must start with "/" (e.g., "/documents/file.pdf")
+- Never implement direct file system access or custom upload/download logic
+
 </rules>
 
 <instant_db>
