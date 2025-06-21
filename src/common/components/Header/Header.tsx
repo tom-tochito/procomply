@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import logo from "@/assets/images/logo-white.png";
+import logo from "@/common/assets/images/logo/light.png";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import {
   Database,
