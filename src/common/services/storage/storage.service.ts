@@ -9,11 +9,10 @@ export async function uploadFile(path: `/${string}`, file: File) {
   return path;
 }
 
-export async function downloadFile(path: `/${string}`) {
-  const context = await getCloudflareContext({ async: true });
-  const bucket = context.env.PROCOMPLY_BUCKET;
-  const file = await bucket.get(path);
-  return file;
+export async function getFileUrl(tenant: string, path: `/${string}`) {
+  // Remove leading slash for URL construction
+  const pathWithoutLeadingSlash = path.startsWith('/') ? path.slice(1) : path;
+  return `/tenant/${tenant}/files/${pathWithoutLeadingSlash}`;
 }
 
 export async function deleteFile(path: `/${string}`) {

@@ -41,11 +41,25 @@ All repository files must use the "use server" directive at the top of the file.
 
 All file uploads and downloads must use the storage service located at src/common/services/storage/storage.service.ts. When implementing file upload/download functionality:
 - Use `uploadFile(path, file)` for uploading files to Cloudflare storage
-- Use `downloadFile(path)` for retrieving files from storage
+- Use `getFileUrl(tenant, path)` to generate a URL for serving files via HTTP GET requests
 - Use `deleteFile(path)` for removing files from storage
 - Store the file path (returned from uploadFile) in the database for reference
 - The path parameter must start with "/" (e.g., "/documents/file.pdf")
+- Files can be accessed via GET request at `/tenant/[tenant]/files/[path]` (e.g., `/tenant/acme/files/documents/report.pdf`)
 - Never implement direct file system access or custom upload/download logic
+
+## 10. Route Parameters
+
+All Next.js route handlers must await params when accessing route parameters. The params object is now a Promise that must be awaited:
+```typescript
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ tenant: string }> }
+) {
+  const { tenant } = await params;
+  // ... rest of handler
+}
+```
 
 </rules>
 
