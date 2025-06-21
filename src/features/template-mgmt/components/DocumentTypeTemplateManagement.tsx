@@ -3,8 +3,8 @@
 import { useState } from "react";
 import SearchBar from "./SearchBar";
 import PageHeader from "./PageHeader";
-import DocumentTypeTemplateTable from "@/components/DocumentTypeTemplateTable";
-import DocumentTypeTemplateForm from "@/components/DocumentTypeTemplateForm";
+import DocumentTypeTemplateTable from "./DocumentTypeTemplateTable";
+import DocumentTypeTemplateForm from "./DocumentTypeTemplateForm";
 
 export interface DocumentTypeTemplate {
   id: string;

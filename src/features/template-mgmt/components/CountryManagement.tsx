@@ -3,8 +3,8 @@
 import { useState } from "react";
 import SearchBar from "./SearchBar";
 import PageHeader from "./PageHeader";
-import CountryTable from "@/components/CountryTable";
-import CountryForm from "@/components/CountryForm";
+import CountryTable from "./CountryTable";
+import CountryForm from "./CountryForm";
 
 export interface Country {
   id: string;

@@ -3,8 +3,8 @@
 import { useState } from "react";
 import SearchBar from "./SearchBar";
 import PageHeader from "./PageHeader";
-import SubsectionTable from "@/components/SubsectionTable";
-import SubsectionForm from "@/components/SubsectionForm";
+import SubsectionTable from "./SubsectionTable";
+import SubsectionForm from "./SubsectionForm";
 
 export interface Subsection {
   id: string;

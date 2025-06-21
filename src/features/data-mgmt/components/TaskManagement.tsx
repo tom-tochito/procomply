@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Task } from "@/data/tasks";
-import TaskDetailsDialog from "@/components/TaskDetailsDialog";
-import LabelModal from "@/components/LabelModal";
-import TaskModal from "@/components/TaskModal";
-import TaskTemplateModal from "@/components/TaskTemplateModal";
+import TaskDetailsDialog from "./TaskDetailsDialog";
+import LabelModal from "./LabelModal";
+import TaskModal from "./TaskModal";
+import TaskTemplateModal from "@/features/template-mgmt/components/TaskTemplateModal";
 import TaskSidebar from "./TaskSidebar";
 import TaskFilters from "./TaskFilters";
 import TaskTable from "./TaskTable";

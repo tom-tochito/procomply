@@ -3,8 +3,8 @@
 import { useState } from "react";
 import SearchBar from "./SearchBar";
 import PageHeader from "./PageHeader";
-import LegislationTable from "@/components/LegislationTable";
-import LegislationForm from "@/components/LegislationForm";
+import LegislationTable from "./LegislationTable";
+import LegislationForm from "./LegislationForm";
 
 export interface Legislation {
   id: string;

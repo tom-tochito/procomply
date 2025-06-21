@@ -3,8 +3,8 @@
 import { useState } from "react";
 import SearchBar from "./SearchBar";
 import PageHeader from "./PageHeader";
-import TaskTemplateTable from "@/components/TaskTemplateTable";
-import TaskTemplateForm from "@/components/TaskTemplateForm";
+import TaskTemplateTable from "./TaskTemplateTable";
+import TaskTemplateForm from "./TaskTemplateForm";
 
 export interface TaskTemplate {
   id: string;

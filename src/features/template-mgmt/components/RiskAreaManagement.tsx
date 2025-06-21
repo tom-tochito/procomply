@@ -4,7 +4,7 @@ import { useState } from "react";
 import SearchBar from "./SearchBar";
 import PageHeader from "./PageHeader";
 import RiskAreaTable from "./RiskAreaTable";
-import RiskAreaForm from "@/components/RiskAreaForm";
+import RiskAreaForm from "./RiskAreaForm";
 
 export interface RiskArea {
   id: string;

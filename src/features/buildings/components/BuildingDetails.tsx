@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Building } from "@/data/buildings";
 import { Task } from "@/data/tasks";
-import TaskDetailsDialog from "@/components/TaskDetailsDialog";
+import TaskDetailsDialog from "@/features/data-mgmt/components/TaskDetailsDialog";
 import TabNavigation from "./TabNavigation";
 import BuildingInfo from "./BuildingInfo";
 import TaskFilters from "./TaskFilters";

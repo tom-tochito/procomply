@@ -3,8 +3,8 @@
 import { useState } from "react";
 import SearchBar from "./SearchBar";
 import PageHeader from "./PageHeader";
-import SurveyTypeTable from "@/components/SurveyTypeTable";
-import SurveyTypeForm from "@/components/SurveyTypeForm";
+import SurveyTypeTable from "./SurveyTypeTable";
+import SurveyTypeForm from "./SurveyTypeForm";
 
 export interface SurveyType {
   id: string;

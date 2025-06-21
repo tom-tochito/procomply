@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { Document } from "@/data/documents";
-import DocumentDetailsDialog from "@/components/DocumentDetailsDialog";
-import UploadDocumentDialog from "@/components/UploadDocumentDialog";
-import DocumentTable from "@/components/DocumentTable";
+import DocumentDetailsDialog from "./DocumentDetailsDialog";
+import UploadDocumentDialog from "./UploadDocumentDialog";
+import DocumentTable from "./DocumentTable";
 import DocumentSidebar from "./DocumentSidebar";
 import DocumentActionBar from "./DocumentActionBar";
 
