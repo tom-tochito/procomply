@@ -1,1 +1,7 @@
-export { TenantRepository } from "./tenant.repository";
+export {
+  findTenantById,
+  findTenantBySubdomain,
+  createTenant,
+  updateTenant,
+  findAllTenants
+} from "./tenant.repository";

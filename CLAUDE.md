@@ -33,6 +33,10 @@ Component filenames must be descriptive of their function (e.g., BuildingCard.ts
 - Package Manager: The project must be configured to use pnpm.
 - Build Integrity: The generated code and file structure must be valid and able to pass a pnpm build command without errors.
 
+## 8. Server Actions and Repository Syntax
+
+All repository files must use the "use server" directive at the top of the file. When using "use server" directive, you must use export function syntax. Classes with "use server" are not allowed. All server actions and repository methods must be exported as individual functions, not as static methods on a class.
+
 </rules>
 
 <instant_db>

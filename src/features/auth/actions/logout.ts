@@ -1,10 +1,10 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { AuthRepository } from "../repository";
+import { clearAuthCookies } from "../repository";
 import { generateTenantRedirectUrl } from "@/utils/tenant";
 
 export async function logoutAction(tenantSubdomain: string) {
-  await AuthRepository.clearAuthCookies();
+  await clearAuthCookies();
   redirect(generateTenantRedirectUrl(tenantSubdomain, "/login"));
 }

@@ -1,15 +1,15 @@
-import { AuthRepository } from "../repository";
-import { TenantRepository } from "@/features/tenant/repository";
+import { requireAuth as requireAuthFromRepo, getAuthCookies } from "../repository";
+import { findTenantBySubdomain } from "@/features/tenant/repository";
 
 export async function requireAuth(tenantSubdomain: string) {
-  return AuthRepository.requireAuth(tenantSubdomain);
+  return requireAuthFromRepo(tenantSubdomain);
 }
 
 export async function checkAuth() {
-  return AuthRepository.getAuthCookies();
+  return getAuthCookies();
 }
 
 export async function getTenantIdBySubdomain(subdomain: string): Promise<string | null> {
-  const tenant = await TenantRepository.findBySubdomain(subdomain);
+  const tenant = await findTenantBySubdomain(subdomain);
   return tenant?.id || null;
 }

@@ -1,7 +1,7 @@
 "use server";
 
-import { UserRepository } from "@/features/user/repository";
-import { AuthRepository } from "../repository";
+import { findUserByEmailAndTenant } from "@/features/user/repository";
+import { setAuthCookies } from "../repository";
 
 export interface CheckUserResult {
   success: boolean;
@@ -23,7 +23,7 @@ export async function checkUserExistsAction(
   tenantId: string
 ): Promise<CheckUserResult> {
   try {
-    const user = await UserRepository.findByEmailAndTenant(email, tenantId);
+    const user = await findUserByEmailAndTenant(email, tenantId);
     
     return { 
       success: true,
@@ -49,7 +49,7 @@ export async function setAuthCookiesAction(
 ): Promise<SetAuthCookiesResult> {
   try {
     // Get the user to ensure they still exist
-    const user = await UserRepository.findByEmailAndTenant(email, tenantId);
+    const user = await findUserByEmailAndTenant(email, tenantId);
     
     if (!user) {
       return { 
@@ -59,7 +59,7 @@ export async function setAuthCookiesAction(
     }
 
     // Set auth cookies
-    await AuthRepository.setAuthCookies(user, tenantId);
+    await setAuthCookies(user, tenantId);
     
     return { success: true };
   } catch (error) {
