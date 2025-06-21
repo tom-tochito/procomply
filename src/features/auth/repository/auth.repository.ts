@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { generateTenantRedirectUrl } from "@/utils/tenant";
+import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import type { FullUser } from "@/features/user/repository";
 
 const AUTH_COOKIE_NAME = "procomply-auth";
@@ -17,7 +17,7 @@ export interface AuthCookieData {
  */
 export async function setAuthCookies(user: FullUser): Promise<void> {
   const cookieStore = await cookies();
-  
+
   const authData: AuthCookieData = {
     user,
   };
@@ -71,20 +71,19 @@ export async function isAuthenticated(): Promise<boolean> {
  */
 export async function requireAuth(tenantSlug: string): Promise<AuthCookieData> {
   const auth = await getAuthCookies();
-  
+
   if (!auth) {
     redirect(generateTenantRedirectUrl(tenantSlug, "/login"));
   }
-  
+
   // Validate tenant relationship
   const userBelongsToTenant = auth.user.tenant?.slug === tenantSlug;
   const isAdmin = auth.user.profile?.role === "admin";
-  
+
   if (!userBelongsToTenant && !isAdmin) {
     // User doesn't have access to this tenant
     redirect(generateTenantRedirectUrl(tenantSlug, "/login"));
   }
-  
+
   return auth;
 }
-

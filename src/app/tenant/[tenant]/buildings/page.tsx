@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { buildings as initialBuildings, divisions } from "@/data/buildings";
-import { generateTenantRedirectUrl } from "@/utils/tenant";
+import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import BuildingsList from "@/features/buildings/components/BuildingsList";
 
 interface BuildingsPageProps {

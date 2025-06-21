@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import logo from "@/assets/images/logo-white.png";
-import { generateTenantRedirectUrl } from "@/utils/tenant";
+import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import {
   Database,
   ChevronDown,

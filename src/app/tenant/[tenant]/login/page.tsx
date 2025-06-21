@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import logo from "@/assets/images/logo.png";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 import { checkAuth } from "@/features/auth/utils/check-auth";
-import { generateTenantRedirectUrl } from "@/utils/tenant";
+import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import { findTenantBySlug } from "@/features/tenant/repository";
 
 interface PageProps {

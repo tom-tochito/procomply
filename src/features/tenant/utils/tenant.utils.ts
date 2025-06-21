@@ -1,4 +1,4 @@
-import { PROTOCOL, ROOT_DOMAIN } from "@/constants";
+import { PROTOCOL, ROOT_DOMAIN } from "~/src/common/constants";
 
 export function generateTenantRedirectUrl(
   tenantSlug = "akelius",

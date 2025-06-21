@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { companies } from "@/data/companies";
-import { generateTenantRedirectUrl } from "@/utils/tenant";
+import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import CompanyManagement from "@/features/data-mgmt/components/CompanyManagement";
 
 interface CompanyPageProps {

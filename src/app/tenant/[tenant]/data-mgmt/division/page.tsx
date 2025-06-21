@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { divisions } from "@/data/buildings";
-import { generateTenantRedirectUrl } from "@/utils/tenant";
+import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import DivisionManagement from "@/features/data-mgmt/components/DivisionManagement";
 
 interface DivisionPageProps {

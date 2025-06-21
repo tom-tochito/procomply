@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Table, ColumnDef } from "@/common/components/Table";
 import { Building } from "@/data/buildings";
-import { generateTenantRedirectUrl } from "@/utils/tenant";
+import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 
 interface BuildingsTableProps {
   buildings: Building[];

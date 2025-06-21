@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { generateTenantRedirectUrl } from "@/utils/tenant";
+import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import ComplianceOverview from "@/features/compliance/components/ComplianceOverview";
 
 const mockBuildings = [

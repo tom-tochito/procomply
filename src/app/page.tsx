@@ -1,5 +1,5 @@
 import { findAllTenants } from "@/features/tenant/repository/tenant.repository";
-import { ROOT_DOMAIN, PROTOCOL } from "@/constants";
+import { ROOT_DOMAIN, PROTOCOL } from "~/src/common/constants";
 
 export default async function Page() {
   const tenants = await findAllTenants();

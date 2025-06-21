@@ -3,7 +3,7 @@ import { getTasksByBuildingId } from "@/data/tasks";
 import BuildingDetails from "@/features/buildings/components/BuildingDetails";
 import Link from "next/link";
 import Image from "next/image";
-import { generateTenantRedirectUrl } from "@/utils/tenant";
+import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 
 interface BuildingDetailsPageProps {
   params: Promise<{

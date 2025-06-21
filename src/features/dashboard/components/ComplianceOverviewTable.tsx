@@ -1,11 +1,13 @@
 import Link from "next/link";
-import { generateTenantRedirectUrl } from "@/utils/tenant";
+import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 
 interface ComplianceOverviewTableProps {
   tenant: string;
 }
 
-export default function ComplianceOverviewTable({ tenant }: ComplianceOverviewTableProps) {
+export default function ComplianceOverviewTable({
+  tenant,
+}: ComplianceOverviewTableProps) {
   return (
     <div className="rounded-lg border p-4 md:p-5 bg-white shadow-sm">
       <h3 className="font-bold text-lg mb-4 text-gray-800 border-b pb-2">
@@ -26,9 +28,7 @@ export default function ComplianceOverviewTable({ tenant }: ComplianceOverviewTa
               <th className="p-3 text-left font-semibold">
                 Asbestos Reinspections
               </th>
-              <th className="p-3 text-left font-semibold">
-                Asbestos Surveys
-              </th>
+              <th className="p-3 text-left font-semibold">Asbestos Surveys</th>
               <th className="p-3 text-left font-semibold">
                 Fire Alarm Testing
               </th>
@@ -50,10 +50,7 @@ export default function ComplianceOverviewTable({ tenant }: ComplianceOverviewTa
             <tr className="border-t hover:bg-gray-50">
               <td className="p-3 font-medium">
                 <Link
-                  href={generateTenantRedirectUrl(
-                    tenant,
-                    "/buildings/40001"
-                  )}
+                  href={generateTenantRedirectUrl(tenant, "/buildings/40001")}
                   className="text-[#F30] hover:underline"
                 >
                   40001 Viney Court
@@ -77,10 +74,7 @@ export default function ComplianceOverviewTable({ tenant }: ComplianceOverviewTa
             <tr className="border-t hover:bg-gray-50">
               <td className="p-3 font-medium">
                 <Link
-                  href={generateTenantRedirectUrl(
-                    tenant,
-                    "/buildings/40002"
-                  )}
+                  href={generateTenantRedirectUrl(tenant, "/buildings/40002")}
                   className="text-[#F30] hover:underline"
                 >
                   40002 Maple House

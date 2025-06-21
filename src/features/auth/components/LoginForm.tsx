@@ -3,8 +3,11 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "~/lib/db";
-import { checkUserExistsAction, setAuthCookiesAction } from "../actions/magic-code";
-import { generateTenantRedirectUrl } from "@/utils/tenant";
+import {
+  checkUserExistsAction,
+  setAuthCookiesAction,
+} from "../actions/magic-code";
+import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import type { InstaQLEntity } from "@instantdb/react";
 import type { AppSchema } from "~/instant.schema";
 
@@ -32,20 +35,22 @@ export function LoginForm({ tenant }: LoginFormProps) {
     try {
       // Check if user exists in our database
       const checkResult = await checkUserExistsAction(email, tenant.id);
-      
+
       if (!checkResult.success) {
         setError(checkResult.error || "Failed to verify email");
         return;
       }
 
       if (!checkResult.exists) {
-        setError("No account found with this email address. Please contact your administrator.");
+        setError(
+          "No account found with this email address. Please contact your administrator."
+        );
         return;
       }
 
       // Send magic code using InstantDB client
       await db.auth.sendMagicCode({ email });
-      
+
       // Move to code step
       setStep("code");
     } catch (err) {
@@ -66,10 +71,10 @@ export function LoginForm({ tenant }: LoginFormProps) {
     try {
       // Verify magic code with InstantDB
       await db.auth.signInWithMagicCode({ email, code });
-      
+
       // Set server-side auth cookies
       const cookieResult = await setAuthCookiesAction(email, tenant.id);
-      
+
       if (!cookieResult.success) {
         setError(cookieResult.error || "Failed to complete login");
         return;
@@ -94,7 +99,7 @@ export function LoginForm({ tenant }: LoginFormProps) {
             {error}
           </div>
         )}
-        
+
         <div>
           <label
             htmlFor="email"
@@ -134,7 +139,7 @@ export function LoginForm({ tenant }: LoginFormProps) {
           {error}
         </div>
       )}
-      
+
       <div className="space-y-2">
         <p className="text-sm text-gray-600">
           We sent a verification code to <strong>{email}</strong>

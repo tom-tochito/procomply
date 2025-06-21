@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { documents } from "@/data/documents";
-import { generateTenantRedirectUrl } from "@/utils/tenant";
+import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import DocumentManagement from "@/features/data-mgmt/components/DocumentManagement";
 
 interface DocumentPageProps {

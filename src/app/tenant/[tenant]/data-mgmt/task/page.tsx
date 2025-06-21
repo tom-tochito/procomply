@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { tasks } from "@/data/tasks";
-import { generateTenantRedirectUrl } from "@/utils/tenant";
+import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import TaskManagement from "@/features/data-mgmt/components/TaskManagement";
 
 interface TaskPageProps {
