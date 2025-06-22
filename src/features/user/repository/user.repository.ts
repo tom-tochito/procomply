@@ -2,16 +2,9 @@
 
 import { dbAdmin } from "~/lib/db-admin";
 import { id } from "@instantdb/admin";
-import type { InstaQLEntity } from "@instantdb/react";
-import type { AppSchema } from "~/instant.schema";
+import type { FullUser } from "@/features/user/models";
 
-export type User = InstaQLEntity<AppSchema, "$users">;
-export type UserProfile = InstaQLEntity<AppSchema, "userProfiles">;
-export type Tenant = InstaQLEntity<AppSchema, "tenants">;
-export type FullUser = User & { 
-  profile?: UserProfile;
-  tenant?: Tenant;
-};
+export type { FullUser };
 
 
 /**

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Building } from "@/data/buildings";
+import { BuildingWithRelations } from "@/features/buildings/models";
+import { DocumentWithRelations } from "@/features/documents/models";
 import { Task } from "@/data/tasks";
 import TaskDetailsDialog from "@/features/data-mgmt/components/TaskDetailsDialog";
 import TabNavigation from "./TabNavigation";
@@ -14,12 +15,12 @@ import NotesTab from "./NotesTab";
 import YearPlannerTab from "./YearPlannerTab";
 
 interface BuildingDetailsProps {
-  building: Building;
+  building: BuildingWithRelations;
   initialTasks: Task[];
   tenant: string;
 }
 
-export default function BuildingDetails({ building, initialTasks }: BuildingDetailsProps) {
+export default function BuildingDetails({ building, initialTasks, tenant }: BuildingDetailsProps) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [activeTab, setActiveTab] = useState("details");
   const [filterByTeam, setFilterByTeam] = useState("");
@@ -128,7 +129,12 @@ export default function BuildingDetails({ building, initialTasks }: BuildingDeta
         );
       
       case "documents":
-        return <DocumentsTab buildingId={building.id} />;
+        return <DocumentsTab 
+          buildingId={building.id} 
+          tenantId={building.tenant?.id || ""} 
+          tenant={tenant}
+          documents={(building.documents || []) as DocumentWithRelations[]}
+        />;
       
       case "contacts":
         return <ContactsTab buildingId={building.id} />;

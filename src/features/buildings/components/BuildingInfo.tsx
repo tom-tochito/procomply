@@ -1,57 +1,58 @@
 "use client";
 
-import React from "react";
-import { Building } from "@/data/buildings";
+import React, { useState } from "react";
+import { Building } from "@/features/buildings/models";
+import EditBuildingModal from "./EditBuildingModal";
 
 interface BuildingInfoProps {
   building: Building;
 }
 
 export default function BuildingInfo({ building }: BuildingInfoProps) {
-  // Mock data matching the old style
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  // Building data from database
   const buildingData = {
     generalData: {
-      ref: building.id,
       name: building.name,
-      description: `${building.id} ${building.name}`,
-      division: building.division,
-      billingAccount: "UK Two Ltd",
-      availability: "Open - Rented",
-      openingHours: "Communal refurb in April 21",
-      archived: "—",
-      siteAccess: "Keys are in the safe - Parking outside"
+      description: building.description || "—",
+      division: building.division || "—",
+      billingAccount: building.billingAccount || "—",
+      availability: building.availability || "—",
+      openingHours: building.openingHours || "—",
+      archived: building.archived ? "Yes" : "No",
+      siteAccess: building.siteAccess || "—"
     },
     position: {
-      complex: "—",
-      address: "78 Kings Avenue",
-      postcode: "SW4 8BH",
-      cityTown: "Clapham",
-      country: "United Kingdom"
+      complex: building.complex || "—",
+      address: building.address || "—",
+      postcode: building.zipCode || "—",
+      cityTown: building.city || "—",
+      country: building.state || "—"
     },
     maintenanceData: {
-      condition: "—",
-      criticality: "—",
-      fireRiskRating: "—",
-      lastCheckDate: "—"
+      condition: building.condition || "—",
+      criticality: building.criticality || "—",
+      fireRiskRating: building.fireRiskRating || "—",
+      lastCheckDate: building.lastCheckDate ? new Date(building.lastCheckDate).toLocaleDateString() : "—"
     },
     dimensionalData: {
-      totalGrossArea: "9848",
-      totalNetArea: "—",
-      coveredArea: "—",
-      glazedArea: "—",
-      cleanableArea: "—",
-      totalVolume: "—",
-      heatedVolume: "—",
-      numberOfFloors: "—",
-      numberOfRooms: "—",
-      numberOfUnits: "16"
+      totalGrossArea: building.totalGrossArea?.toString() || "—",
+      totalNetArea: building.totalNetArea?.toString() || "—",
+      coveredArea: building.coveredArea?.toString() || "—",
+      glazedArea: building.glazedArea?.toString() || "—",
+      cleanableArea: building.cleanableArea?.toString() || "—",
+      totalVolume: building.totalVolume?.toString() || "—",
+      heatedVolume: building.heatedVolume?.toString() || "—",
+      numberOfFloors: building.floors?.toString() || "—",
+      numberOfRooms: building.numberOfRooms?.toString() || "—",
+      numberOfUnits: building.numberOfUnits?.toString() || "—"
     },
     contact: {
-      outOfHourContact: "—",
-      telephone: "—"
+      outOfHourContact: building.outOfHourContact || "—",
+      telephone: building.telephone || "—"
     },
     statistics: {
-      compliancePercent: building.compliance,
+      compliancePercent: 100, // TODO: Calculate from tasks when available
       statutoryDocCompliance: "—",
       lowPriorityTasks: "0",
       mediumPriorityTasks: "0",
@@ -121,9 +122,9 @@ export default function BuildingInfo({ building }: BuildingInfoProps) {
         </div>
         <div className="bg-white p-4 rounded-lg border">
           <h3 className="text-sm font-medium text-gray-600 mb-2">Remedial Task Compliance</h3>
-          <div className="text-3xl font-bold text-gray-800 mb-2">{building.compliance}%</div>
+          <div className="text-3xl font-bold text-gray-800 mb-2">{buildingData.statistics.compliancePercent}%</div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-green-500 h-2 rounded-full" style={{ width: `${building.compliance}%` }}></div>
+            <div className="bg-green-500 h-2 rounded-full" style={{ width: `${buildingData.statistics.compliancePercent}%` }}></div>
           </div>
         </div>
       </div>
@@ -198,7 +199,15 @@ export default function BuildingInfo({ building }: BuildingInfoProps) {
         {/* Middle content area */}
         <div className="lg:col-span-6 order-first lg:order-none">
           <div className="bg-white rounded-lg border overflow-hidden">
-            <h3 className="text-md font-medium p-4 bg-gray-50 border-b">Details</h3>
+            <div className="flex items-center justify-between p-4 bg-gray-50 border-b">
+              <h3 className="text-md font-medium">Details</h3>
+              <button
+                onClick={() => setIsEditModalOpen(true)}
+                className="px-3 py-1 bg-[#F30] text-white text-sm font-medium rounded hover:bg-[#E20] transition-colors"
+              >
+                Edit Building
+              </button>
+            </div>
 
             {/* General Data section */}
             <div id="general-data" className="p-4 border-b">
@@ -207,15 +216,9 @@ export default function BuildingInfo({ building }: BuildingInfoProps) {
                 <h4 className="font-medium text-gray-700">General Data</h4>
               </div>
               <div className="space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Ref:</div>
-                    <div className="font-medium">{buildingData.generalData.ref}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Name:</div>
-                    <div className="font-medium">{buildingData.generalData.name}</div>
-                  </div>
+                <div>
+                  <div className="text-sm text-gray-500">Name:</div>
+                  <div className="font-medium">{buildingData.generalData.name}</div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-500">Description:</div>
@@ -490,6 +493,13 @@ export default function BuildingInfo({ building }: BuildingInfoProps) {
           </div>
         </div>
       </div>
+      
+      {/* Edit Building Modal */}
+      <EditBuildingModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        building={building}
+      />
     </div>
   );
 }

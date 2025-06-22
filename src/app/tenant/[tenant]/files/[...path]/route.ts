@@ -16,7 +16,9 @@ export async function GET(
     return NextResponse.json({ error: "Path is required" }, { status: 400 });
   }
 
-  const filePath = `/${tenant}/${Array.isArray(path) ? path.join("/") : path}`;
+  const filePath = `/tenant/${tenant}/${
+    Array.isArray(path) ? path.join("/") : path
+  }`;
 
   try {
     const context = await getCloudflareContext({ async: true });
@@ -28,12 +30,13 @@ export async function GET(
     }
 
     const headers = new Headers();
-    object.writeHttpMetadata(headers);
-    headers.set("etag", object.httpEtag);
+    headers.set("etag", object.httpEtag || "");
+    headers.set(
+      "content-type",
+      object.httpMetadata?.contentType || "application/octet-stream"
+    );
 
-    return new Response(object.body, {
-      headers,
-    });
+    return new Response(object.body, { headers });
   } catch (error) {
     console.error("Error fetching file:", error);
     return NextResponse.json(

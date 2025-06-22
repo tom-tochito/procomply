@@ -4,11 +4,11 @@ import React, { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Table, ColumnDef } from "@/common/components/Table";
-import { Building } from "@/data/buildings";
+import { BuildingWithStats } from "@/features/buildings/models";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 
 interface BuildingsTableProps {
-  buildings: Building[];
+  buildings: BuildingWithStats[];
   tenant: string;
   searchTerm?: string;
 }
@@ -20,7 +20,7 @@ export default function BuildingsTable({
 }: BuildingsTableProps) {
   const router = useRouter();
 
-  const columns = useMemo<ColumnDef<Building>[]>(
+  const columns = useMemo<ColumnDef<BuildingWithStats>[]>(
     () => [
       {
         accessorKey: "image",
@@ -36,13 +36,6 @@ export default function BuildingsTable({
           </div>
         ),
         enableSorting: false,
-      },
-      {
-        accessorKey: "id",
-        header: "ID",
-        cell: ({ row }) => (
-          <span className="font-medium text-gray-900">{row.original.id}</span>
-        ),
       },
       {
         accessorKey: "name",
@@ -84,7 +77,7 @@ export default function BuildingsTable({
         accessorKey: "compliance",
         header: "Compliance",
         cell: ({ row }) => {
-          const compliance = row.original.compliance;
+          const compliance = row.original.compliance ?? 0;
           const getComplianceColor = (value: number) => {
             if (value >= 70) return "text-green-600";
             if (value >= 40) return "text-orange-600";
@@ -119,7 +112,7 @@ export default function BuildingsTable({
         accessorKey: "inbox",
         header: "Inbox",
         cell: ({ row }) => {
-          const { urgent, warning, email } = row.original.inbox;
+          const { urgent, warning, email } = row.original.inbox ?? { urgent: 0, warning: 0, email: false };
           return (
             <div className="flex items-center gap-3">
               {urgent > 0 && (
@@ -158,7 +151,7 @@ export default function BuildingsTable({
     []
   );
 
-  const handleRowClick = (building: Building) => {
+  const handleRowClick = (building: BuildingWithStats) => {
     router.push(generateTenantRedirectUrl(tenant, `/buildings/${building.id}`));
   };
 

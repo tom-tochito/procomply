@@ -1,7 +1,11 @@
 import Link from "next/link";
-import { buildings as initialBuildings, divisions } from "@/data/buildings";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import BuildingsList from "@/features/buildings/components/BuildingsList";
+import { getBuildingsWithComplianceStats } from "@/features/buildings/repository/buildings.repository";
+import { requireAuth } from "@/features/auth/repository/auth.repository";
+import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
+import { BuildingWithStats } from "@/features/buildings/models";
+import { getFileUrl } from "@/common/utils/file";
 
 interface BuildingsPageProps {
   params: Promise<{
@@ -11,6 +15,41 @@ interface BuildingsPageProps {
 
 export default async function BuildingsPage({ params }: BuildingsPageProps) {
   const { tenant } = await params;
+
+  // Require authentication
+  await requireAuth(tenant);
+
+  // Get tenant data
+  const tenantData = await findTenantBySlug(tenant);
+  if (!tenantData) {
+    throw new Error("Tenant not found");
+  }
+
+  // Fetch buildings from InstantDB
+  const buildings = await getBuildingsWithComplianceStats(tenantData);
+
+  // Transform buildings to match expected format
+  const transformedBuildings: BuildingWithStats[] = buildings.map(
+    (building) => ({
+      ...building,
+      image: getFileUrl(tenant, building.image as `/${string}`), // Default image
+      division: building.city, // Using city as division for now
+      status: "Active",
+      compliance:
+        building.taskStats.total > 0
+          ? Math.round(
+              (building.taskStats.completed / building.taskStats.total) * 100
+            )
+          : 100,
+      inbox: { urgent: 0, warning: 0, email: false }, // Default values for now
+    })
+  );
+
+  // Get unique divisions (cities) from buildings
+  const divisions = [
+    "Active Divisions",
+    ...new Set(buildings.map((b) => b.city)),
+  ].filter(Boolean);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -34,9 +73,9 @@ export default async function BuildingsPage({ params }: BuildingsPageProps) {
 
         {/* Buildings list component */}
         <BuildingsList
-          initialBuildings={initialBuildings}
+          initialBuildings={transformedBuildings}
           divisions={divisions}
-          tenant={tenant}
+          tenant={tenantData}
         />
       </div>
     </div>

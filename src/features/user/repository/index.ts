@@ -7,8 +7,5 @@ export {
 } from "./user.repository";
 
 export type {
-  User,
-  UserProfile,
-  Tenant,
   FullUser
 } from "./user.repository";

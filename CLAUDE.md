@@ -41,7 +41,7 @@ All repository files must use the "use server" directive at the top of the file.
 
 All file uploads and downloads must use the storage service located at src/common/services/storage/storage.service.ts. When implementing file upload/download functionality:
 - Use `uploadFile(path, file)` for uploading files to Cloudflare storage
-- Use `getFileUrl(tenant, path)` to generate a URL for serving files via HTTP GET requests
+- Use `getFileUrl(tenant, path)` from src/common/utils/file.ts to generate a URL for serving files via HTTP GET requests
 - Use `deleteFile(path)` for removing files from storage
 - Store the file path (returned from uploadFile) in the database for reference
 - The path parameter must start with "/" (e.g., "/documents/file.pdf")
@@ -58,6 +58,78 @@ export async function GET(
 ) {
   const { tenant } = await params;
   // ... rest of handler
+}
+```
+
+## 11. Next.js Form Guidelines
+
+All forms in client components must follow Next.js form guidelines with server actions and useActionState:
+- Use `useActionState` hook for form state management instead of `useState`
+- Remove `preventDefault` and use native form submission with `action` attribute
+- Server actions receive FormData directly and handle validation
+- Use `isPending` from useActionState for loading states instead of manual state
+- Display errors through the state returned by useActionState, not alerts
+- Forms support progressive enhancement when JavaScript is disabled
+
+Example pattern:
+```typescript
+"use client";
+import { useActionState } from "react";
+
+interface FormState {
+  error: string | null;
+  success: boolean;
+}
+
+export function MyForm() {
+  const [state, formAction, isPending] = useActionState(
+    async (prevState: FormState, formData: FormData) => {
+      // Validation and server action call
+      const result = await myServerAction(formData);
+      return result.success 
+        ? { error: null, success: true }
+        : { error: result.error, success: false };
+    },
+    { error: null, success: false }
+  );
+
+  return (
+    <form action={formAction}>
+      {state.error && <div className="error">{state.error}</div>}
+      <input name="field" required disabled={isPending} />
+      <button disabled={isPending}>
+        {isPending ? "Submitting..." : "Submit"}
+      </button>
+    </form>
+  );
+}
+```
+
+## 12. Type System Guidelines
+
+All entity types must be derived from InstantDB schema using InstaQLEntity:
+- Never create custom type definitions for database entities
+- Use `InstaQLEntity<AppSchema, "entityName">` for base types
+- Use `InstaQLEntity<AppSchema, "entityName", { relation: {} }>` for types with relations
+- Each feature should have a `models/index.ts` file that exports InstantDB types for reuse
+- UI-specific types that extend database entities should be interfaces extending the base type
+- Common form types (like FormState) should be defined in `src/common/types/`
+- InstantDB date fields accept ISO string format (e.g., new Date().toISOString())
+- Always pass full entity models to functions/components instead of just IDs (e.g., pass full Tenant object, not tenantId)
+
+Example pattern:
+```typescript
+// src/features/buildings/models/index.ts
+import { InstaQLEntity } from "@instantdb/react";
+import { AppSchema } from "~/instant.schema";
+
+export type Building = InstaQLEntity<AppSchema, "buildings">;
+export type BuildingWithTenant = InstaQLEntity<AppSchema, "buildings", { tenant: {} }>;
+
+// UI-specific extension
+export interface BuildingWithStats extends Building {
+  compliance?: number;
+  status?: string;
 }
 ```
 
@@ -727,6 +799,26 @@ posts: i.entity({
   title: i.string(),
   category: i.string().indexed(), // Indexed for queries
   publishedAt: i.date().indexed(),
+  description: i.string().optional(), // Optional field
+  tags: i.json().optional(), // Optional JSON field
+});
+```
+
+### Optional Fields
+
+Use `.optional()` to make fields optional in the schema:
+
+```typescript
+buildings: i.entity({
+  // Required fields
+  name: i.string(),
+  address: i.string(),
+  
+  // Optional fields
+  description: i.string().optional(),
+  lastCheckDate: i.date().optional(),
+  totalGrossArea: i.number().optional(),
+  metadata: i.json().optional(),
 });
 ```
 

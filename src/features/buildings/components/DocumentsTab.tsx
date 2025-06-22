@@ -1,104 +1,116 @@
 "use client";
 
-import React, { useState } from "react";
-import { FileText, Download, Eye, Search, Upload } from "lucide-react";
-
-interface Document {
-  id: string;
-  name: string;
-  type: string;
-  category: string;
-  size: string;
-  uploadedDate: string;
-  uploadedBy: string;
-  status: "active" | "archived" | "draft";
-}
+import React, { useState, useRef } from "react";
+import { FileText, Download, Eye, Search, Upload, Trash2 } from "lucide-react";
+import { uploadDocumentAction, deleteDocumentAction } from "@/features/documents/actions/documents.actions";
+import { useRouter } from "next/navigation";
+import { DocumentWithRelations } from "@/features/documents/models";
 
 interface DocumentsTabProps {
   buildingId: string;
+  tenantId: string;
+  tenant: string;
+  documents: DocumentWithRelations[]; // Documents from server
 }
 
-export default function DocumentsTab({ }: DocumentsTabProps) {
+export default function DocumentsTab({ buildingId, tenantId, tenant, documents = [] }: DocumentsTabProps) {
+  const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [documents] = useState<Document[]>([
-    {
-      id: "1",
-      name: "Fire Safety Certificate 2024",
-      type: "PDF",
-      category: "Compliance",
-      size: "2.4 MB",
-      uploadedDate: "2024-03-15",
-      uploadedBy: "John Smith",
-      status: "active"
-    },
-    {
-      id: "2",
-      name: "Building Inspection Report",
-      type: "PDF",
-      category: "Inspection",
-      size: "5.1 MB",
-      uploadedDate: "2024-03-10",
-      uploadedBy: "Sarah Johnson",
-      status: "active"
-    },
-    {
-      id: "3",
-      name: "Asbestos Survey Results",
-      type: "DOCX",
-      category: "Survey",
-      size: "1.8 MB",
-      uploadedDate: "2024-02-28",
-      uploadedBy: "Mike Wilson",
-      status: "active"
-    },
-    {
-      id: "4",
-      name: "Water Safety Assessment",
-      type: "PDF",
-      category: "Compliance",
-      size: "3.2 MB",
-      uploadedDate: "2024-02-15",
-      uploadedBy: "Emma Davis",
-      status: "active"
-    },
-    {
-      id: "5",
-      name: "Electrical Installation Certificate",
-      type: "PDF",
-      category: "Compliance",
-      size: "1.5 MB",
-      uploadedDate: "2024-01-20",
-      uploadedBy: "Tom Brown",
-      status: "archived"
-    }
-  ]);
+  const [isUploading, setIsUploading] = useState(false);
 
   const categories = ["all", "Compliance", "Inspection", "Survey", "Maintenance", "Other"];
 
   const filteredDocuments = documents.filter(doc => {
     const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         doc.uploadedBy.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || doc.category === categoryFilter;
+                         doc.uploader?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = categoryFilter === "all" || getDocumentCategory(doc.type) === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case "active": return "bg-green-100 text-green-800";
-      case "archived": return "bg-gray-100 text-gray-800";
-      case "draft": return "bg-yellow-100 text-yellow-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
+  const getDocumentCategory = (type: string) => {
+    // Map document types to categories
+    if (type.includes("pdf")) return "Compliance";
+    if (type.includes("image")) return "Inspection";
+    return "Other";
+  };
+
+  const getStatusBadgeClass = () => {
+    // All uploaded documents are active
+    return "bg-green-100 text-green-800";
   };
 
   const getFileIcon = (type: string) => {
-    switch (type.toUpperCase()) {
-      case "PDF": return "🔴";
-      case "DOCX": return "🔵";
-      case "XLSX": return "🟢";
-      default: return "📄";
+    if (type.includes("pdf")) return "🔴";
+    if (type.includes("word") || type.includes("doc")) return "🔵";
+    if (type.includes("excel") || type.includes("sheet")) return "🟢";
+    if (type.includes("image")) return "🖼️";
+    return "📄";
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const result = await uploadDocumentAction(buildingId, tenantId, formData);
+      if (result.success) {
+        router.refresh();
+      } else {
+        alert(result.error || "Failed to upload document");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("Failed to upload document");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
+  };
+
+  const handleDelete = async (documentId: string, documentName: string) => {
+    if (!confirm(`Are you sure you want to delete "${documentName}"?`)) {
+      return;
+    }
+
+    try {
+      const result = await deleteDocumentAction(documentId);
+      if (result.success) {
+        router.refresh();
+      } else {
+        alert(result.error || "Failed to delete document");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Failed to delete document");
+    }
+  };
+
+  const handleDownload = (doc: DocumentWithRelations) => {
+    // Generate download URL
+    const downloadUrl = `/tenant/${tenant}/files${doc.path}`;
+    window.open(downloadUrl, '_blank');
+  };
+
+  const handleView = (doc: DocumentWithRelations) => {
+    // For PDFs and images, open in new tab
+    const viewUrl = `/tenant/${tenant}/files${doc.path}`;
+    window.open(viewUrl, '_blank');
   };
 
   return (
@@ -131,9 +143,21 @@ export default function DocumentsTab({ }: DocumentsTabProps) {
             ))}
           </select>
 
-          <button className="px-3 sm:px-4 py-2 bg-[#F30] text-white rounded-md hover:bg-[#E62E00] transition-colors flex items-center gap-2 text-sm sm:text-base">
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={handleUpload}
+            className="hidden"
+            accept="*/*"
+          />
+          
+          <button 
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="px-3 sm:px-4 py-2 bg-[#F30] text-white rounded-md hover:bg-[#E62E00] transition-colors flex items-center gap-2 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Upload className="h-4 w-4" />
-            Upload Document
+            {isUploading ? "Uploading..." : "Upload Document"}
           </button>
         </div>
       </div>
@@ -180,29 +204,44 @@ export default function DocumentsTab({ }: DocumentsTabProps) {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {doc.category}
+                  {getDocumentCategory(doc.type)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {doc.size}
+                  {formatFileSize(doc.size)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(doc.uploadedDate).toLocaleDateString()}
+                  {new Date(doc.uploadedAt).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {doc.uploadedBy}
+                  {doc.uploader?.email || "Unknown"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(doc.status)}`}>
-                    {doc.status}
+                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass()}`}>
+                    active
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex items-center gap-3">
-                    <button className="text-[#F30] hover:text-[#E62E00]">
+                    <button 
+                      onClick={() => handleView(doc)}
+                      className="text-[#F30] hover:text-[#E62E00]"
+                      title="View"
+                    >
                       <Eye className="h-4 w-4" />
                     </button>
-                    <button className="text-[#F30] hover:text-[#E62E00]">
+                    <button 
+                      onClick={() => handleDownload(doc)}
+                      className="text-[#F30] hover:text-[#E62E00]"
+                      title="Download"
+                    >
                       <Download className="h-4 w-4" />
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(doc.id, doc.name)}
+                      className="text-red-600 hover:text-red-800"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </td>

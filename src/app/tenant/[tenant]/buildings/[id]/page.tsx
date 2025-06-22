@@ -1,9 +1,11 @@
-import { getBuildingById } from "@/data/buildings";
-import { getTasksByBuildingId } from "@/data/tasks";
 import BuildingDetails from "@/features/buildings/components/BuildingDetails";
 import Link from "next/link";
 import Image from "next/image";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
+import { getBuildingById } from "@/features/buildings/repository/buildings.repository";
+import { requireAuth } from "@/features/auth/repository/auth.repository";
+import { Task } from "@/data/tasks";
+import { getFileUrl } from "@/common/utils/file";
 
 interface BuildingDetailsPageProps {
   params: Promise<{
@@ -16,8 +18,16 @@ export default async function BuildingDetailsPage({
   params,
 }: BuildingDetailsPageProps) {
   const { tenant, id } = await params;
-  const building = getBuildingById(id);
-  const initialTasks = getTasksByBuildingId(id);
+
+  // Require authentication
+  await requireAuth(tenant);
+
+  // Fetch building from InstantDB
+  const building = await getBuildingById(id);
+
+  // TODO: Transform tasks when task management is migrated to InstantDB
+  // For now, provide empty array as tasks have different structure
+  const initialTasks: Task[] = [];
 
   if (!building) {
     return (
@@ -39,6 +49,12 @@ export default async function BuildingDetailsPage({
     );
   }
 
+  // Transform building image URL to use file service
+  const buildingWithImageUrl = {
+    ...building,
+    image: getFileUrl(tenant, building.image as `/${string}`),
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="px-3 md:px-6 py-4 md:py-6 space-y-4 md:space-y-6">
@@ -49,8 +65,8 @@ export default async function BuildingDetailsPage({
             <div className="relative h-48 w-full md:w-64 rounded-lg overflow-hidden md:flex-shrink-0">
               <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent z-10" />
               <Image
-                src={building.image}
-                alt={building.name}
+                src={buildingWithImageUrl.image}
+                alt={buildingWithImageUrl.name}
                 layout="fill"
                 objectFit="cover"
               />
@@ -59,7 +75,7 @@ export default async function BuildingDetailsPage({
             <div className="flex flex-col justify-between py-2 space-y-4 md:space-y-0">
               <div>
                 <h1 className="text-xl md:text-2xl font-bold text-gray-800">
-                  {building.id} - {building.name}
+                  {buildingWithImageUrl.name}
                 </h1>
                 <div className="flex flex-wrap items-center text-sm text-gray-600 mt-1">
                   <Link
@@ -76,15 +92,17 @@ export default async function BuildingDetailsPage({
                     <span>Buildings</span>
                   </Link>
                   <span className="mx-2">/</span>
-                  <span>{building.division}</span>
+                  <span>{buildingWithImageUrl.city}</span>
+                </div>
+                <div className="text-sm text-gray-600 mt-2">
+                  {buildingWithImageUrl.address}, {buildingWithImageUrl.city},{" "}
+                  {buildingWithImageUrl.state} {buildingWithImageUrl.zipCode}
                 </div>
               </div>
 
               <div>
                 <div className="text-sm text-gray-600">Rem. compliance:</div>
-                <div className="text-xl font-bold text-blue-600">
-                  {building.compliance}%
-                </div>
+                <div className="text-xl font-bold text-blue-600">100%</div>
               </div>
             </div>
           </div>
@@ -93,7 +111,7 @@ export default async function BuildingDetailsPage({
         {/* Building details component */}
         <div className="max-w-7xl mx-auto">
           <BuildingDetails
-            building={building}
+            building={buildingWithImageUrl}
             initialTasks={initialTasks}
             tenant={tenant}
           />

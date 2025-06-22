@@ -1,7 +1,16 @@
 import Link from "next/link";
-import { divisions } from "@/data/buildings";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import DivisionManagement from "@/features/data-mgmt/components/DivisionManagement";
+
+// Temporary divisions data - should be fetched from database
+const divisions = [
+  "Active Divisions",
+  "Hampstead",
+  "Ealing",
+  "Camden",
+  "Leased",
+  "Archived",
+];
 
 interface DivisionPageProps {
   params: Promise<{

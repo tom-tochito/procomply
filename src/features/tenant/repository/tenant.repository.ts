@@ -2,10 +2,7 @@
 
 import { dbAdmin } from "~/lib/db-admin";
 import { id } from "@instantdb/admin";
-import type { InstaQLEntity } from "@instantdb/react";
-import type { AppSchema } from "~/instant.schema";
-
-type Tenant = InstaQLEntity<AppSchema, "tenants">;
+import type { Tenant } from "@/features/tenant/models";
 
 /**
  * Find a tenant by ID

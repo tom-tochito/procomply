@@ -5,13 +5,14 @@ import BuildingCard from "./BuildingCard";
 import BuildingsTable from "./BuildingsTable";
 import BuildingFilters from "./BuildingFilters";
 import BuildingSearch from "./BuildingSearch";
-import AddBuildingModal from "./AddBuildingModal";
-import { Building } from "@/data/buildings";
+import AddBuildingModal from "./AddBuildingModalNew";
+import { BuildingWithStats } from "@/features/buildings/models";
+import { Tenant } from "@/features/tenant/models";
 
 interface BuildingsListProps {
-  initialBuildings: Building[];
+  initialBuildings: BuildingWithStats[];
   divisions: string[];
-  tenant: string;
+  tenant: Tenant;
 }
 
 export default function BuildingsList({
@@ -20,7 +21,6 @@ export default function BuildingsList({
   tenant,
 }: BuildingsListProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [buildings, setBuildings] = useState<Building[]>(initialBuildings);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDivision, setSelectedDivision] = useState("Active Divisions");
   const [buildingUse, setBuildingUse] = useState("Building Use");
@@ -28,7 +28,7 @@ export default function BuildingsList({
   const [viewMode, setViewMode] = useState<"cards" | "table">("table");
 
   // Filter buildings based on search and filters
-  const filteredBuildings = buildings.filter((building) => {
+  const filteredBuildings = initialBuildings.filter((building) => {
     // Search filter
     if (
       searchTerm &&
@@ -78,14 +78,6 @@ export default function BuildingsList({
     return true;
   });
 
-  // Function to handle saving a new building
-  const handleSaveBuilding = (newBuildingData: Building) => {
-    // Here you would typically send the data to your backend/API
-    // For now, we'll just add it to the local state
-    setBuildings((prevBuildings) => [newBuildingData, ...prevBuildings]);
-    console.log("New Building Saved:", newBuildingData);
-    // Optionally refetch data or update UI further
-  };
 
   return (
     <>
@@ -160,7 +152,7 @@ export default function BuildingsList({
 
       {/* Building list */}
       {viewMode === "table" ? (
-        <BuildingsTable buildings={filteredBuildings} tenant={tenant} searchTerm={searchTerm} />
+        <BuildingsTable buildings={filteredBuildings} tenant={tenant.slug} searchTerm={searchTerm} />
       ) : (
         <div className="space-y-4">
           {filteredBuildings.length > 0 ? (
@@ -168,7 +160,7 @@ export default function BuildingsList({
               <BuildingCard
                 key={building.id}
                 building={building}
-                tenant={tenant}
+                tenant={tenant.slug}
               />
             ))
           ) : (
@@ -237,7 +229,7 @@ export default function BuildingsList({
       <AddBuildingModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSave={handleSaveBuilding}
+        tenant={tenant}
       />
     </>
   );
