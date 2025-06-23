@@ -16,6 +16,7 @@ interface DocumentDetailsDialogProps {
   isOpen: boolean;
   onClose: () => void;
   document: Document; // The document data to display
+  onDownload?: (document: Document) => void;
 }
 
 // --- Icon Components ---
@@ -39,6 +40,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
   isOpen,
   onClose,
   document,
+  onDownload,
 }) => {
   const [activeSidebarItem, setActiveSidebarItem] = React.useState("details");
 
@@ -128,11 +130,23 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
             {document.name}
           </h2>
           <div className="flex items-center space-x-1 sm:space-x-3 md:space-x-4 flex-shrink-0">
-            <button className="bg-blue-500 hover:bg-blue-600 text-white px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 rounded text-xs sm:text-sm font-medium whitespace-nowrap flex items-center">
+            <button 
+              onClick={() => onDownload && onDownload(document)}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 rounded text-xs sm:text-sm font-medium whitespace-nowrap flex items-center"
+            >
               <DownloadIcon className="h-4 w-4 mr-1" />
               <span className="hidden sm:inline">Download</span>
             </button>
-            <button className="bg-gray-600 hover:bg-gray-700 text-white px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 rounded text-xs sm:text-sm font-medium whitespace-nowrap flex items-center">
+            <button 
+              onClick={() => {
+                // Share functionality - copy link to clipboard
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                  alert('Document link copied to clipboard!');
+                });
+              }}
+              className="bg-gray-600 hover:bg-gray-700 text-white px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 rounded text-xs sm:text-sm font-medium whitespace-nowrap flex items-center"
+            >
               <ShareIcon className="h-4 w-4 mr-1" />
               <span className="hidden sm:inline">Share</span>
             </button>
@@ -336,7 +350,10 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                       Preview not available. Click the button below to download
                       and view this file.
                     </p>
-                    <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium flex items-center">
+                    <button 
+                      onClick={() => onDownload && onDownload(document)}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium flex items-center"
+                    >
                       <DownloadIcon className="h-4 w-4 mr-2" />
                       Download File
                     </button>

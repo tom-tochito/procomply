@@ -1,35 +1,26 @@
-import React, { useState, useRef } from "react";
+"use client";
+
+import React, { useState, useRef, useActionState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import { X, FilePlus } from "lucide-react";
+import { X, FilePlus, FileText, Hash, Tag, Building2, Calendar, Shield, Info } from "lucide-react";
+import { uploadDocumentForDataMgmtAction } from "@/features/data-mgmt/actions/document-upload.action";
+import { FormState } from "@/common/types/form";
+import { db } from "~/lib/db";
+import { Tenant } from "@/features/tenant/models";
 
 // Props definition
 interface UploadDocumentDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpload: (documentData: DocumentData) => void;
+  tenant?: Tenant;
 }
 
-// Define a type for the document data
-interface DocumentData {
-  file: File | null;
-  docType: string;
-  code: string;
-  reference: string;
-  building: string;
-  description: string;
-  category: string;
-  subCategory: string;
-  docCategory: string;
-  validFrom: Date | null;
-  expiry: Date | null;
-  isStatutory: boolean;
-}
 
 export default function UploadDocumentDialog({
   isOpen,
   onClose,
-  onUpload,
+  tenant,
 }: UploadDocumentDialogProps) {
   // Form state
   const [file, setFile] = useState<File | null>(null);
@@ -48,8 +39,28 @@ export default function UploadDocumentDialog({
   // For drag and drop functionality
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Use action state for form submission
+  const initialState: FormState = { error: null, success: false };
+  const [state, formAction, isPending] = useActionState(
+    uploadDocumentForDataMgmtAction,
+    initialState
+  );
+  
+  // Subscribe to buildings if tenant is provided
+  const { data: buildingsData, isLoading: buildingsLoading } = tenant ? db.useQuery({
+    buildings: {
+      $: {
+        where: {
+          tenant: tenant.id,
+        },
+      },
+    },
+  }) : { data: null, isLoading: false };
+  
+  const buildings = buildingsData?.buildings || [];
 
-  // Reset form state when dialog closes
+  // Reset form state when dialog closes or on success
   const handleClose = () => {
     setFile(null);
     setDocType("");
@@ -65,34 +76,16 @@ export default function UploadDocumentDialog({
     setIsStatutory(false);
     onClose();
   };
-
-  // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!file) {
-      alert("Please select a file to upload");
-      return;
+  
+  // Handle successful upload
+  React.useEffect(() => {
+    if (state.success) {
+      handleClose();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.success]);
 
-    const documentData = {
-      file,
-      docType,
-      code,
-      reference,
-      building,
-      description,
-      category,
-      subCategory,
-      docCategory,
-      validFrom: validFrom ? new Date(validFrom) : null,
-      expiry: expiry ? new Date(expiry) : null,
-      isStatutory,
-    };
-
-    onUpload(documentData);
-    handleClose();
-  };
+  // Remove handleSubmit as we'll use form action instead
 
   // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,7 +138,7 @@ export default function UploadDocumentDialog({
     "Compliance",
     "Operations",
   ];
-  const buildings = ["Building A", "Building B", "Building C", "All buildings"];
+  // Buildings are now fetched from InstantDB
   const docCategories = [
     "Asbestos",
     "Electrical",
@@ -203,13 +196,29 @@ export default function UploadDocumentDialog({
                   </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form action={formAction} className="space-y-4">
+                  {/* Hidden fields for server action */}
+                  {tenant && <input type="hidden" name="tenantId" value={tenant.id} />}
+                  
+                  {/* Error display */}
+                  {state.error && (
+                    <div className="rounded-lg bg-red-50 p-4 mb-4">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <X className="h-5 w-5 text-red-400" aria-hidden="true" />
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm font-medium text-red-800">{state.error}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   {/* File Upload Area */}
                   <div
-                    className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center cursor-pointer ${
+                    className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center cursor-pointer transition-all ${
                       isDragging
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-300"
+                        ? "border-[#F30] bg-red-50"
+                        : "border-gray-300 hover:border-gray-400"
                     }`}
                     onDragEnter={handleDragEnter}
                     onDragLeave={handleDragLeave}
@@ -222,9 +231,9 @@ export default function UploadDocumentDialog({
                       className="hidden"
                       ref={fileInputRef}
                       onChange={handleFileChange}
-                      accept=".pdf,.doc,.docx,.xls,.xlsx"
+                      name="file"
                     />
-                    <FilePlus className="mx-auto h-10 w-10 text-gray-400" />
+                    <FilePlus className="mx-auto h-12 w-12 text-gray-400" />
                     {file ? (
                       <div className="mt-2">
                         <p className="text-sm font-medium text-gray-900">
@@ -240,7 +249,7 @@ export default function UploadDocumentDialog({
                           Drop file here or click to upload
                         </p>
                         <p className="text-xs text-gray-500">
-                          PDF, DOC, DOCX, XLS, XLSX up to 10MB
+                          Any file type up to 10MB
                         </p>
                       </div>
                     )}
@@ -252,14 +261,17 @@ export default function UploadDocumentDialog({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       {/* Doc Type */}
                       <div>
-                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                        <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                          <FileText className="h-4 w-4 text-gray-400" />
                           Doc Type
                         </label>
                         <select
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:border-[#F30] focus:outline-none focus:ring-2 focus:ring-[#F30]/20 hover:border-gray-400"
+                          name="docType"
                           value={docType}
                           onChange={(e) => setDocType(e.target.value)}
                           required
+                          disabled={isPending}
                         >
                           <option value="">Select Doc Type</option>
                           {docTypes.map((type) => (
@@ -272,45 +284,56 @@ export default function UploadDocumentDialog({
 
                       {/* Code */}
                       <div>
-                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                        <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                          <Hash className="h-4 w-4 text-gray-400" />
                           Code
                         </label>
                         <input
                           type="text"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:border-[#F30] focus:outline-none focus:ring-2 focus:ring-[#F30]/20 hover:border-gray-400"
+                          name="code"
                           value={code}
                           onChange={(e) => setCode(e.target.value)}
                           required
+                          disabled={isPending}
                         />
                       </div>
 
                       {/* Reference */}
                       <div>
-                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                        <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                          <Tag className="h-4 w-4 text-gray-400" />
                           Reference
                         </label>
                         <input
                           type="text"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:border-[#F30] focus:outline-none focus:ring-2 focus:ring-[#F30]/20 hover:border-gray-400"
+                          name="reference"
                           value={reference}
                           onChange={(e) => setReference(e.target.value)}
+                          disabled={isPending}
                         />
                       </div>
 
                       {/* Building */}
                       <div>
-                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                        <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                          <Building2 className="h-4 w-4 text-gray-400" />
                           Building
                         </label>
                         <select
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:border-[#F30] focus:outline-none focus:ring-2 focus:ring-[#F30]/20 hover:border-gray-400"
+                          name="buildingId"
                           value={building}
                           onChange={(e) => setBuilding(e.target.value)}
+                          disabled={isPending}
                         >
-                          <option value="">Select Building</option>
-                          {buildings.map((b) => (
-                            <option key={b} value={b}>
-                              {b}
+                          <option value="">
+                            {buildingsLoading ? "Loading..." : "Select Building (Optional)"}
+                          </option>
+                          {!buildingsLoading && buildings.map((b) => (
+                            <option key={b.id} value={b.id}>
+                              {b.name}
                             </option>
                           ))}
                         </select>
@@ -318,14 +341,17 @@ export default function UploadDocumentDialog({
 
                       {/* Doc Category */}
                       <div>
-                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                        <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                          <Shield className="h-4 w-4 text-gray-400" />
                           Doc Category
                         </label>
                         <select
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:border-[#F30] focus:outline-none focus:ring-2 focus:ring-[#F30]/20 hover:border-gray-400"
+                          name="docCategory"
                           value={docCategory}
                           onChange={(e) => setDocCategory(e.target.value)}
                           required
+                          disabled={isPending}
                         >
                           <option value="">Select Doc Category</option>
                           {docCategories.map((cat) => (
@@ -338,14 +364,17 @@ export default function UploadDocumentDialog({
 
                       {/* Category */}
                       <div>
-                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                        <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                          <Tag className="h-4 w-4 text-gray-400" />
                           Category
                         </label>
                         <select
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:border-[#F30] focus:outline-none focus:ring-2 focus:ring-[#F30]/20 hover:border-gray-400"
+                          name="category"
                           value={category}
                           onChange={(e) => setCategory(e.target.value)}
                           required
+                          disabled={isPending}
                         >
                           <option value="">Select Category</option>
                           {categories.map((cat) => (
@@ -358,13 +387,16 @@ export default function UploadDocumentDialog({
 
                       {/* Sub Category */}
                       <div>
-                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                        <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                          <Tag className="h-4 w-4 text-gray-400" />
                           Sub Category
                         </label>
                         <select
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:border-[#F30] focus:outline-none focus:ring-2 focus:ring-[#F30]/20 hover:border-gray-400"
+                          name="subCategory"
                           value={subCategory}
                           onChange={(e) => setSubCategory(e.target.value)}
+                          disabled={isPending}
                         >
                           <option value="">Select Sub Category</option>
                           {subCategories.map((subCat) => (
@@ -377,41 +409,50 @@ export default function UploadDocumentDialog({
 
                       {/* Valid From */}
                       <div>
-                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                        <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                          <Calendar className="h-4 w-4 text-gray-400" />
                           Valid From
                         </label>
                         <input
                           type="date"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:border-[#F30] focus:outline-none focus:ring-2 focus:ring-[#F30]/20 hover:border-gray-400"
+                          name="validFrom"
                           value={validFrom}
                           onChange={(e) => setValidFrom(e.target.value)}
+                          disabled={isPending}
                         />
                       </div>
 
                       {/* Expiry */}
                       <div>
-                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                        <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                          <Calendar className="h-4 w-4 text-gray-400" />
                           Expiry
                         </label>
                         <input
                           type="date"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:border-[#F30] focus:outline-none focus:ring-2 focus:ring-[#F30]/20 hover:border-gray-400"
+                          name="expiry"
                           value={expiry}
                           onChange={(e) => setExpiry(e.target.value)}
+                          disabled={isPending}
                         />
                       </div>
 
                       {/* Description - full width */}
                       <div className="sm:col-span-2">
-                        <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                        <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                          <Info className="h-4 w-4 text-gray-400" />
                           Description
                         </label>
                         <textarea
                           rows={2}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:border-[#F30] focus:outline-none focus:ring-2 focus:ring-[#F30]/20 hover:border-gray-400 resize-none"
+                          name="description"
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
                           required
+                          disabled={isPending}
                         />
                       </div>
 
@@ -419,9 +460,11 @@ export default function UploadDocumentDialog({
                       <div className="flex items-center sm:col-span-2">
                         <input
                           type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="h-4 w-4 rounded border-gray-300 text-[#F30] focus:ring-[#F30] transition-colors"
+                          name="isStatutory"
                           checked={isStatutory}
                           onChange={(e) => setIsStatutory(e.target.checked)}
+                          disabled={isPending}
                         />
                         <label className="ml-2 block text-xs sm:text-sm text-gray-700">
                           Statutory
@@ -434,16 +477,18 @@ export default function UploadDocumentDialog({
                   <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100">
                     <button
                       type="button"
-                      className="rounded-md border border-gray-300 bg-white py-1.5 px-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      className="rounded-lg border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
                       onClick={handleClose}
+                      disabled={isPending}
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-1.5 px-3 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      className="inline-flex justify-center rounded-lg border border-transparent bg-[#F30] py-2 px-4 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#E20] focus:outline-none focus:ring-2 focus:ring-[#F30] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={isPending || !file}
                     >
-                      Upload
+                      {isPending ? "Uploading..." : "Upload"}
                     </button>
                   </div>
                 </form>

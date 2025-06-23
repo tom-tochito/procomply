@@ -4,18 +4,20 @@ import React from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import Table from "@/common/components/Table/Table";
 import { Document } from "@/data/documents";
-import { Download } from "lucide-react";
+import { Download, Trash2 } from "lucide-react";
 
 interface DocumentTableProps {
   documents: Document[];
   onRowClick: (document: Document) => void;
   onDownload: (document: Document) => void;
+  onDelete?: (document: Document) => void;
 }
 
 export default function DocumentTable({
   documents,
   onRowClick,
   onDownload,
+  onDelete,
 }: DocumentTableProps) {
   // Helper function to get file icon
   const getFileIcon = (fileType: string) => {
@@ -151,9 +153,24 @@ export default function DocumentTable({
               e.stopPropagation();
               onDownload(row.original);
             }}
+            title="Download"
           >
             <Download className="h-4 w-4" />
           </button>
+          {onDelete && (
+            <button
+              className="text-red-600 hover:text-red-900"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (confirm(`Are you sure you want to delete "${row.original.name}"?`)) {
+                  onDelete(row.original);
+                }
+              }}
+              title="Delete"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
       ),
     },

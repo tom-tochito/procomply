@@ -1,35 +1,24 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Document } from "@/data/documents";
+import React, { useState, useEffect, useActionState, startTransition } from "react";
+import { db } from "~/lib/db";
+import { Document } from "@/data/documents"; // Use the legacy Document type
 import DocumentDetailsDialog from "./DocumentDetailsDialog";
 import UploadDocumentDialog from "./UploadDocumentDialog";
 import DocumentTable from "./DocumentTable";
 import DocumentSidebar from "./DocumentSidebar";
 import DocumentActionBar from "./DocumentActionBar";
-
-interface UploadedDocumentData {
-  file: File | null;
-  docType: string;
-  code: string;
-  reference: string;
-  building: string;
-  description: string;
-  category: string;
-  subCategory: string;
-  docCategory: string;
-  validFrom: Date | null;
-  expiry: Date | null;
-  isStatutory: boolean;
-}
+import { Tenant } from "@/features/tenant/models";
+import { getFileUrl } from "@/common/utils/file";
+import { deleteDocumentAction } from "@/features/data-mgmt/actions/document-delete.action";
+import { FormState } from "@/common/types/form";
 
 interface DocumentManagementProps {
-  initialDocuments: Document[];
-  tenant: string;
+  tenant: Tenant;
 }
 
 export default function DocumentManagement({
-  initialDocuments,
+  tenant,
 }: DocumentManagementProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
@@ -44,6 +33,26 @@ export default function DocumentManagement({
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(
     null
   );
+  // Delete action state
+  const initialDeleteState: FormState = { error: null, success: false };
+  const [deleteState, deleteAction] = useActionState(
+    deleteDocumentAction,
+    initialDeleteState
+  );
+
+  // Subscribe to documents using InstantDB
+  const { data, isLoading, error } = db.useQuery({
+    documents: {
+      $: {
+        where: {
+          tenant: tenant.id,
+        },
+      },
+      building: {},
+      uploader: {},
+      tenant: {},
+    },
+  });
 
   useEffect(() => {
     const handleResize = () => {
@@ -59,6 +68,8 @@ export default function DocumentManagement({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const documents = data?.documents || [];
+
   const handleDocumentClick = (document: Document) => {
     setSelectedDocument(document);
     setDialogOpen(true);
@@ -67,21 +78,50 @@ export default function DocumentManagement({
   const handleDialogClose = () => {
     setDialogOpen(false);
   };
+  
+  const handleDelete = async (document: Document) => {
+    const formData = new FormData();
+    formData.append('documentId', document.id);
+    formData.append('tenantSlug', tenant.slug);
+    
+    startTransition(() => {
+      deleteAction(formData);
+    });
+  };
+  
+  // Show error if delete fails
+  React.useEffect(() => {
+    if (deleteState.error) {
+      alert(`Error deleting document: ${deleteState.error}`);
+    }
+  }, [deleteState.error]);
 
   const handleUploadClick = () => {
     setUploadDialogOpen(true);
   };
 
-  const handleUploadDocument = (documentData: UploadedDocumentData) => {
-    console.log("Document uploaded:", documentData);
-    alert(
-      `Document "${
-        documentData.file?.name || "Unknown"
-      }" uploaded successfully!`
-    );
-  };
+  // Upload is now handled directly by the server action in UploadDocumentDialog
 
-  const filteredDocuments = initialDocuments.filter((document) => {
+  // Transform documents to match UI expectations
+  const transformedDocuments: Document[] = documents.map((doc) => ({
+    id: doc.id,
+    name: doc.name,
+    file_type: doc.type,
+    category: doc.type, // Will be enhanced with proper categories
+    document_category: "Miscellaneous", // Default for now
+    upload_date: new Date(doc.uploadedAt).toLocaleDateString('en-GB'),
+    uploaded_by: doc.uploader?.email || 'Unknown',
+    size: `${(doc.size / 1024 / 1024).toFixed(1)} MB`,
+    status: "Active" as const,
+    building_id: doc.building?.id || '',
+    task_id: '',
+    description: '',
+    tags: [],
+    last_accessed: new Date(doc.updatedAt).toLocaleDateString('en-GB'),
+    version: '1.0',
+  }));
+
+  const filteredDocuments = transformedDocuments.filter((document) => {
     if (
       searchTerm &&
       !document.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -116,8 +156,24 @@ export default function DocumentManagement({
     return true;
   });
 
-  const categories = Array.from(new Set(initialDocuments.map((doc) => doc.category)));
-  const fileTypes = Array.from(new Set(initialDocuments.map((doc) => doc.file_type)));
+  const categories = Array.from(new Set(transformedDocuments.map((doc) => doc.category)));
+  const fileTypes = Array.from(new Set(transformedDocuments.map((doc) => doc.file_type)));
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F30]"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8 text-red-600">
+        Error loading documents: {error.message}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -126,13 +182,24 @@ export default function DocumentManagement({
           isOpen={dialogOpen}
           onClose={handleDialogClose}
           document={selectedDocument}
+          onDownload={(document) => {
+            // Find the original document to get the path
+            const originalDoc = documents.find(d => d.id === document.id);
+            if (originalDoc?.path) {
+              // Generate download URL using the utility function
+              const downloadUrl = getFileUrl(tenant.slug, originalDoc.path as `/${string}`);
+              window.open(downloadUrl, '_blank');
+            } else {
+              alert('File path not available');
+            }
+          }}
         />
       )}
 
       <UploadDocumentDialog
         isOpen={uploadDialogOpen}
         onClose={() => setUploadDialogOpen(false)}
-        onUpload={handleUploadDocument}
+        tenant={tenant}
       />
 
       <div className="flex items-center justify-between mb-6">
@@ -328,7 +395,18 @@ export default function DocumentManagement({
           <DocumentTable
             documents={filteredDocuments}
             onRowClick={handleDocumentClick}
-            onDownload={(document) => alert(`Downloading ${document.name}`)}
+            onDownload={(document) => {
+              // Find the original document to get the path
+              const originalDoc = documents.find(d => d.id === document.id);
+              if (originalDoc?.path) {
+                // Generate download URL using the utility function
+                const downloadUrl = getFileUrl(tenant.slug, originalDoc.path as `/${string}`);
+                window.open(downloadUrl, '_blank');
+              } else {
+                alert('File path not available');
+              }
+            }}
+            onDelete={handleDelete}
           />
         </div>
       </div>

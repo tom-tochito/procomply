@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import DocumentManagement from "@/features/data-mgmt/components/DocumentManagement";
-import { getDocumentsByTenant } from "@/features/documents/repository/documents.repository";
 import { requireAuth } from "@/features/auth/repository/auth.repository";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 
@@ -23,27 +22,7 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
     throw new Error("Tenant not found");
   }
 
-  // Fetch documents from InstantDB
-  const documentsFromDB = await getDocumentsByTenant(tenantData);
-  
-  // Transform to match component expectations
-  const documents = documentsFromDB.map((doc) => ({
-    id: doc.id,
-    name: doc.name,
-    file_type: doc.type,
-    category: doc.type, // Using type as category for now
-    document_category: doc.type,
-    upload_date: new Date(doc.uploadedAt).toLocaleDateString('en-GB'),
-    uploaded_by: doc.uploader?.email || 'Unknown',
-    size: `${(doc.size / 1024 / 1024).toFixed(1)} MB`,
-    status: "Active" as const,
-    building_id: doc.building?.id || '',
-    task_id: '', // No task association in current schema
-    description: '', // No description in current schema
-    tags: [],
-    last_accessed: new Date(doc.updatedAt).toLocaleDateString('en-GB'),
-    version: '1.0',
-  }));
+  // Documents are now fetched directly in the client component using InstantDB subscriptions
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -64,7 +43,7 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
           </div>
         </div>
 
-        <DocumentManagement initialDocuments={documents} tenant={tenant} />
+        <DocumentManagement tenant={tenantData} />
       </div>
     </div>
   );
