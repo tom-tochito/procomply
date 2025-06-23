@@ -2,7 +2,7 @@ import Link from "next/link";
 import { InstaQLEntity } from "@instantdb/react";
 import { AppSchema } from "~/instant.schema";
 
-type ComplianceCheck = InstaQLEntity<AppSchema, "complianceChecks", { building: {} }>;
+type ComplianceCheck = InstaQLEntity<AppSchema, "complianceChecks", { building: object }>;
 
 interface ComplianceStatusProps {
   complianceChecks: ComplianceCheck[];
@@ -29,13 +29,7 @@ export default function ComplianceStatus({ complianceChecks, tenant }: Complianc
     pending: "bg-gray-100 text-gray-800"
   };
 
-  const checkTypes = [
-    { key: "annualFlatDoor", label: "Annual Flat Door", icon: "🚪" },
-    { key: "asbestosReinspections", label: "Asbestos Reinspections", icon: "⚠️" },
-    { key: "fireRiskAssessment", label: "Fire Risk Assessment", icon: "🔥" },
-    { key: "electricalTesting", label: "Electrical Testing", icon: "⚡" },
-    { key: "gasCompliance", label: "Gas Compliance", icon: "🔧" }
-  ];
+  // Removed unused checkTypes variable
 
   return (
     <div className="rounded-lg border p-4 md:p-5 bg-white shadow-sm">

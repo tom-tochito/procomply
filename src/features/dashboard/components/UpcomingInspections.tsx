@@ -2,7 +2,7 @@ import Link from "next/link";
 import { InstaQLEntity } from "@instantdb/react";
 import { AppSchema } from "~/instant.schema";
 
-type Inspection = InstaQLEntity<AppSchema, "inspections", { building: {} }>;
+type Inspection = InstaQLEntity<AppSchema, "inspections", { building: object }>;
 
 interface UpcomingInspectionsProps {
   inspections: Inspection[];

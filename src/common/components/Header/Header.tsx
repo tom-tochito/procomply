@@ -17,10 +17,6 @@ import {
   UserCircle,
   ClipboardList,
   Layout,
-  Shield,
-  FileCheck,
-  Globe,
-  Tag,
   PieChart,
   LogOut,
   X,
@@ -124,7 +120,7 @@ function DataManagementMenu() {
   const menuRef = useRef<HTMLDivElement>(null);
   const tenant = useParams().tenant as string;
   
-  const menuItems = [
+  const menuItems: Array<{ href: `/${string}`; label: string; icon: React.ComponentType<{ className?: string }> }> = [
     { href: "/data-mgmt/company", label: "Company", icon: Building2 },
     { href: "/data-mgmt/division", label: "Division", icon: Menu },
     { href: "/data-mgmt/buildings", label: "Building", icon: Building2 },

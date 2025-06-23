@@ -16,7 +16,7 @@ interface DashboardPageProps {
 
 export default async function DashboardPage({ params }: DashboardPageProps) {
   const { tenant } = await params;
-  const auth = await requireAuth(tenant);
+  await requireAuth(tenant);
   
   // Get tenant data
   const tenantData = await findTenantBySlug(tenant);
