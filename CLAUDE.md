@@ -143,4 +143,40 @@ export interface BuildingWithStats extends Building {
 }
 ```
 
+## 13. InstantDB Read/Write Separation 🚨🚨🚨
+
+**CRITICAL RULE - MUST FOLLOW AT ALL TIMES:**
+
+- **READ OPERATIONS:** ALWAYS use `~/lib/db.ts` client for ALL read operations
+  - Import: `import { db } from "~/lib/db";`
+  - Use `db.useQuery()` in client components for real-time subscriptions
+  - This is the ONLY way to read data from InstantDB
+  
+- **WRITE OPERATIONS:** ALWAYS use `~/lib/db-admin.ts` for ALL write operations
+  - Import: `import { dbAdmin } from "~/lib/db-admin";`
+  - Use in server actions with "use server" directive
+  - Use `dbAdmin.transact()` for mutations
+  - Use `dbAdmin.query()` ONLY for authorization checks before writes
+  
+**NEVER MIX THESE UP! NEVER USE db FOR WRITES! NEVER USE dbAdmin FOR CLIENT-SIDE READS!**
+
+Example:
+```typescript
+// ❌ WRONG - Never use dbAdmin in client components
+"use client";
+import { dbAdmin } from "~/lib/db-admin"; // ❌ WRONG!
+
+// ✅ CORRECT - Client component read
+"use client";
+import { db } from "~/lib/db";
+const { data } = db.useQuery({ users: {} });
+
+// ✅ CORRECT - Server action write
+"use server";
+import { dbAdmin } from "~/lib/db-admin";
+await dbAdmin.transact([
+  dbAdmin.tx.users[id].update({ name: "New Name" })
+]);
+```
+
 </rules>
