@@ -7,6 +7,10 @@ const _schema = i.schema({
     }),
     userProfiles: i.entity({
       role: i.string().indexed(), // "user" or "admin"
+      name: i.string().optional(),
+      phone: i.string().optional(),
+      phoneMobile: i.string().optional(),
+      position: i.string().optional(), // job title/position
       createdAt: i.date().indexed(),
       updatedAt: i.date().indexed(),
     }),
@@ -101,6 +105,30 @@ const _schema = i.schema({
       createdAt: i.date().indexed(),
       updatedAt: i.date().indexed(),
     }),
+    companies: i.entity({
+      name: i.string(),
+      referral: i.string(),
+      category: i.string().optional(),
+      email: i.string().optional(),
+      phone: i.string().optional(),
+      postcode: i.string().optional(),
+      numberOfEmployees: i.number().optional(),
+      createdAt: i.date().indexed(),
+      updatedAt: i.date().indexed(),
+    }),
+    divisions: i.entity({
+      name: i.string().indexed(),
+      type: i.string().indexed(), // "Active", "Archived", "Leased"
+      description: i.string().optional(),
+      createdAt: i.date().indexed(),
+      updatedAt: i.date().indexed(),
+    }),
+    teams: i.entity({
+      code: i.string().optional(),
+      description: i.string(),
+      createdAt: i.date().indexed(),
+      updatedAt: i.date().indexed(),
+    }),
   },
   links: {
     userProfile: {
@@ -162,6 +190,34 @@ const _schema = i.schema({
     documentTenant: {
       forward: { on: "documents", has: "one", label: "tenant" },
       reverse: { on: "tenants", has: "many", label: "documents" },
+    },
+    companyTenant: {
+      forward: { on: "companies", has: "one", label: "tenant" },
+      reverse: { on: "tenants", has: "many", label: "companies" },
+    },
+    divisionTenant: {
+      forward: { on: "divisions", has: "one", label: "tenant" },
+      reverse: { on: "tenants", has: "many", label: "divisions" },
+    },
+    divisionBuildings: {
+      forward: { on: "buildings", has: "one", label: "divisionEntity" },
+      reverse: { on: "divisions", has: "many", label: "buildings" },
+    },
+    teamTenant: {
+      forward: { on: "teams", has: "one", label: "tenant" },
+      reverse: { on: "tenants", has: "many", label: "teams" },
+    },
+    teamCompany: {
+      forward: { on: "teams", has: "one", label: "company" },
+      reverse: { on: "companies", has: "many", label: "teams" },
+    },
+    teamSupervisor: {
+      forward: { on: "teams", has: "one", label: "supervisor" },
+      reverse: { on: "userProfiles", has: "many", label: "supervisedTeams" },
+    },
+    personCompany: {
+      forward: { on: "userProfiles", has: "one", label: "company" },
+      reverse: { on: "companies", has: "many", label: "employees" },
     },
   },
 });

@@ -8,16 +8,19 @@ import BuildingSearch from "./BuildingSearch";
 import AddBuildingModal from "./AddBuildingModalNew";
 import { BuildingWithStats } from "@/features/buildings/models";
 import { Tenant } from "@/features/tenant/models";
+import { Division } from "@/features/divisions/models";
 
 interface BuildingsListProps {
   initialBuildings: BuildingWithStats[];
   divisions: string[];
+  divisionsData?: Division[];
   tenant: Tenant;
 }
 
 export default function BuildingsList({
   initialBuildings,
   divisions,
+  divisionsData,
   tenant,
 }: BuildingsListProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -230,6 +233,7 @@ export default function BuildingsList({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         tenant={tenant}
+        divisions={divisionsData}
       />
     </>
   );

@@ -38,13 +38,18 @@ export async function createUser(data: {
   email: string;
   role: string;
   tenantId: string;
+  name?: string;
+  phone?: string;
+  phoneMobile?: string;
+  position?: string;
+  companyId?: string;
 }): Promise<FullUser | null> {
   try {
     const userId = id();
     const profileId = id();
     const now = new Date().toISOString();
 
-    await dbAdmin.transact([
+    const transactions = [
       // Create user
       dbAdmin.tx.$users[userId]
         .update({
@@ -55,11 +60,24 @@ export async function createUser(data: {
       dbAdmin.tx.userProfiles[profileId]
         .update({
           role: data.role,
+          ...(data.name && { name: data.name }),
+          ...(data.phone && { phone: data.phone }),
+          ...(data.phoneMobile && { phoneMobile: data.phoneMobile }),
+          ...(data.position && { position: data.position }),
           createdAt: now,
           updatedAt: now,
         })
         .link({ $user: userId }),
-    ]);
+    ];
+
+    // Link to company if provided
+    if (data.companyId) {
+      transactions.push(
+        dbAdmin.tx.userProfiles[profileId].link({ company: data.companyId })
+      );
+    }
+
+    await dbAdmin.transact(transactions);
 
     // Fetch and return the created user
     return findUserByEmail(data.email);
@@ -77,6 +95,11 @@ export async function updateUser(
   data: Partial<{
     email: string;
     role: string;
+    name: string;
+    phone: string;
+    phoneMobile: string;
+    position: string;
+    companyId: string;
   }>
 ): Promise<boolean> {
   try {
@@ -89,8 +112,15 @@ export async function updateUser(
       );
     }
 
-    // Update role if provided
-    if (data.role) {
+    // Update profile data if provided
+    const profileUpdates: Record<string, unknown> = {};
+    if (data.role) profileUpdates.role = data.role;
+    if (data.name) profileUpdates.name = data.name;
+    if (data.phone) profileUpdates.phone = data.phone;
+    if (data.phoneMobile) profileUpdates.phoneMobile = data.phoneMobile;
+    if (data.position) profileUpdates.position = data.position;
+
+    if (Object.keys(profileUpdates).length > 0) {
       // First, get the user's profile
       const result = await dbAdmin.query({
         $users: {
@@ -101,12 +131,17 @@ export async function updateUser(
 
       const userProfile = result.$users?.[0]?.profile;
       if (userProfile) {
+        profileUpdates.updatedAt = new Date().toISOString();
         transactions.push(
-          dbAdmin.tx.userProfiles[userProfile.id].update({
-            role: data.role,
-            updatedAt: new Date().toISOString(),
-          })
+          dbAdmin.tx.userProfiles[userProfile.id].update(profileUpdates)
         );
+
+        // Update company link if provided
+        if (data.companyId) {
+          transactions.push(
+            dbAdmin.tx.userProfiles[userProfile.id].link({ company: data.companyId })
+          );
+        }
       }
     }
 
@@ -131,6 +166,35 @@ export async function deleteUser(userId: string): Promise<boolean> {
   } catch (error) {
     console.error("Error deleting user:", error);
     return false;
+  }
+}
+
+/**
+ * Get all users for a tenant with extended profile data
+ */
+export async function findUsersWithProfilesByTenant(
+  tenantId: string
+): Promise<FullUser[]> {
+  try {
+    const result = await dbAdmin.query({
+      $users: {
+        $: {
+          where: {
+            "tenant.id": tenantId,
+          },
+          order: { email: "asc" },
+        },
+        tenant: {},
+        profile: {
+          company: {},
+        },
+      },
+    });
+
+    return result.$users || [];
+  } catch (error) {
+    console.error("Error fetching users by tenant:", error);
+    return [];
   }
 }
 

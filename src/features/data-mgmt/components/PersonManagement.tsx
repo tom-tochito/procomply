@@ -3,18 +3,25 @@
 import React, { useState } from "react";
 import PersonSearch from "./PersonSearch";
 import ContactCard, { Contact } from "@/features/common/components/ContactCard";
+import AddPersonModal from "@/features/user/components/AddPersonModal";
 import { Plus, User } from "lucide-react";
+import { Tenant } from "@/features/tenant/models";
+import type { Company } from "@/features/companies/models";
 
 interface PersonManagementProps {
   initialPersons: Contact[];
-  tenant: string;
+  tenant: Tenant;
+  companies: Company[];
 }
 
 export default function PersonManagement({
   initialPersons,
+  tenant,
+  companies,
 }: PersonManagementProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const categories = ["all", "internal", "contractor", "emergency", "supplier", "other"];
 
@@ -52,7 +59,10 @@ export default function PersonManagement({
             ))}
           </select>
 
-          <button className="px-3 sm:px-4 py-2 bg-[#F30] text-white rounded-md hover:bg-[#E62E00] transition-colors flex items-center gap-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#F30] focus:ring-offset-2">
+          <button 
+            onClick={() => setIsAddModalOpen(true)}
+            className="px-3 sm:px-4 py-2 bg-[#F30] text-white rounded-md hover:bg-[#E62E00] transition-colors flex items-center gap-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#F30] focus:ring-offset-2"
+          >
             <Plus className="h-4 w-4" />
             Add Person
           </button>
@@ -79,6 +89,13 @@ export default function PersonManagement({
           </div>
         </div>
       )}
+
+      <AddPersonModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        tenant={tenant}
+        companies={companies}
+      />
     </>
   );
 }

@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { createBuildingAction } from "@/features/buildings/actions/buildings.actions";
 import { useRouter } from "next/navigation";
 import { Tenant } from "@/features/tenant/models";
+import { Division } from "@/features/divisions/models";
 import { FormState } from "@/common/types/form.types";
 import BuildingForm from "./BuildingForm";
 
@@ -11,12 +12,14 @@ interface AddBuildingModalProps {
   isOpen: boolean;
   onClose: () => void;
   tenant: Tenant;
+  divisions?: Division[];
 }
 
 export default function AddBuildingModal({
   isOpen,
   onClose,
   tenant,
+  divisions,
 }: AddBuildingModalProps) {
   const router = useRouter();
   const [successState, setSuccessState] = React.useState(false);
@@ -83,6 +86,7 @@ export default function AddBuildingModal({
         {/* Modal Body */}
         <div className="p-4 md:p-5">
           <BuildingForm 
+            divisions={divisions}
             onSubmit={handleSubmit} 
             onCancel={onClose}
           />

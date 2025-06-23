@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { tasks } from "@/data/tasks";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import TaskManagement from "@/features/data-mgmt/components/TaskManagement";
+import { getTasksByTenant } from "@/features/tasks/repository/tasks.repository";
+import { requireAuth } from "@/features/auth/repository/auth.repository";
+import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 
 interface TaskPageProps {
   params: Promise<{
@@ -11,6 +13,35 @@ interface TaskPageProps {
 
 export default async function TaskPage({ params }: TaskPageProps) {
   const { tenant } = await params;
+
+  // Require authentication
+  await requireAuth(tenant);
+
+  // Get tenant data
+  const tenantData = await findTenantBySlug(tenant);
+  if (!tenantData) {
+    throw new Error("Tenant not found");
+  }
+
+  // Fetch tasks from InstantDB
+  const tasksFromDB = await getTasksByTenant(tenantData);
+  
+  // Transform to match component expectations
+  const tasks = tasksFromDB.map((task) => ({
+    id: task.id,
+    description: task.title,
+    risk_area: "Fire", // Default as no risk area in schema
+    priority: (task.priority?.charAt(0) || "M") as "H" | "M" | "L",
+    risk_level: "M" as "H" | "M" | "L", // Default as no risk level in schema
+    due_date: new Date(task.dueDate).toLocaleDateString('en-GB'),
+    team: '', // No team association in current schema
+    assignee: task.assignee?.email || '',
+    progress: task.status,
+    notes: [],
+    completed: task.status === 'completed',
+    groups: [],
+    building_id: task.building?.id || '',
+  }));
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -3,6 +3,11 @@
 import React, { useState } from "react";
 import CompanySearch from "./CompanySearch";
 import TeamTable from "@/features/team/components/TeamTable";
+import AddTeamModal from "@/features/teams/components/AddTeamModal";
+import { Plus } from "lucide-react";
+import { Tenant } from "@/features/tenant/models";
+import type { Company } from "@/features/companies/models";
+import type { FullUser } from "@/features/user/models";
 
 interface Team {
   id: number;
@@ -14,13 +19,19 @@ interface Team {
 
 interface TeamManagementProps {
   initialTeams: Team[];
-  tenant: string;
+  tenant: Tenant;
+  companies: Company[];
+  supervisors: FullUser[];
 }
 
 export default function TeamManagement({
   initialTeams,
+  tenant,
+  companies,
+  supervisors,
 }: TeamManagementProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const filteredTeams = initialTeams.filter((team) => {
     const searchLower = searchTerm.toLowerCase();
@@ -42,24 +53,22 @@ export default function TeamManagement({
       <TeamTable teams={filteredTeams} searchTerm={searchTerm} />
 
       <div className="flex justify-end mt-6">
-        <button className="bg-[#F30] text-white px-4 py-2 rounded-md hover:bg-[#E20] transition-colors flex items-center focus:outline-none focus:ring-2 focus:ring-[#F30] focus:ring-offset-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 mr-1"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
+        <button 
+          onClick={() => setIsAddModalOpen(true)}
+          className="bg-[#F30] text-white px-4 py-2 rounded-md hover:bg-[#E20] transition-colors flex items-center focus:outline-none focus:ring-2 focus:ring-[#F30] focus:ring-offset-2"
+        >
+          <Plus className="h-5 w-5 mr-1" />
           Add Team
         </button>
       </div>
+
+      <AddTeamModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        tenant={tenant}
+        companies={companies}
+        supervisors={supervisors}
+      />
     </>
   );
 }

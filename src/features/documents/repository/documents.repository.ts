@@ -70,6 +70,35 @@ export async function getDocumentsByBuilding(
   return result.documents || [];
 }
 
+export async function getDocumentsByTenant(
+  tenant: Tenant
+): Promise<DocumentWithRelations[]> {
+  const auth = await getAuthCookies();
+  if (!auth) throw new Error("Unauthorized");
+
+  // Verify user has access
+  const isAdmin = auth.user.profile?.role === "admin";
+  const belongsToTenant = auth.user.tenant?.id === tenant.id;
+  
+  if (!isAdmin && !belongsToTenant) {
+    throw new Error("Unauthorized: User must be admin or belong to tenant");
+  }
+
+  const result = await dbAdmin.query({
+    documents: {
+      $: {
+        where: { "tenant.id": tenant.id },
+        order: { uploadedAt: "desc" },
+      },
+      building: {},
+      uploader: {},
+      tenant: {},
+    },
+  });
+
+  return result.documents || [];
+}
+
 export async function deleteDocument(documentId: string): Promise<void> {
   const auth = await getAuthCookies();
   if (!auth) throw new Error("Unauthorized");

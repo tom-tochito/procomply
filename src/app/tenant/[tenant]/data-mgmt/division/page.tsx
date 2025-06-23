@@ -1,16 +1,9 @@
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import DivisionManagement from "@/features/data-mgmt/components/DivisionManagement";
-
-// Temporary divisions data - should be fetched from database
-const divisions = [
-  "Active Divisions",
-  "Hampstead",
-  "Ealing",
-  "Camden",
-  "Leased",
-  "Archived",
-];
+import { getDivisionsByTenant } from "@/features/divisions/repository/divisions.repository";
+import { requireAuth } from "@/features/auth/repository/auth.repository";
+import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 
 interface DivisionPageProps {
   params: Promise<{
@@ -20,6 +13,18 @@ interface DivisionPageProps {
 
 export default async function DivisionPage({ params }: DivisionPageProps) {
   const { tenant } = await params;
+
+  // Require authentication
+  await requireAuth(tenant);
+
+  // Get tenant data
+  const tenantData = await findTenantBySlug(tenant);
+  if (!tenantData) {
+    throw new Error("Tenant not found");
+  }
+
+  // Fetch divisions from InstantDB
+  const divisions = await getDivisionsByTenant(tenantData);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -40,7 +45,7 @@ export default async function DivisionPage({ params }: DivisionPageProps) {
           </div>
         </div>
 
-        <DivisionManagement initialDivisions={divisions} tenant={tenant} />
+        <DivisionManagement initialDivisions={divisions} tenant={tenantData} />
       </div>
     </div>
   );

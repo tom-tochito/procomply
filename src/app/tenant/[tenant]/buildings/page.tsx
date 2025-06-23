@@ -2,6 +2,7 @@ import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import BuildingsList from "@/features/buildings/components/BuildingsList";
 import { getBuildingsWithComplianceStats } from "@/features/buildings/repository/buildings.repository";
+import { getDivisionsByTenant } from "@/features/divisions/repository/divisions.repository";
 import { requireAuth } from "@/features/auth/repository/auth.repository";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 import { BuildingWithStats } from "@/features/buildings/models";
@@ -27,13 +28,16 @@ export default async function BuildingsPage({ params }: BuildingsPageProps) {
 
   // Fetch buildings from InstantDB
   const buildings = await getBuildingsWithComplianceStats(tenantData);
+  
+  // Fetch divisions from InstantDB
+  const divisionsData = await getDivisionsByTenant(tenantData);
 
   // Transform buildings to match expected format
   const transformedBuildings: BuildingWithStats[] = buildings.map(
     (building) => ({
       ...building,
       image: getFileUrl(tenant, building.image as `/${string}`), // Default image
-      division: building.city, // Using city as division for now
+      division: (building as any).divisionEntity?.name || building.division || "Unassigned",
       status: "Active",
       compliance:
         building.taskStats.total > 0
@@ -45,11 +49,12 @@ export default async function BuildingsPage({ params }: BuildingsPageProps) {
     })
   );
 
-  // Get unique divisions (cities) from buildings
-  const divisions = [
+  // Get unique divisions from database
+  const divisionNames = [
     "Active Divisions",
-    ...new Set(buildings.map((b) => b.city)),
-  ].filter(Boolean);
+    ...divisionsData.map(d => d.name),
+    "Archived"
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -74,7 +79,8 @@ export default async function BuildingsPage({ params }: BuildingsPageProps) {
         {/* Buildings list component */}
         <BuildingsList
           initialBuildings={transformedBuildings}
-          divisions={divisions}
+          divisions={divisionNames}
+          divisionsData={divisionsData}
           tenant={tenantData}
         />
       </div>

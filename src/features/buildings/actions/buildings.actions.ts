@@ -22,6 +22,7 @@ function parseFormData(formData: FormData) {
     
     // General Data
     division: formData.get("division") as string | undefined,
+    divisionId: formData.get("divisionId") as string | undefined,
     billingAccount: formData.get("billingAccount") as string | undefined,
     availability: formData.get("availability") as string | undefined,
     openingHours: formData.get("openingHours") as string | undefined,

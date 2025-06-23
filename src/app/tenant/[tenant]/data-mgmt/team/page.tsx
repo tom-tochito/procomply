@@ -1,23 +1,11 @@
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import TeamManagement from "@/features/data-mgmt/components/TeamManagement";
-
-const mockTeams = [
-  {
-    id: 1,
-    code: "",
-    description: "Akelius Residential Ltd",
-    company: "Akelius",
-    supervisor: "",
-  },
-  {
-    id: 2,
-    code: "",
-    description: "ASAP Comply Ltd",
-    company: "ASAP Comply",
-    supervisor: "",
-  },
-];
+import { getTeamsByTenant } from "@/features/teams/repository/teams.repository";
+import { requireAuth } from "@/features/auth/repository/auth.repository";
+import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
+import { getCompaniesByTenant } from "@/features/companies/repository/companies.repository";
+import { findUsersByTenant } from "@/features/user/repository/user.repository";
 
 interface TeamPageProps {
   params: Promise<{
@@ -27,6 +15,31 @@ interface TeamPageProps {
 
 export default async function TeamPage({ params }: TeamPageProps) {
   const { tenant } = await params;
+
+  // Require authentication
+  await requireAuth(tenant);
+
+  // Get tenant data
+  const tenantData = await findTenantBySlug(tenant);
+  if (!tenantData) {
+    throw new Error("Tenant not found");
+  }
+
+  // Fetch teams, companies and supervisors from InstantDB
+  const [teamsFromDB, companies, supervisors] = await Promise.all([
+    getTeamsByTenant(tenantData),
+    getCompaniesByTenant(tenantData),
+    findUsersByTenant(tenantData.id),
+  ]);
+  
+  // Transform to match component expectations
+  const teams = teamsFromDB.map((team, index) => ({
+    id: index + 1, // Component expects number id
+    code: team.code || '',
+    description: team.description,
+    company: team.company?.name || '',
+    supervisor: team.supervisor?.name || '',
+  }));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -45,7 +58,12 @@ export default async function TeamPage({ params }: TeamPageProps) {
           </div>
         </div>
 
-        <TeamManagement initialTeams={mockTeams} tenant={tenant} />
+        <TeamManagement 
+          initialTeams={teams} 
+          tenant={tenantData} 
+          companies={companies}
+          supervisors={supervisors}
+        />
       </div>
     </div>
   );

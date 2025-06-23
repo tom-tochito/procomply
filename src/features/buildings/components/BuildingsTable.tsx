@@ -27,12 +27,18 @@ export default function BuildingsTable({
         header: "",
         cell: ({ row }) => (
           <div className="w-16 h-16 relative overflow-hidden rounded-lg">
-            <Image
-              src={row.original.image}
-              alt={row.original.name}
-              fill
-              className="object-cover"
-            />
+            {row.original.image ? (
+              <Image
+                src={row.original.image}
+                alt={row.original.name}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-400 text-xs">No image</span>
+              </div>
+            )}
           </div>
         ),
         enableSorting: false,

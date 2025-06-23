@@ -3,14 +3,16 @@
 import React, { useActionState, useRef } from "react";
 import Image from "next/image";
 import type { Building } from "@/features/buildings/models";
+import type { Division } from "@/features/divisions/models";
 
 interface BuildingFormProps {
   building?: Building;
+  divisions?: Division[];
   onSubmit: (prevState: { error: string | null; success: boolean }, formData: FormData) => Promise<{ error: string | null; success: boolean }>;
   onCancel: () => void;
 }
 
-export default function BuildingForm({ building, onSubmit, onCancel }: BuildingFormProps) {
+export default function BuildingForm({ building, divisions, onSubmit, onCancel }: BuildingFormProps) {
   const [state, formAction, isPending] = useActionState(onSubmit, {
     error: null,
     success: false,
@@ -82,13 +84,19 @@ export default function BuildingForm({ building, onSubmit, onCancel }: BuildingF
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Division
             </label>
-            <input
-              type="text"
-              name="division"
-              defaultValue={building?.division}
+            <select
+              name="divisionId"
+              defaultValue={(building as any)?.divisionEntity?.id || ""}
               disabled={isPending}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
-            />
+            >
+              <option value="">Select a division</option>
+              {divisions?.map((division) => (
+                <option key={division.id} value={division.id}>
+                  {division.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

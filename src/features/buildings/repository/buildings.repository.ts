@@ -39,6 +39,7 @@ export async function createBuilding(
     imageFile?: File;
     // General Data
     division?: string;
+    divisionId?: string;
     billingAccount?: string;
     availability?: string;
     openingHours?: string;
@@ -89,55 +90,58 @@ export async function createBuilding(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { imageFile, lastCheckDate, ...buildingData } = data;
 
-  await dbAdmin.transact([
-    dbAdmin.tx.buildings[finalBuildingId]
-      .update({
-        // Required fields
-        name: data.name,
-        address: data.address,
-        city: data.city,
-        state: data.state,
-        zipCode: data.zipCode,
-        floors: data.floors,
-        archived: data.archived || false,
+  const transaction = dbAdmin.tx.buildings[finalBuildingId]
+    .update({
+      // Required fields
+      name: data.name,
+      address: data.address,
+      city: data.city,
+      state: data.state,
+      zipCode: data.zipCode,
+      floors: data.floors,
+      archived: data.archived || false,
 
-        // Optional fields - only include if provided
-        ...(data.description && { description: data.description }),
-        ...(data.division && { division: data.division }),
-        ...(data.billingAccount && { billingAccount: data.billingAccount }),
-        ...(data.availability && { availability: data.availability }),
-        ...(data.openingHours && { openingHours: data.openingHours }),
-        ...(data.siteAccess && { siteAccess: data.siteAccess }),
-        ...(data.complex && { complex: data.complex }),
-        ...(data.condition && { condition: data.condition }),
-        ...(data.criticality && { criticality: data.criticality }),
-        ...(data.fireRiskRating && { fireRiskRating: data.fireRiskRating }),
-        ...(lastCheckDate && {
-          lastCheckDate: new Date(lastCheckDate).toISOString(),
-        }),
-        ...(data.outOfHourContact && {
-          outOfHourContact: data.outOfHourContact,
-        }),
-        ...(data.telephone && { telephone: data.telephone }),
-        ...(imagePath && { image: imagePath }),
+      // Optional fields - only include if provided
+      ...(data.description && { description: data.description }),
+      ...(data.division && { division: data.division }),
+      ...(data.billingAccount && { billingAccount: data.billingAccount }),
+      ...(data.availability && { availability: data.availability }),
+      ...(data.openingHours && { openingHours: data.openingHours }),
+      ...(data.siteAccess && { siteAccess: data.siteAccess }),
+      ...(data.complex && { complex: data.complex }),
+      ...(data.condition && { condition: data.condition }),
+      ...(data.criticality && { criticality: data.criticality }),
+      ...(data.fireRiskRating && { fireRiskRating: data.fireRiskRating }),
+      ...(lastCheckDate && {
+        lastCheckDate: new Date(lastCheckDate).toISOString(),
+      }),
+      ...(data.outOfHourContact && {
+        outOfHourContact: data.outOfHourContact,
+      }),
+      ...(data.telephone && { telephone: data.telephone }),
+      ...(imagePath && { image: imagePath }),
 
-        // Optional dimensional data fields
-        ...(data.totalGrossArea && { totalGrossArea: data.totalGrossArea }),
-        ...(data.totalNetArea && { totalNetArea: data.totalNetArea }),
-        ...(data.coveredArea && { coveredArea: data.coveredArea }),
-        ...(data.glazedArea && { glazedArea: data.glazedArea }),
-        ...(data.cleanableArea && { cleanableArea: data.cleanableArea }),
-        ...(data.totalVolume && { totalVolume: data.totalVolume }),
-        ...(data.heatedVolume && { heatedVolume: data.heatedVolume }),
-        ...(data.numberOfRooms && { numberOfRooms: data.numberOfRooms }),
-        ...(data.numberOfUnits && { numberOfUnits: data.numberOfUnits }),
+      // Optional dimensional data fields
+      ...(data.totalGrossArea && { totalGrossArea: data.totalGrossArea }),
+      ...(data.totalNetArea && { totalNetArea: data.totalNetArea }),
+      ...(data.coveredArea && { coveredArea: data.coveredArea }),
+      ...(data.glazedArea && { glazedArea: data.glazedArea }),
+      ...(data.cleanableArea && { cleanableArea: data.cleanableArea }),
+      ...(data.totalVolume && { totalVolume: data.totalVolume }),
+      ...(data.heatedVolume && { heatedVolume: data.heatedVolume }),
+      ...(data.numberOfRooms && { numberOfRooms: data.numberOfRooms }),
+      ...(data.numberOfUnits && { numberOfUnits: data.numberOfUnits }),
 
-        // Timestamps
-        createdAt: now,
-        updatedAt: now,
-      })
-      .link({ tenant: tenant.id }),
-  ]);
+      // Timestamps
+      createdAt: now,
+      updatedAt: now,
+    })
+    .link({ 
+      tenant: tenant.id,
+      ...(data.divisionId && { divisionEntity: data.divisionId })
+    });
+
+  await dbAdmin.transact([transaction]);
 
   return finalBuildingId;
 }
@@ -155,6 +159,7 @@ export async function updateBuilding(
     imageFile: File;
     // General Data
     division: string;
+    divisionId: string;
     billingAccount: string;
     availability: string;
     openingHours: string;
@@ -222,18 +227,46 @@ export async function updateBuilding(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { imageFile, lastCheckDate, ...buildingData } = data;
+  const { imageFile, lastCheckDate, divisionId, ...buildingData } = data;
 
-  await dbAdmin.transact([
-    dbAdmin.tx.buildings[buildingId].update({
-      ...buildingData,
-      ...(imagePath && { image: imagePath }),
-      ...(lastCheckDate && {
-        lastCheckDate: new Date(lastCheckDate).toISOString(),
-      }),
-      updatedAt: new Date().toISOString(),
+  const updateTransaction = dbAdmin.tx.buildings[buildingId].update({
+    ...buildingData,
+    ...(imagePath && { image: imagePath }),
+    ...(lastCheckDate && {
+      lastCheckDate: new Date(lastCheckDate).toISOString(),
     }),
-  ]);
+    updatedAt: new Date().toISOString(),
+  });
+
+  // Handle division linking separately
+  const transactions = [updateTransaction];
+  
+  if (divisionId !== undefined) {
+    if (divisionId) {
+      // Link to new division
+      transactions.push(
+        dbAdmin.tx.buildings[buildingId].link({ divisionEntity: divisionId })
+      );
+    } else {
+      // Unlink from current division if divisionId is empty
+      const currentBuilding = await dbAdmin.query({
+        buildings: {
+          $: { where: { id: buildingId } },
+          divisionEntity: {}
+        }
+      });
+      
+      if (currentBuilding.buildings[0]?.divisionEntity) {
+        transactions.push(
+          dbAdmin.tx.buildings[buildingId].unlink({ 
+            divisionEntity: currentBuilding.buildings[0].divisionEntity.id 
+          })
+        );
+      }
+    }
+  }
+
+  await dbAdmin.transact(transactions);
 }
 
 export async function deleteBuilding(buildingId: string): Promise<void> {
@@ -292,6 +325,7 @@ export async function getBuildingById(
         where: { id: buildingId },
       },
       tenant: {},
+      divisionEntity: {},
       tasks: {
         $: {
           order: { createdAt: "desc" },
@@ -375,6 +409,7 @@ export async function getBuildingsWithComplianceStats(
           order: { createdAt: "desc" },
         },
         tenant: {},
+        divisionEntity: {},
       },
     });
 

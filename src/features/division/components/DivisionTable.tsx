@@ -2,14 +2,17 @@
 
 import React, { useMemo } from "react";
 import { Table, ColumnDef } from "@/common/components/Table";
+import { DivisionWithRelations } from "@/features/divisions/models";
 
 interface DivisionData {
+  id: string;
   name: string;
+  type: string;
   buildingsCount: number;
 }
 
 interface DivisionTableProps {
-  divisions: string[];
+  divisions: DivisionWithRelations[];
   searchTerm?: string;
 }
 
@@ -17,8 +20,10 @@ export default function DivisionTable({ divisions, searchTerm = "" }: DivisionTa
   // Transform divisions array into table data format
   const divisionData: DivisionData[] = useMemo(
     () => divisions.map(division => ({
-      name: division,
-      buildingsCount: 0 // Mock data - in real app this would come from backend
+      id: division.id,
+      name: division.name,
+      type: division.type,
+      buildingsCount: (division as any).buildings?.length || 0
     })),
     [divisions]
   );
@@ -30,6 +35,19 @@ export default function DivisionTable({ divisions, searchTerm = "" }: DivisionTa
         header: "Name",
         cell: ({ row }) => (
           <span className="font-medium text-gray-900">{row.original.name}</span>
+        ),
+      },
+      {
+        accessorKey: "type",
+        header: "Type",
+        cell: ({ row }) => (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            row.original.type === "Active" ? "bg-green-100 text-green-800" :
+            row.original.type === "Archived" ? "bg-gray-100 text-gray-800" :
+            "bg-blue-100 text-blue-800"
+          }`}>
+            {row.original.type}
+          </span>
         ),
       },
       {
