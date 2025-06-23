@@ -6,6 +6,7 @@ import { getBuildingById } from "@/features/buildings/repository/buildings.repos
 import { requireAuth } from "@/features/auth/repository/auth.repository";
 import { Task } from "@/data/tasks";
 import { getFileUrl } from "@/common/utils/file";
+import { dbAdmin } from "~/lib/db-admin";
 
 interface BuildingDetailsPageProps {
   params: Promise<{
@@ -25,10 +26,6 @@ export default async function BuildingDetailsPage({
   // Fetch building from InstantDB
   const building = await getBuildingById(id);
 
-  // TODO: Transform tasks when task management is migrated to InstantDB
-  // For now, provide empty array as tasks have different structure
-  const initialTasks: Task[] = [];
-
   if (!building) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -47,6 +44,36 @@ export default async function BuildingDetailsPage({
         </div>
       </div>
     );
+  }
+
+  // Transform tasks to match component expectations
+  const initialTasks: Task[] = (building.tasks || []).map((task) => ({
+    id: task.id,
+    description: task.title,
+    risk_area: "Fire", // Default as no risk area in schema
+    priority: (task.priority === "high" ? "H" : task.priority === "low" ? "L" : "M") as "H" | "M" | "L",
+    risk_level: "M" as "H" | "M" | "L", // Default as no risk level in schema
+    due_date: task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-GB') : '',
+    team: '', // No team association in current schema
+    assignee: '', // Not included in building tasks query
+    progress: task.status,
+    notes: [],
+    completed: task.status === 'completed',
+    groups: [],
+    building_id: id,
+  }));
+
+  // Fetch users for assignee dropdown
+  let users: Array<{ id: string; email: string }> = [];
+  if (building.tenant?.id) {
+    const result = await dbAdmin.query({
+      "$users": {
+        $: {
+          where: { "tenant.id": building.tenant.id }
+        }
+      }
+    });
+    users = result.$users || [];
   }
 
   // Transform building image URL to use file service
@@ -102,7 +129,7 @@ export default async function BuildingDetailsPage({
 
               <div>
                 <div className="text-sm text-gray-600">Rem. compliance:</div>
-                <div className="text-xl font-bold text-blue-600">100%</div>
+                <div className="text-xl font-bold text-[#F30]">100%</div>
               </div>
             </div>
           </div>
@@ -114,6 +141,7 @@ export default async function BuildingDetailsPage({
             building={buildingWithImageUrl}
             initialTasks={initialTasks}
             tenant={tenant}
+            users={users}
           />
         </div>
       </div>

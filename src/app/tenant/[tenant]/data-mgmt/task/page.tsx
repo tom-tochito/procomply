@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
-import TaskManagement from "@/features/data-mgmt/components/TaskManagement";
+import TaskManagementNew from "@/features/tasks/components/TaskManagementNew";
 import { getTasksByTenant } from "@/features/tasks/repository/tasks.repository";
 import { requireAuth } from "@/features/auth/repository/auth.repository";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
+import { getBuildingsByTenant } from "@/features/buildings/repository/buildings.repository";
+import { dbAdmin } from "~/lib/db-admin";
 
 interface TaskPageProps {
   params: Promise<{
@@ -26,14 +28,27 @@ export default async function TaskPage({ params }: TaskPageProps) {
   // Fetch tasks from InstantDB
   const tasksFromDB = await getTasksByTenant(tenantData);
   
+  // Fetch buildings for the dropdown
+  const buildings = await getBuildingsByTenant(tenantData);
+  
+  // Fetch users for assignee dropdown
+  const result = await dbAdmin.query({
+    "$users": {
+      $: {
+        where: { "tenant.id": tenantData.id }
+      }
+    }
+  });
+  const users = result.$users || [];
+  
   // Transform to match component expectations
   const tasks = tasksFromDB.map((task) => ({
     id: task.id,
     description: task.title,
     risk_area: "Fire", // Default as no risk area in schema
-    priority: (task.priority?.charAt(0) || "M") as "H" | "M" | "L",
+    priority: (task.priority === "high" ? "H" : task.priority === "low" ? "L" : "M") as "H" | "M" | "L",
     risk_level: "M" as "H" | "M" | "L", // Default as no risk level in schema
-    due_date: new Date(task.dueDate).toLocaleDateString('en-GB'),
+    due_date: task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-GB') : '',
     team: '', // No team association in current schema
     assignee: task.assignee?.email || '',
     progress: task.status,
@@ -62,7 +77,13 @@ export default async function TaskPage({ params }: TaskPageProps) {
           </div>
         </div>
 
-        <TaskManagement initialTasks={tasks} tenant={tenant} />
+        <TaskManagementNew 
+          initialTasks={tasks} 
+          tenant={tenant} 
+          tenantId={tenantData.id}
+          buildings={buildings}
+          users={users}
+        />
       </div>
     </div>
   );

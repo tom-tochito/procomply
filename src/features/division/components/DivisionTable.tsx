@@ -23,7 +23,7 @@ export default function DivisionTable({ divisions, searchTerm = "" }: DivisionTa
       id: division.id,
       name: division.name,
       type: division.type,
-      buildingsCount: (division as any).buildings?.length || 0
+      buildingsCount: division.buildings?.length || 0
     })),
     [divisions]
   );

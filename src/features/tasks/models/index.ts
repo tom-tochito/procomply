@@ -4,8 +4,8 @@ import { AppSchema } from "~/instant.schema";
 
 export type Task = InstaQLEntity<AppSchema, "tasks">;
 export type TaskWithRelations = InstaQLEntity<AppSchema, "tasks", {
-  building: {},
-  assignee: {},
-  creator: {},
-  tenant: {}
+  assignee: {};
+  creator: {};
+  tenant: {};
+  building: {};
 }>;

@@ -37,7 +37,7 @@ export default async function BuildingsPage({ params }: BuildingsPageProps) {
     (building) => ({
       ...building,
       image: getFileUrl(tenant, building.image as `/${string}`), // Default image
-      division: (building as any).divisionEntity?.name || building.division || "Unassigned",
+      division: building.divisionEntity?.name || building.division || "Unassigned",
       status: "Active",
       compliance:
         building.taskStats.total > 0

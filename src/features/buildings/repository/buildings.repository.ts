@@ -6,6 +6,7 @@ import { getAuthCookies } from "@/features/auth/repository/auth.repository";
 import type { FullUser } from "@/features/user/repository/user.repository";
 import type {
   BuildingWithTenant,
+  BuildingWithDivision,
   BuildingWithRelations,
 } from "@/features/buildings/models";
 import type { Tenant } from "@/features/tenant/models";
@@ -394,7 +395,7 @@ export async function searchBuildings(
 export async function getBuildingsWithComplianceStats(
   tenant: Tenant
 ): Promise<
-  (BuildingWithTenant & { taskStats: { total: number; completed: number } })[]
+  (BuildingWithTenant & BuildingWithDivision & { taskStats: { total: number; completed: number } })[]
 > {
   const auth = await getAuthCookies();
   if (!auth) throw new Error("Unauthorized");

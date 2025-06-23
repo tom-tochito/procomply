@@ -117,7 +117,7 @@ export default function BuildingInfo({ building }: BuildingInfoProps) {
           <h3 className="text-sm font-medium text-gray-600 mb-2">Statutory Doc Compliance</h3>
           <div className="text-3xl font-bold text-gray-800 mb-2">0%</div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-blue-600 h-2 rounded-full" style={{ width: "0%" }}></div>
+            <div className="bg-[#F30] h-2 rounded-full" style={{ width: "0%" }}></div>
           </div>
         </div>
         <div className="bg-white p-4 rounded-lg border">

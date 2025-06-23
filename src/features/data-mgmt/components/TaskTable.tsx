@@ -115,7 +115,7 @@ export default function TaskTable({
         ? "bg-red-500"
         : level === "M"
         ? "bg-yellow-500"
-        : "bg-blue-500";
+        : "bg-green-500";
     return (
       <span
         className={`inline-flex items-center justify-center rounded-full ${bgColor} text-white w-6 h-6 text-xs font-medium`}
@@ -446,7 +446,7 @@ export default function TaskTable({
 
                   <div className="flex justify-end space-x-2 mt-2 border-t pt-2">
                     <button
-                      className="text-blue-600 hover:text-blue-800 p-1"
+                      className="text-[#F30] hover:text-[#E20] p-1"
                       onClick={(e) => {
                         e.stopPropagation();
                         onTaskClick(task);
@@ -717,7 +717,7 @@ export default function TaskTable({
                         >
                           <div className="flex space-x-2">
                             <button
-                              className="text-blue-600 hover:text-blue-800"
+                              className="text-[#F30] hover:text-[#E20]"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onTaskClick(task);

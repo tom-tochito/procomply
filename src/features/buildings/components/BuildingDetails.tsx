@@ -5,6 +5,8 @@ import { BuildingWithRelations } from "@/features/buildings/models";
 import { DocumentWithRelations } from "@/features/documents/models";
 import { Task } from "@/data/tasks";
 import TaskDetailsDialog from "@/features/data-mgmt/components/TaskDetailsDialog";
+import { AddTaskModal } from "@/features/tasks/components/AddTaskModal";
+import { useRouter } from "next/navigation";
 import TabNavigation from "./TabNavigation";
 import BuildingInfo from "./BuildingInfo";
 import TaskFilters from "./TaskFilters";
@@ -18,10 +20,12 @@ interface BuildingDetailsProps {
   building: BuildingWithRelations;
   initialTasks: Task[];
   tenant: string;
+  users?: Array<{ id: string; email: string }>;
 }
 
-export default function BuildingDetails({ building, initialTasks, tenant }: BuildingDetailsProps) {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+export default function BuildingDetails({ building, initialTasks, tenant, users: initialUsers = [] }: BuildingDetailsProps) {
+  const router = useRouter();
+  const [tasks] = useState<Task[]>(initialTasks);
   const [activeTab, setActiveTab] = useState("details");
   const [filterByTeam, setFilterByTeam] = useState("");
   const [filterByAssignee, setFilterByAssignee] = useState("");
@@ -38,23 +42,18 @@ export default function BuildingDetails({ building, initialTasks, tenant }: Buil
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
+  // State for Add Task Modal
+  const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
+  const [users] = useState<Array<{ id: string; email: string }>>(initialUsers);
+
   const addNewTask = () => {
-    const newTask: Task = {
-      id: `${tasks.length + 1}`,
-      description: "New Task",
-      risk_area: "General",
-      priority: "M",
-      risk_level: "M",
-      due_date: new Date().toLocaleDateString("en-GB"),
-      team: "ASAP Comply Ltd",
-      building_id: building.id,
-      progress: "Not Started",
-      assignee: "",
-      notes: [],
-      groups: [],
-      completed: false,
-    };
-    setTasks([...tasks, newTask]);
+    setIsAddTaskModalOpen(true);
+  };
+
+  const handleTaskSuccess = () => {
+    // Page will be revalidated server-side via revalidatePath
+    // Force a hard refresh to ensure the page gets fresh data
+    router.refresh();
   };
 
   // Filter tasks based on progress status
@@ -168,8 +167,20 @@ export default function BuildingDetails({ building, initialTasks, tenant }: Buil
           isOpen={isDialogOpen}
           onClose={() => setIsDialogOpen(false)}
           task={selectedTask}
+          building={building}
         />
       )}
+
+      {/* Add Task Modal */}
+      <AddTaskModal
+        isOpen={isAddTaskModalOpen}
+        onClose={() => setIsAddTaskModalOpen(false)}
+        onSuccess={handleTaskSuccess}
+        tenantId={building.tenant?.id || ""}
+        buildings={[building]}
+        users={users}
+        buildingId={building.id}
+      />
     </>
   );
 }

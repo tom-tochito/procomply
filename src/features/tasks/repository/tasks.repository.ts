@@ -71,7 +71,7 @@ export async function createTask(
     status: string;
     priority: string;
     dueDate: string;
-    buildingId: string;
+    buildingId?: string;
     assigneeId?: string;
     tenantId: string;
   }
@@ -81,6 +81,24 @@ export async function createTask(
 
   const taskId = id();
   const now = new Date().toISOString();
+
+  const linkData: {
+    creator: string;
+    tenant: string;
+    building?: string;
+    assignee?: string;
+  } = {
+    creator: auth.user.id,
+    tenant: data.tenantId,
+  };
+
+  if (data.buildingId) {
+    linkData.building = data.buildingId;
+  }
+
+  if (data.assigneeId) {
+    linkData.assignee = data.assigneeId;
+  }
 
   const transactions = [
     dbAdmin.tx.tasks[taskId]
@@ -93,12 +111,7 @@ export async function createTask(
         createdAt: now,
         updatedAt: now,
       })
-      .link({
-        building: data.buildingId,
-        creator: auth.user.id,
-        tenant: data.tenantId,
-        ...(data.assigneeId && { assignee: data.assigneeId }),
-      }),
+      .link(linkData),
   ];
 
   await dbAdmin.transact(transactions);

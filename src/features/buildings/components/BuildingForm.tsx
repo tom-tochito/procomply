@@ -2,11 +2,11 @@
 
 import React, { useActionState, useRef } from "react";
 import Image from "next/image";
-import type { Building } from "@/features/buildings/models";
+import type { Building, BuildingWithDivision } from "@/features/buildings/models";
 import type { Division } from "@/features/divisions/models";
 
 interface BuildingFormProps {
-  building?: Building;
+  building?: Building | BuildingWithDivision;
   divisions?: Division[];
   onSubmit: (prevState: { error: string | null; success: boolean }, formData: FormData) => Promise<{ error: string | null; success: boolean }>;
   onCancel: () => void;
@@ -86,7 +86,7 @@ export default function BuildingForm({ building, divisions, onSubmit, onCancel }
             </label>
             <select
               name="divisionId"
-              defaultValue={(building as any)?.divisionEntity?.id || ""}
+              defaultValue={(building && 'divisionEntity' in building) ? building.divisionEntity?.id : ""}
               disabled={isPending}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
             >
