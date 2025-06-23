@@ -2,13 +2,16 @@
 
 import React from "react";
 import { Task } from "@/data/tasks";
+import { db } from "~/lib/db";
 
 interface TaskTableProps {
   tasks: Task[];
   onTaskClick: (task: Task) => void;
+  onTaskEdit?: (task: Task) => void;
+  onTaskUpdate?: () => void;
 }
 
-export default function TaskTable({ tasks, onTaskClick }: TaskTableProps) {
+export default function TaskTable({ tasks, onTaskClick, onTaskEdit, onTaskUpdate }: TaskTableProps) {
   const getPriorityBadgeClass = (priority: string) => {
     switch (priority) {
       case "H": return "bg-red-100 text-red-800";
@@ -85,17 +88,57 @@ export default function TaskTable({ tasks, onTaskClick }: TaskTableProps) {
                 {task.team}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getProgressBadgeClass(task.progress, task.completed)}`}>
-                  {task.completed ? "Completed" : task.progress}
-                </span>
+                <select
+                  value={task.completed ? "completed" : task.progress.toLowerCase().replace(" ", "_")}
+                  onChange={async (e) => {
+                    const newStatus = e.target.value;
+                    
+                    try {
+                      // Update task directly through InstantDB
+                      await db.transact([
+                        db.tx.tasks[task.id].update({
+                          status: newStatus,
+                          updatedAt: new Date().toISOString(),
+                          completedDate: newStatus === "completed" ? new Date().toISOString() : undefined,
+                        })
+                      ]);
+                      
+                      if (onTaskUpdate) {
+                        onTaskUpdate();
+                      }
+                    } catch (error) {
+                      console.error("Error updating task status:", error);
+                    }
+                  }}
+                  className={`text-xs font-semibold px-2 py-1 rounded-md border-0 focus:ring-2 focus:ring-[#F30] ${getProgressBadgeClass(task.progress, task.completed)}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="on_hold">On Hold</option>
+                </select>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button
-                  onClick={() => onTaskClick(task)}
-                  className="text-[#F30] hover:text-[#E62E00]"
-                >
-                  View
-                </button>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => onTaskClick(task)}
+                    className="text-[#F30] hover:text-[#E62E00]"
+                  >
+                    View
+                  </button>
+                  {onTaskEdit && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onTaskEdit(task);
+                      }}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      Edit
+                    </button>
+                  )}
+                </div>
               </td>
             </tr>
           ))}

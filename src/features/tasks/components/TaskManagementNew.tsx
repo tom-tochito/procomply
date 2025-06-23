@@ -3,16 +3,16 @@
 import React, { useState } from "react";
 import { Task } from "@/data/tasks";
 import { Building } from "@/features/buildings/models";
-import { AddTaskModal } from "./AddTaskModal";
+import { TaskModal } from "./TaskModal";
+import { TaskWithRelations } from "@/features/tasks/models";
 import TaskDetailsDialog from "@/features/data-mgmt/components/TaskDetailsDialog";
 import TaskSidebar from "@/features/data-mgmt/components/TaskSidebar";
 import TaskFilters from "@/features/data-mgmt/components/TaskFilters";
 import TaskTable from "@/features/data-mgmt/components/TaskTable";
 import TaskStatusFilters from "@/features/data-mgmt/components/TaskStatusFilters";
-import { useRouter } from "next/navigation";
+import { db } from "~/lib/db";
 
 interface TaskManagementNewProps {
-  initialTasks: Task[];
   tenant?: string;
   tenantId: string;
   buildings?: Building[];
@@ -21,17 +21,47 @@ interface TaskManagementNewProps {
 }
 
 export default function TaskManagementNew({ 
-  initialTasks, 
   tenantId,
   buildings = [],
   users: initialUsers = [],
   buildingId 
 }: TaskManagementNewProps) {
-  const router = useRouter();
-  const [tasks] = useState(initialTasks);
+  
+  // Fetch tasks from InstantDB client-side
+  const { data: instantData } = db.useQuery({
+    tasks: {
+      $: {
+        where: { "tenant.id": tenantId },
+        order: { dueDate: "asc" }
+      },
+      building: {},
+      assignee: {},
+      creator: {},
+      tenant: {},
+    },
+  });
+
+  // Transform InstantDB tasks to match Task interface
+  const tasks: Task[] = (instantData?.tasks || []).map((task) => ({
+    id: task.id,
+    description: task.title,
+    risk_area: "Fire", // Default as no risk area in schema
+    priority: (task.priority === "high" ? "H" : task.priority === "low" ? "L" : "M") as "H" | "M" | "L",
+    risk_level: "M" as "H" | "M" | "L", // Default as no risk level in schema
+    due_date: task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-GB') : '',
+    team: '', // No team association in current schema
+    assignee: task.assignee?.email || '',
+    progress: task.status,
+    notes: [],
+    completed: task.status === 'completed',
+    groups: [],
+    building_id: task.building?.id || '',
+  }));
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
+  const [editTask, setEditTask] = useState<TaskWithRelations | undefined>(undefined);
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -119,14 +149,58 @@ export default function TaskManagementNew({
     setDialogOpen(false);
   };
 
-  // const handleSaveLabel = (labelData: { name: string; color: string }) => {
-  //   setLabels([...labels, labelData]);
-  // };
+  const handleAddTask = () => {
+    setEditTask(undefined);
+    setModalMode("create");
+    setTaskModalOpen(true);
+  };
+
+  const handleEditTask = (task: Task) => {
+    // Convert Task to TaskWithRelations format for the modal
+    const taskWithRelations: TaskWithRelations = {
+      id: task.id,
+      title: task.description,
+      description: task.notes?.join("\n") || "",
+      status: task.progress,
+      priority: task.priority === "H" ? "high" : task.priority === "L" ? "low" : "medium",
+      dueDate: task.due_date ? new Date(task.due_date.split('/').reverse().join('-')).toISOString() : new Date().toISOString(),
+      completedDate: task.completed ? new Date().toISOString() : undefined,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      building: task.building_id ? { 
+        id: task.building_id,
+        name: "",
+        address: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        floors: 0,
+        archived: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      } : undefined,
+      assignee: undefined, // We don't have assignee ID from the Task type
+      creator: {
+        id: "",
+        email: ""
+      },
+      tenant: { 
+        id: tenantId,
+        name: "",
+        slug: "",
+        description: "",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+    };
+    
+    setEditTask(taskWithRelations);
+    setModalMode("edit");
+    setTaskModalOpen(true);
+  };
 
   const handleTaskSuccess = () => {
-    // Page will be revalidated server-side via revalidatePath
-    // Force a hard refresh to ensure the page gets fresh data
-    router.refresh();
+    // No need to refresh - InstantDB will automatically update the data
   };
 
   const handleStatusFilterChange = (filter: keyof typeof statusFilters, value: boolean) => {
@@ -153,7 +227,7 @@ export default function TaskManagementNew({
         />
       )}
 
-      <AddTaskModal
+      <TaskModal
         isOpen={taskModalOpen}
         onClose={() => setTaskModalOpen(false)}
         onSuccess={handleTaskSuccess}
@@ -161,6 +235,8 @@ export default function TaskManagementNew({
         buildings={buildings}
         users={users}
         buildingId={buildingId}
+        task={editTask}
+        mode={modalMode}
       />
 
       <div className="flex items-center justify-between mb-6">
@@ -225,7 +301,7 @@ export default function TaskManagementNew({
               setSelectedAssignee={setSelectedAssignee}
               buildingUse={buildingUse}
               setBuildingUse={setBuildingUse}
-              onAddTaskClick={() => setTaskModalOpen(true)}
+              onAddTaskClick={handleAddTask}
               onColumnsMenuToggle={() => setColumnsMenuOpen(!columnsMenuOpen)}
             />
           </div>
@@ -239,6 +315,7 @@ export default function TaskManagementNew({
           <TaskTable
             tasks={filteredTasks}
             onTaskClick={handleTaskClick}
+            onTaskEdit={handleEditTask}
             columnsMenuOpen={columnsMenuOpen}
             setColumnsMenuOpen={setColumnsMenuOpen}
           />

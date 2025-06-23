@@ -4,7 +4,6 @@ import Image from "next/image";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import { getBuildingById } from "@/features/buildings/repository/buildings.repository";
 import { requireAuth } from "@/features/auth/repository/auth.repository";
-import { Task } from "@/data/tasks";
 import { getFileUrl } from "@/common/utils/file";
 import { dbAdmin } from "~/lib/db-admin";
 
@@ -46,22 +45,6 @@ export default async function BuildingDetailsPage({
     );
   }
 
-  // Transform tasks to match component expectations
-  const initialTasks: Task[] = (building.tasks || []).map((task) => ({
-    id: task.id,
-    description: task.title,
-    risk_area: "Fire", // Default as no risk area in schema
-    priority: (task.priority === "high" ? "H" : task.priority === "low" ? "L" : "M") as "H" | "M" | "L",
-    risk_level: "M" as "H" | "M" | "L", // Default as no risk level in schema
-    due_date: task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-GB') : '',
-    team: '', // No team association in current schema
-    assignee: '', // Not included in building tasks query
-    progress: task.status,
-    notes: [],
-    completed: task.status === 'completed',
-    groups: [],
-    building_id: id,
-  }));
 
   // Fetch users for assignee dropdown
   let users: Array<{ id: string; email: string }> = [];
@@ -139,7 +122,6 @@ export default async function BuildingDetailsPage({
         <div className="max-w-7xl mx-auto">
           <BuildingDetails
             building={buildingWithImageUrl}
-            initialTasks={initialTasks}
             tenant={tenant}
             users={users}
           />

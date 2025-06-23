@@ -12,18 +12,6 @@ interface TaskFiltersProps {
   uniqueTeams: string[];
   uniqueAssignees: string[];
   onAddNewTask: () => void;
-  progressFilters: {
-    inProgressFilter: boolean;
-    setInProgressFilter: (value: boolean) => void;
-    inboxFilter: boolean;
-    setInboxFilter: (value: boolean) => void;
-    futureFilter: boolean;
-    setFutureFilter: (value: boolean) => void;
-    completedFilter: boolean;
-    setCompletedFilter: (value: boolean) => void;
-    onHoldFilter: boolean;
-    setOnHoldFilter: (value: boolean) => void;
-  };
 }
 
 export default function TaskFilters({
@@ -36,20 +24,7 @@ export default function TaskFilters({
   uniqueTeams,
   uniqueAssignees,
   onAddNewTask,
-  progressFilters,
 }: TaskFiltersProps) {
-  const {
-    inProgressFilter,
-    setInProgressFilter,
-    inboxFilter,
-    setInboxFilter,
-    futureFilter,
-    setFutureFilter,
-    completedFilter,
-    setCompletedFilter,
-    onHoldFilter,
-    setOnHoldFilter,
-  } = progressFilters;
 
   return (
     <div className="bg-white shadow rounded-lg p-6 mb-6">
@@ -96,55 +71,6 @@ export default function TaskFilters({
         >
           Add Task
         </button>
-      </div>
-
-      {/* Progress filters */}
-      <div className="flex flex-wrap gap-4">
-        <label className="flex items-center cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={inProgressFilter}
-            onChange={(e) => setInProgressFilter(e.target.checked)}
-            className="w-4 h-4 text-[#F30] bg-white border-gray-300 rounded focus:ring-2 focus:ring-[#F30] focus:ring-offset-0 checked:bg-[#F30] checked:border-[#F30] checked:hover:bg-[#E62E00] checked:hover:border-[#E62E00] checked:focus:bg-[#F30] checked:focus:border-[#F30]"
-          />
-          <span className="ml-2 text-sm text-gray-700">In Progress</span>
-        </label>
-        <label className="flex items-center cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={inboxFilter}
-            onChange={(e) => setInboxFilter(e.target.checked)}
-            className="w-4 h-4 text-[#F30] bg-white border-gray-300 rounded focus:ring-2 focus:ring-[#F30] focus:ring-offset-0 checked:bg-[#F30] checked:border-[#F30] checked:hover:bg-[#E62E00] checked:hover:border-[#E62E00] checked:focus:bg-[#F30] checked:focus:border-[#F30]"
-          />
-          <span className="ml-2 text-sm text-gray-700">Inbox</span>
-        </label>
-        <label className="flex items-center cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={futureFilter}
-            onChange={(e) => setFutureFilter(e.target.checked)}
-            className="w-4 h-4 text-[#F30] bg-white border-gray-300 rounded focus:ring-2 focus:ring-[#F30] focus:ring-offset-0 checked:bg-[#F30] checked:border-[#F30] checked:hover:bg-[#E62E00] checked:hover:border-[#E62E00] checked:focus:bg-[#F30] checked:focus:border-[#F30]"
-          />
-          <span className="ml-2 text-sm text-gray-700">Future</span>
-        </label>
-        <label className="flex items-center cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={completedFilter}
-            onChange={(e) => setCompletedFilter(e.target.checked)}
-            className="w-4 h-4 text-[#F30] bg-white border-gray-300 rounded focus:ring-2 focus:ring-[#F30] focus:ring-offset-0 checked:bg-[#F30] checked:border-[#F30] checked:hover:bg-[#E62E00] checked:hover:border-[#E62E00] checked:focus:bg-[#F30] checked:focus:border-[#F30]"
-          />
-          <span className="ml-2 text-sm text-gray-700">Completed</span>
-        </label>
-        <label className="flex items-center cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={onHoldFilter}
-            onChange={(e) => setOnHoldFilter(e.target.checked)}
-            className="w-4 h-4 text-[#F30] bg-white border-gray-300 rounded focus:ring-2 focus:ring-[#F30] focus:ring-offset-0 checked:bg-[#F30] checked:border-[#F30] checked:hover:bg-[#E62E00] checked:hover:border-[#E62E00] checked:focus:bg-[#F30] checked:focus:border-[#F30]"
-          />
-          <span className="ml-2 text-sm text-gray-700">On Hold</span>
-        </label>
       </div>
     </div>
   );

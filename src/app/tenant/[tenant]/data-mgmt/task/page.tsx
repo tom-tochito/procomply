@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import TaskManagementNew from "@/features/tasks/components/TaskManagementNew";
-import { getTasksByTenant } from "@/features/tasks/repository/tasks.repository";
 import { requireAuth } from "@/features/auth/repository/auth.repository";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 import { getBuildingsByTenant } from "@/features/buildings/repository/buildings.repository";
@@ -24,9 +23,6 @@ export default async function TaskPage({ params }: TaskPageProps) {
   if (!tenantData) {
     throw new Error("Tenant not found");
   }
-
-  // Fetch tasks from InstantDB
-  const tasksFromDB = await getTasksByTenant(tenantData);
   
   // Fetch buildings for the dropdown
   const buildings = await getBuildingsByTenant(tenantData);
@@ -41,22 +37,6 @@ export default async function TaskPage({ params }: TaskPageProps) {
   });
   const users = result.$users || [];
   
-  // Transform to match component expectations
-  const tasks = tasksFromDB.map((task) => ({
-    id: task.id,
-    description: task.title,
-    risk_area: "Fire", // Default as no risk area in schema
-    priority: (task.priority === "high" ? "H" : task.priority === "low" ? "L" : "M") as "H" | "M" | "L",
-    risk_level: "M" as "H" | "M" | "L", // Default as no risk level in schema
-    due_date: task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-GB') : '',
-    team: '', // No team association in current schema
-    assignee: task.assignee?.email || '',
-    progress: task.status,
-    notes: [],
-    completed: task.status === 'completed',
-    groups: [],
-    building_id: task.building?.id || '',
-  }));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -78,7 +58,6 @@ export default async function TaskPage({ params }: TaskPageProps) {
         </div>
 
         <TaskManagementNew 
-          initialTasks={tasks} 
           tenant={tenant} 
           tenantId={tenantData.id}
           buildings={buildings}

@@ -6,6 +6,7 @@ import { Task } from "@/data/tasks";
 interface TaskTableProps {
   tasks: Task[];
   onTaskClick: (task: Task) => void;
+  onTaskEdit?: (task: Task) => void;
   columnsMenuOpen: boolean;
   setColumnsMenuOpen: (open: boolean) => void;
 }
@@ -29,6 +30,7 @@ type VisibleColumnsState = typeof initialVisibleColumns;
 export default function TaskTable({
   tasks,
   onTaskClick,
+  onTaskEdit,
   columnsMenuOpen,
   setColumnsMenuOpen,
 }: TaskTableProps) {
@@ -139,141 +141,6 @@ export default function TaskTable({
 
   return (
     <>
-      <div className="mb-6">
-        <div className="block md:hidden">
-          <select
-            className="w-full border rounded-md px-3 py-2 bg-white"
-            onChange={(e) => alert(`Selected tab: ${e.target.value}`)}
-          >
-            <option value="in-progress">In Progress (107)</option>
-            <option value="inbox">Inbox (157 + 43)</option>
-            <option value="future">Future (377)</option>
-            <option value="completed">Completed (10238)</option>
-            <option value="on-hold-requested">On Hold Requested</option>
-            <option value="on-hold">On Hold</option>
-          </select>
-        </div>
-
-        <div className="hidden md:flex space-x-2">
-          <div className="flex items-center px-3 py-2 bg-white rounded-md border border-gray-200">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-2 text-gray-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            In Progress
-            <span className="ml-2 bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-xs">
-              107
-            </span>
-          </div>
-          <div className="flex items-center px-3 py-2 bg-white rounded-md border border-gray-200">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-2 text-gray-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-              />
-            </svg>
-            Inbox
-            <span className="ml-2 bg-red-500 text-white px-1.5 py-0.5 rounded text-xs">
-              157
-            </span>
-            <span className="ml-1 bg-yellow-500 text-white px-1.5 py-0.5 rounded text-xs">
-              43
-            </span>
-          </div>
-          <div className="flex items-center px-3 py-2 bg-white rounded-md border border-gray-200">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-2 text-gray-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-            Future
-            <span className="ml-2 bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-xs">
-              377
-            </span>
-          </div>
-          <div className="flex items-center px-3 py-2 bg-white rounded-md border border-gray-200">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-2 text-gray-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-            Completed
-            <span className="ml-2 bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-xs">
-              10238
-            </span>
-          </div>
-          <div className="flex items-center px-3 py-2 bg-white rounded-md border border-gray-200">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-2 text-gray-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            On Hold Requested
-          </div>
-          <div className="flex items-center px-3 py-2 bg-white rounded-md border border-gray-200">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-2 text-gray-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            On Hold
-          </div>
-        </div>
-      </div>
 
       {columnsMenuOpen && (
         <div className="columns-menu absolute right-48 top-40 w-48 bg-white rounded-md shadow-lg z-20 py-1 border border-gray-200">
@@ -449,7 +316,11 @@ export default function TaskTable({
                       className="text-[#F30] hover:text-[#E20] p-1"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onTaskClick(task);
+                        if (onTaskEdit) {
+                          onTaskEdit(task);
+                        } else {
+                          onTaskClick(task);
+                        }
                       }}
                       title="Edit"
                     >
@@ -720,7 +591,11 @@ export default function TaskTable({
                               className="text-[#F30] hover:text-[#E20]"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                onTaskClick(task);
+                                if (onTaskEdit) {
+                                  onTaskEdit(task);
+                                } else {
+                                  onTaskClick(task);
+                                }
                               }}
                               title="Edit"
                             >

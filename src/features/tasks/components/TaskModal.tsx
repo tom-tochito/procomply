@@ -4,21 +4,24 @@ import React, { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { TaskForm } from "./TaskForm";
 import { Building } from "@/features/buildings/models";
+import { TaskWithRelations } from "@/features/tasks/models";
 import { FormState } from "@/common/types/form";
-import { createTaskAction } from "@/features/tasks/actions/task.actions";
+import { createTaskAction, updateTaskAction } from "@/features/tasks/actions/task.actions";
 import { usePathname } from "next/navigation";
 
-interface AddTaskModalProps {
+interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
   tenantId: string;
   buildings?: Building[];
   users?: Array<{ id: string; email: string }>;
-  buildingId?: string; // Pre-selected building for building details page
+  buildingId?: string;
+  task?: TaskWithRelations;
+  mode: "create" | "edit";
 }
 
-export function AddTaskModal({
+export function TaskModal({
   isOpen,
   onClose,
   onSuccess,
@@ -26,24 +29,29 @@ export function AddTaskModal({
   buildings = [],
   users = [],
   buildingId,
-}: AddTaskModalProps) {
+  task,
+  mode,
+}: TaskModalProps) {
   const pathname = usePathname();
-  const tenantSlug = pathname.split('/')[2]; // Extract tenant from /tenant/[tenant]/...
+  const tenantSlug = pathname.split('/')[2];
 
   async function handleSubmit(prevState: FormState, formData: FormData): Promise<FormState> {
-    // Append tenantId and tenantSlug to formData
     formData.append("tenantId", tenantId);
     formData.append("tenantSlug", tenantSlug);
+    
+    if (mode === "edit" && task) {
+      formData.append("taskId", task.id);
+    }
     
     const selectedBuildingId = formData.get("buildingId") as string || buildingId || "";
     if (selectedBuildingId && !formData.has("buildingId")) {
       formData.append("buildingId", selectedBuildingId);
     }
 
-    const result = await createTaskAction(prevState, formData);
+    const action = mode === "create" ? createTaskAction : updateTaskAction;
+    const result = await action(prevState, formData);
     
     if (result.success) {
-      // Close modal and trigger success callback
       onClose();
       if (onSuccess) {
         onSuccess();
@@ -52,6 +60,16 @@ export function AddTaskModal({
     
     return result;
   }
+
+  const initialData = mode === "edit" && task ? {
+    title: task.title,
+    description: task.description || "",
+    priority: task.priority,
+    status: task.status,
+    dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : "",
+    buildingId: task.building?.id || buildingId || "",
+    assigneeId: task.assignee?.id || "",
+  } : buildingId ? { buildingId } : undefined;
 
   return (
     <Transition show={isOpen} as={Fragment}>
@@ -82,7 +100,7 @@ export function AddTaskModal({
               <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-lg bg-white shadow-xl transition-all">
                 <div className="px-4 py-3 border-b border-gray-200">
                   <Dialog.Title className="text-base font-medium text-gray-900">
-                    Add New Task
+                    {mode === "create" ? "Add New Task" : "Edit Task"}
                   </Dialog.Title>
                 </div>
 
@@ -91,8 +109,8 @@ export function AddTaskModal({
                     onSubmit={handleSubmit}
                     buildings={buildings}
                     users={users}
-                    mode="create"
-                    initialData={buildingId ? { buildingId } : undefined}
+                    mode={mode}
+                    initialData={initialData}
                     onCancel={onClose}
                   />
                 </div>
