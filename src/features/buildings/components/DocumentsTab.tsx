@@ -2,9 +2,13 @@
 
 import React, { useState, useRef } from "react";
 import { FileText, Download, Eye, Search, Upload, Trash2 } from "lucide-react";
-import { uploadDocumentAction, deleteDocumentAction } from "@/features/documents/actions/documents.actions";
+import {
+  uploadDocumentAction,
+  deleteDocumentAction,
+} from "@/features/documents/actions/documents.actions";
 import { useRouter } from "next/navigation";
 import { DocumentWithRelations } from "@/features/documents/models";
+import { getFileUrl } from "~/src/common/utils/file";
 
 interface DocumentsTabProps {
   buildingId: string;
@@ -13,19 +17,34 @@ interface DocumentsTabProps {
   documents: DocumentWithRelations[]; // Documents from server
 }
 
-export default function DocumentsTab({ buildingId, tenantId, tenant, documents = [] }: DocumentsTabProps) {
+export default function DocumentsTab({
+  buildingId,
+  tenantId,
+  tenant,
+  documents = [],
+}: DocumentsTabProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [isUploading, setIsUploading] = useState(false);
 
-  const categories = ["all", "Compliance", "Inspection", "Survey", "Maintenance", "Other"];
+  const categories = [
+    "all",
+    "Compliance",
+    "Inspection",
+    "Survey",
+    "Maintenance",
+    "Other",
+  ];
 
-  const filteredDocuments = documents.filter(doc => {
-    const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         doc.uploader?.email?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || getDocumentCategory(doc.type) === categoryFilter;
+  const filteredDocuments = documents.filter((doc) => {
+    const matchesSearch =
+      doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doc.uploader?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      categoryFilter === "all" ||
+      getDocumentCategory(doc.type) === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
@@ -50,11 +69,11 @@ export default function DocumentsTab({ buildingId, tenantId, tenant, documents =
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,14 +122,14 @@ export default function DocumentsTab({ buildingId, tenantId, tenant, documents =
 
   const handleDownload = (doc: DocumentWithRelations) => {
     // Generate download URL
-    const downloadUrl = `/tenant/${tenant}/files${doc.path}`;
-    window.open(downloadUrl, '_blank');
+    const downloadUrl = getFileUrl(tenant, doc.path as `/${string}`);
+    window.open(downloadUrl, "_blank");
   };
 
   const handleView = (doc: DocumentWithRelations) => {
     // For PDFs and images, open in new tab
-    const viewUrl = `/tenant/${tenant}/files${doc.path}`;
-    window.open(viewUrl, '_blank');
+    const viewUrl = getFileUrl(tenant, doc.path as `/${string}`);
+    window.open(viewUrl, "_blank");
   };
 
   return (
@@ -130,13 +149,13 @@ export default function DocumentsTab({ buildingId, tenantId, tenant, documents =
               />
             </div>
           </div>
-          
+
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30] focus:border-[#F30]"
           >
-            {categories.map(category => (
+            {categories.map((category) => (
               <option key={category} value={category}>
                 {category === "all" ? "All Categories" : category}
               </option>
@@ -150,8 +169,8 @@ export default function DocumentsTab({ buildingId, tenantId, tenant, documents =
             className="hidden"
             accept="*/*"
           />
-          
-          <button 
+
+          <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
             className="px-3 sm:px-4 py-2 bg-[#F30] text-white rounded-md hover:bg-[#E62E00] transition-colors flex items-center gap-2 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
@@ -166,88 +185,94 @@ export default function DocumentsTab({ buildingId, tenantId, tenant, documents =
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Document
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Category
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Size
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Uploaded
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Uploaded By
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredDocuments.map((doc) => (
-              <tr key={doc.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <span className="mr-3 text-lg">{getFileIcon(doc.type)}</span>
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">{doc.name}</div>
-                      <div className="text-sm text-gray-500">{doc.type}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {getDocumentCategory(doc.type)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {formatFileSize(doc.size)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(doc.uploadedAt).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {doc.uploader?.email || "Unknown"}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass()}`}>
-                    active
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex items-center gap-3">
-                    <button 
-                      onClick={() => handleView(doc)}
-                      className="text-[#F30] hover:text-[#E62E00]"
-                      title="View"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </button>
-                    <button 
-                      onClick={() => handleDownload(doc)}
-                      className="text-[#F30] hover:text-[#E62E00]"
-                      title="Download"
-                    >
-                      <Download className="h-4 w-4" />
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(doc.id, doc.name)}
-                      className="text-red-600 hover:text-red-800"
-                      title="Delete"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </td>
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Document
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Category
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Size
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Uploaded
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Uploaded By
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredDocuments.map((doc) => (
+                <tr key={doc.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <span className="mr-3 text-lg">
+                        {getFileIcon(doc.type)}
+                      </span>
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {doc.name}
+                        </div>
+                        <div className="text-sm text-gray-500">{doc.type}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {getDocumentCategory(doc.type)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {formatFileSize(doc.size)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(doc.uploadedAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {doc.uploader?.email || "Unknown"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass()}`}
+                    >
+                      active
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => handleView(doc)}
+                        className="text-[#F30] hover:text-[#E62E00]"
+                        title="View"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDownload(doc)}
+                        className="text-[#F30] hover:text-[#E62E00]"
+                        title="Download"
+                      >
+                        <Download className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(doc.id, doc.name)}
+                        className="text-red-600 hover:text-red-800"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
         {filteredDocuments.length === 0 && (
