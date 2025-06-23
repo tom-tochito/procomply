@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Table, ColumnDef } from "@/common/components/Table";
 import { BuildingWithStats } from "@/features/buildings/models";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
+import { getFileUrl } from "~/src/common/utils/file";
 
 interface BuildingsTableProps {
   buildings: BuildingWithStats[];
@@ -29,7 +30,7 @@ export default function BuildingsTable({
           <div className="w-16 h-16 relative overflow-hidden rounded-lg">
             {row.original.image ? (
               <Image
-                src={row.original.image}
+                src={getFileUrl(tenant, row.original.image as `/${string}`)}
                 alt={row.original.name}
                 fill
                 className="object-cover"
@@ -118,7 +119,11 @@ export default function BuildingsTable({
         accessorKey: "inbox",
         header: "Inbox",
         cell: ({ row }) => {
-          const { urgent, warning, email } = row.original.inbox ?? { urgent: 0, warning: 0, email: false };
+          const { urgent, warning, email } = row.original.inbox ?? {
+            urgent: 0,
+            warning: 0,
+            email: false,
+          };
           return (
             <div className="flex items-center gap-3">
               {urgent > 0 && (

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { BuildingWithStats } from "@/features/buildings/models";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
+import { getFileUrl } from "~/src/common/utils/file";
 
 interface BuildingCardProps {
   building: BuildingWithStats;
@@ -28,7 +29,10 @@ export default function BuildingCard({ building, tenant }: BuildingCardProps) {
           {/* Image */}
           <div className="relative w-48 h-48 flex-shrink-0 bg-gray-100">
             <Image
-              src={building.image || "/placeholder-building.jpg"}
+              src={
+                getFileUrl(tenant, building.image as `/${string}`) ||
+                "/placeholder-building.jpg"
+              }
               alt={building.name}
               fill
               objectFit="cover"
