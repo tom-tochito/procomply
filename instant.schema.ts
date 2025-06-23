@@ -129,6 +129,15 @@ const _schema = i.schema({
       createdAt: i.date().indexed(),
       updatedAt: i.date().indexed(),
     }),
+    complianceChecks: i.entity({
+      checkType: i.string().indexed(), // annualFlatDoor, asbestosReinspections, etc.
+      status: i.string().indexed(), // success, warning, overdue, pending
+      dueDate: i.date().indexed(),
+      completedDate: i.date().optional(),
+      notes: i.string().optional(),
+      createdAt: i.date().indexed(),
+      updatedAt: i.date().indexed(),
+    }),
   },
   links: {
     userProfile: {
@@ -218,6 +227,14 @@ const _schema = i.schema({
     personCompany: {
       forward: { on: "userProfiles", has: "one", label: "company" },
       reverse: { on: "companies", has: "many", label: "employees" },
+    },
+    complianceCheckBuilding: {
+      forward: { on: "complianceChecks", has: "one", label: "building" },
+      reverse: { on: "buildings", has: "many", label: "complianceChecks" },
+    },
+    complianceCheckTenant: {
+      forward: { on: "complianceChecks", has: "one", label: "tenant" },
+      reverse: { on: "tenants", has: "many", label: "complianceChecks" },
     },
   },
 });

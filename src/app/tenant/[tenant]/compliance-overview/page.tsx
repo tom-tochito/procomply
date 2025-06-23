@@ -1,84 +1,11 @@
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import ComplianceOverview from "@/features/compliance/components/ComplianceOverview";
-
-const mockBuildings = [
-  {
-    id: "40003",
-    name: "Westcott Park (LEASEHOLD)",
-    location: "Acton",
-    compliance: "38%",
-    pm: "MM",
-    annualFlatDoor: { date: "30/04/2024", status: "warning" },
-    asbestosReinspections: { date: "", status: "" },
-    asbestosSurveys: { date: "20/03/2018", status: "success" },
-    fireAlarmTesting: { date: "20/03/2018", status: "success" },
-    fireRiskAssessment: { date: "", status: "" },
-    hsMonthlyVisit: { date: "", status: "" },
-    hsRiskAssessment: { date: "20/03/2018", status: "success" },
-    legionellaRisk: { date: "24/07/2019", status: "success" },
-  },
-  {
-    id: "40004",
-    name: "Meredith Mews (LEASEHOLD)",
-    location: "Brockley",
-    compliance: "75%",
-    pm: "SW",
-    annualFlatDoor: { date: "", status: "" },
-    asbestosReinspections: { date: "", status: "" },
-    asbestosSurveys: { date: "", status: "" },
-    fireAlarmTesting: { date: "", status: "" },
-    fireRiskAssessment: { date: "03/07/2022", status: "success" },
-    hsMonthlyVisit: { date: "", status: "" },
-    hsRiskAssessment: { date: "", status: "" },
-    legionellaRisk: { date: "", status: "" },
-  },
-  {
-    id: "40005",
-    name: "Lambert Court",
-    location: "Bushey",
-    compliance: "70%",
-    pm: "AM",
-    annualFlatDoor: { date: "", status: "" },
-    asbestosReinspections: { date: "", status: "" },
-    asbestosSurveys: { date: "06/03/2018", status: "success" },
-    fireAlarmTesting: { date: "", status: "" },
-    fireRiskAssessment: { date: "18/03/2022", status: "success" },
-    hsMonthlyVisit: { date: "", status: "" },
-    hsRiskAssessment: { date: "02/11/2022", status: "success" },
-    legionellaRisk: { date: "26/03/2021", status: "success" },
-  },
-  {
-    id: "40006",
-    name: "Hillgate Place (LEASEHOLD)",
-    location: "Clapham",
-    compliance: "100%",
-    pm: "LV",
-    annualFlatDoor: { date: "", status: "" },
-    asbestosReinspections: { date: "", status: "" },
-    asbestosSurveys: { date: "", status: "" },
-    fireAlarmTesting: { date: "", status: "" },
-    fireRiskAssessment: { date: "04/07/2022", status: "success" },
-    hsMonthlyVisit: { date: "", status: "" },
-    hsRiskAssessment: { date: "", status: "" },
-    legionellaRisk: { date: "", status: "" },
-  },
-  {
-    id: "40007",
-    name: "Camfrey Court",
-    location: "Crouch End",
-    compliance: "76%",
-    pm: "AS",
-    annualFlatDoor: { date: "28/03/2024", status: "warning" },
-    asbestosReinspections: { date: "", status: "" },
-    asbestosSurveys: { date: "27/02/2018", status: "success" },
-    fireAlarmTesting: { date: "", status: "" },
-    fireRiskAssessment: { date: "10/04/2018", status: "success" },
-    hsMonthlyVisit: { date: "", status: "" },
-    hsRiskAssessment: { date: "26/01/2022", status: "success" },
-    legionellaRisk: { date: "27/08/2020", status: "success" },
-  },
-];
+import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
+import { getBuildingsWithComplianceData } from "@/features/compliance/repository/compliance.repository";
+import { COMPLIANCE_CHECK_TYPES } from "@/features/compliance/models";
+import type { ComplianceCheck } from "@/features/compliance/models";
+import { dbAdmin } from "~/lib/db-admin";
 
 interface ComplianceOverviewPageProps {
   params: Promise<{
@@ -90,6 +17,47 @@ export default async function ComplianceOverviewPage({
   params,
 }: ComplianceOverviewPageProps) {
   const { tenant } = await params;
+  
+  // Fetch tenant and buildings with compliance data
+  const tenantEntity = await findTenantBySlug(tenant);
+  if (!tenantEntity) {
+    return <div>Tenant not found</div>;
+  }
+
+  const buildings = await getBuildingsWithComplianceData(tenantEntity.id);
+  
+  // Fetch divisions for filters
+  const divisionsQuery = await dbAdmin.query({
+    divisions: {
+      $: {
+        where: {
+          "tenant.id": tenantEntity.id
+        }
+      }
+    }
+  });
+  const divisions = divisionsQuery.divisions || [];
+  
+  // Transform buildings to match the component's expected format
+  const formattedBuildings = buildings.map(building => {
+    const complianceChecksByType = building.complianceChecksByType || {} as Record<string, ComplianceCheck | undefined>;
+    
+    return {
+      id: building.id,
+      name: building.name,
+      location: building.city || "",
+      compliance: `${building.compliance || 0}%`,
+      pm: "", // Property Manager - not in schema yet
+      annualFlatDoor: formatComplianceCheck(complianceChecksByType[COMPLIANCE_CHECK_TYPES.ANNUAL_FLAT_DOOR]),
+      asbestosReinspections: formatComplianceCheck(complianceChecksByType[COMPLIANCE_CHECK_TYPES.ASBESTOS_REINSPECTIONS]),
+      asbestosSurveys: formatComplianceCheck(complianceChecksByType[COMPLIANCE_CHECK_TYPES.ASBESTOS_SURVEYS]),
+      fireAlarmTesting: formatComplianceCheck(complianceChecksByType[COMPLIANCE_CHECK_TYPES.FIRE_ALARM_TESTING]),
+      fireRiskAssessment: formatComplianceCheck(complianceChecksByType[COMPLIANCE_CHECK_TYPES.FIRE_RISK_ASSESSMENT]),
+      hsMonthlyVisit: formatComplianceCheck(complianceChecksByType[COMPLIANCE_CHECK_TYPES.HS_MONTHLY_VISIT]),
+      hsRiskAssessment: formatComplianceCheck(complianceChecksByType[COMPLIANCE_CHECK_TYPES.HS_RISK_ASSESSMENT]),
+      legionellaRisk: formatComplianceCheck(complianceChecksByType[COMPLIANCE_CHECK_TYPES.LEGIONELLA_RISK]),
+    };
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -110,8 +78,24 @@ export default async function ComplianceOverviewPage({
           </div>
         </div>
 
-        <ComplianceOverview initialBuildings={mockBuildings} tenant={tenant} />
+        <ComplianceOverview 
+          initialBuildings={formattedBuildings} 
+          tenant={tenantEntity}
+          divisions={divisions}
+        />
       </div>
     </div>
   );
+}
+
+function formatComplianceCheck(check: ComplianceCheck | undefined): { date: string; status: string } {
+  if (!check) {
+    return { date: "", status: "" };
+  }
+  
+  const date = check.completedDate || check.dueDate;
+  return {
+    date: date ? new Date(date).toLocaleDateString("en-GB") : "",
+    status: check.status || ""
+  };
 }

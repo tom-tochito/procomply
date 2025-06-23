@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ComplianceSearch from "./ComplianceSearch";
-import ComplianceFilters from "./ComplianceFilters";
+import ComplianceDynamicFilters from "./ComplianceDynamicFilters";
 import ComplianceTable from "./ComplianceTable";
+import type { Tenant } from "@/features/tenant/models";
 
 interface Building {
   id: string;
@@ -21,27 +22,35 @@ interface Building {
   legionellaRisk: { date: string; status: string };
 }
 
+interface Division {
+  id: string;
+  name: string;
+  type: string;
+}
+
 interface ComplianceOverviewProps {
   initialBuildings: Building[];
-  tenant: string;
+  tenant: Tenant;
+  divisions?: Division[];
 }
 
 export default function ComplianceOverview({
   initialBuildings,
+  tenant,
+  divisions = [],
 }: ComplianceOverviewProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeFilters, setActiveFilters] = useState({
-    activeOnly: true,
-    hampstead: true,
-    ealing: true,
-    camden: true,
-    leased: true,
-    archived: false,
-    complex: false,
-  });
+  const [selectedDivisions, setSelectedDivisions] = useState<string[]>([]);
+  const [showArchived, setShowArchived] = useState(false);
   const [buildingUse, setBuildingUse] = useState("Building Use");
   const [roomUse, setRoomUse] = useState("Room Use");
   const [buildingManagers, setBuildingManagers] = useState("Building Managers");
+  
+  // Initialize selected divisions to all active divisions
+  useEffect(() => {
+    const activeDivisions = divisions.filter(d => d.type === "Active");
+    setSelectedDivisions(activeDivisions.map(d => d.id));
+  }, [divisions]);
 
   const filteredBuildings = initialBuildings.filter((building) => {
     if (
@@ -61,9 +70,12 @@ export default function ComplianceOverview({
           <ComplianceSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </div>
 
-        <ComplianceFilters
-          activeFilters={activeFilters}
-          setActiveFilters={setActiveFilters}
+        <ComplianceDynamicFilters
+          divisions={divisions}
+          selectedDivisions={selectedDivisions}
+          setSelectedDivisions={setSelectedDivisions}
+          showArchived={showArchived}
+          setShowArchived={setShowArchived}
           buildingUse={buildingUse}
           setBuildingUse={setBuildingUse}
           roomUse={roomUse}
@@ -73,9 +85,11 @@ export default function ComplianceOverview({
         />
       </div>
 
-      <ComplianceTable data={filteredBuildings} searchTerm={searchTerm} />
-
-      <div className="text-sm text-gray-600 mt-4">961 tasks</div>
+      <ComplianceTable 
+        data={filteredBuildings} 
+        searchTerm={searchTerm} 
+        tenant={tenant}
+      />
     </>
   );
 }

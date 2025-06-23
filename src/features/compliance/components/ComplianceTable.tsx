@@ -1,7 +1,12 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import Link from "next/link";
 import { Table, ColumnDef } from "@/common/components/Table";
+import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
+import { Plus } from "lucide-react";
+import AddComplianceCheckDialog from "./AddComplianceCheckDialog";
+import type { Tenant } from "@/features/tenant/models";
 
 interface ComplianceData {
   id: string;
@@ -22,6 +27,8 @@ interface ComplianceData {
 interface ComplianceTableProps {
   data: ComplianceData[];
   searchTerm?: string;
+  tenant: Tenant;
+  onDataChange?: () => void;
 }
 
 const StatusCell = ({ date, status }: { date: string; status: string }) => {
@@ -44,17 +51,26 @@ const StatusCell = ({ date, status }: { date: string; status: string }) => {
   );
 };
 
-export default function ComplianceTable({ data, searchTerm = "" }: ComplianceTableProps) {
+export default function ComplianceTable({ 
+  data, 
+  searchTerm = "", 
+  tenant,
+  onDataChange 
+}: ComplianceTableProps) {
+  const [selectedBuilding, setSelectedBuilding] = useState<{ id: string; name: string } | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const columns = useMemo<ColumnDef<ComplianceData>[]>(
     () => [
       {
         accessorKey: "name",
         header: "Building",
         cell: ({ row }) => (
-          <div>
-            <div className="font-medium text-blue-600">{row.original.name}</div>
-            <div className="text-gray-600 text-sm">{row.original.location}</div>
-          </div>
+          <Link href={generateTenantRedirectUrl(tenant.slug, `/buildings/${row.original.id}`)}>
+            <div className="cursor-pointer hover:underline">
+              <div className="font-medium text-blue-600">{row.original.name}</div>
+              <div className="text-gray-600 text-sm">{row.original.location}</div>
+            </div>
+          </Link>
         ),
       },
       {
@@ -189,17 +205,53 @@ export default function ComplianceTable({ data, searchTerm = "" }: ComplianceTab
         ),
         enableSorting: false,
       },
+      {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => (
+          <div className="text-center">
+            <button
+              onClick={() => {
+                setSelectedBuilding({ id: row.original.id, name: row.original.name });
+                setIsDialogOpen(true);
+              }}
+              className="p-1.5 text-[#F30] hover:bg-red-50 rounded transition-colors"
+              title="Add compliance check"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+        ),
+        enableSorting: false,
+      },
     ],
-    []
+    [tenant]
   );
 
   return (
-    <Table
-      columns={columns}
-      data={data}
-      globalFilter={searchTerm}
-      pageSize={10}
-      className="text-sm"
-    />
+    <>
+      <Table
+        columns={columns}
+        data={data}
+        globalFilter={searchTerm}
+        pageSize={10}
+        className="text-sm"
+      />
+      {selectedBuilding && (
+        <AddComplianceCheckDialog
+          isOpen={isDialogOpen}
+          onClose={() => {
+            setIsDialogOpen(false);
+            setSelectedBuilding(null);
+          }}
+          buildingId={selectedBuilding.id}
+          buildingName={selectedBuilding.name}
+          tenant={tenant}
+          onSuccess={() => {
+            onDataChange?.();
+          }}
+        />
+      )}
+    </>
   );
 }
