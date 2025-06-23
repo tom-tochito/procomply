@@ -62,7 +62,7 @@ export default async function BuildingDetailsPage({
   // Transform building image URL to use file service
   const buildingWithImageUrl = {
     ...building,
-    image: getFileUrl(tenant, building.image as `/${string}`),
+    image: building.image ? getFileUrl(tenant, building.image as `/${string}`) : undefined,
   };
 
   return (
@@ -72,15 +72,17 @@ export default async function BuildingDetailsPage({
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row gap-4 md:gap-6">
             {/* Building image */}
-            <div className="relative h-48 w-full md:w-64 rounded-lg overflow-hidden md:flex-shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent z-10" />
-              <Image
-                src={buildingWithImageUrl.image}
-                alt={buildingWithImageUrl.name}
-                layout="fill"
-                objectFit="cover"
-              />
-            </div>
+            {buildingWithImageUrl.image && (
+              <div className="relative h-48 w-full md:w-64 rounded-lg overflow-hidden md:flex-shrink-0">
+                <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent z-10" />
+                <Image
+                  src={buildingWithImageUrl.image}
+                  alt={buildingWithImageUrl.name}
+                  layout="fill"
+                  objectFit="cover"
+                />
+              </div>
+            )}
 
             <div className="flex flex-col justify-between py-2 space-y-4 md:space-y-0">
               <div>

@@ -36,7 +36,7 @@ export default async function BuildingsPage({ params }: BuildingsPageProps) {
   const transformedBuildings: BuildingWithStats[] = buildings.map(
     (building) => ({
       ...building,
-      image: getFileUrl(tenant, building.image as `/${string}`), // Default image
+      image: building.image ? getFileUrl(tenant, building.image as `/${string}`) : undefined,
       division: building.divisionEntity?.name || building.division || "Unassigned",
       status: "Active",
       compliance:
