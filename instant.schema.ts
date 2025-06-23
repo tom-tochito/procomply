@@ -138,6 +138,39 @@ const _schema = i.schema({
       createdAt: i.date().indexed(),
       updatedAt: i.date().indexed(),
     }),
+    contacts: i.entity({
+      name: i.string(),
+      role: i.string().optional(),
+      email: i.string().optional(),
+      phone: i.string().optional(),
+      mobile: i.string().optional(),
+      department: i.string().optional(),
+      notes: i.string().optional(),
+      isPrimary: i.boolean().indexed(),
+      createdAt: i.date().indexed(),
+      updatedAt: i.date().indexed(),
+    }),
+    notes: i.entity({
+      title: i.string(),
+      content: i.string(),
+      category: i.string().indexed(), // general, maintenance, compliance, etc.
+      priority: i.string().indexed(), // low, medium, high
+      createdAt: i.date().indexed(),
+      updatedAt: i.date().indexed(),
+    }),
+    yearPlannerEvents: i.entity({
+      title: i.string(),
+      description: i.string().optional(),
+      eventType: i.string().indexed(), // inspection, maintenance, compliance, meeting, etc.
+      startDate: i.date().indexed(),
+      endDate: i.date().optional(),
+      allDay: i.boolean(),
+      status: i.string().indexed(), // scheduled, completed, cancelled
+      reminder: i.boolean(),
+      reminderDays: i.number().optional(),
+      createdAt: i.date().indexed(),
+      updatedAt: i.date().indexed(),
+    }),
   },
   links: {
     userProfile: {
@@ -235,6 +268,42 @@ const _schema = i.schema({
     complianceCheckTenant: {
       forward: { on: "complianceChecks", has: "one", label: "tenant" },
       reverse: { on: "tenants", has: "many", label: "complianceChecks" },
+    },
+    contactBuilding: {
+      forward: { on: "contacts", has: "one", label: "building" },
+      reverse: { on: "buildings", has: "many", label: "contacts" },
+    },
+    contactTenant: {
+      forward: { on: "contacts", has: "one", label: "tenant" },
+      reverse: { on: "tenants", has: "many", label: "contacts" },
+    },
+    contactCreator: {
+      forward: { on: "contacts", has: "one", label: "creator" },
+      reverse: { on: "$users", has: "many", label: "createdContacts" },
+    },
+    noteBuilding: {
+      forward: { on: "notes", has: "one", label: "building" },
+      reverse: { on: "buildings", has: "many", label: "notes" },
+    },
+    noteTenant: {
+      forward: { on: "notes", has: "one", label: "tenant" },
+      reverse: { on: "tenants", has: "many", label: "notes" },
+    },
+    noteCreator: {
+      forward: { on: "notes", has: "one", label: "creator" },
+      reverse: { on: "$users", has: "many", label: "createdNotes" },
+    },
+    yearPlannerEventBuilding: {
+      forward: { on: "yearPlannerEvents", has: "one", label: "building" },
+      reverse: { on: "buildings", has: "many", label: "yearPlannerEvents" },
+    },
+    yearPlannerEventTenant: {
+      forward: { on: "yearPlannerEvents", has: "one", label: "tenant" },
+      reverse: { on: "tenants", has: "many", label: "yearPlannerEvents" },
+    },
+    yearPlannerEventCreator: {
+      forward: { on: "yearPlannerEvents", has: "one", label: "creator" },
+      reverse: { on: "$users", has: "many", label: "createdYearPlannerEvents" },
     },
   },
 });

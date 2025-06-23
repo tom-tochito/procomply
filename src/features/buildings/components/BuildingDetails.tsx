@@ -143,13 +143,13 @@ export default function BuildingDetails({ building, tenant, users: initialUsers 
         />;
       
       case "contacts":
-        return <ContactsTab buildingId={building.id} />;
+        return <ContactsTab building={building} />;
       
       case "notes":
-        return <NotesTab buildingId={building.id} />;
+        return <NotesTab building={building} />;
       
       case "yearplanner":
-        return <YearPlannerTab buildingId={building.id} />;
+        return <YearPlannerTab building={building} />;
       
       default:
         return null;
