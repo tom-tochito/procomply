@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import logo from "@/common/assets/images/logo/light.png";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
+import { db } from "~/lib/db";
 import {
   Database,
   ChevronDown,
@@ -25,20 +26,30 @@ import {
   X,
 } from "lucide-react";
 
-export default function Header() {
-  const paramsHook = useParams();
-  const pathname = usePathname();
-  const tenant = paramsHook.tenant as string;
+// Avatar Component
+function UserAvatar({ user }: { user?: { email?: string; profile?: { name?: string } } }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [dataMgmtOpen, setDataMgmtOpen] = useState(false);
-  const [templateMgmtOpen, setTemplateMgmtOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const dataMgmtRef = useRef<HTMLDivElement>(null);
-  const templateMgmtRef = useRef<HTMLDivElement>(null);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdowns when clicking outside
+  const tenant = useParams().tenant as string;
+  
+  // Get initials from profile name first, then email, then fallback to "UN"
+  const getInitials = () => {
+    if (user?.profile?.name) {
+      const names = user.profile.name.trim().split(' ');
+      if (names.length >= 2) {
+        return `${names[0][0]}${names[1][0]}`.toUpperCase();
+      }
+      return names[0].slice(0, 2).toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.slice(0, 2).toUpperCase();
+    }
+    return "UN";
+  };
+  
+  const initials = getInitials();
+  
+  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -47,10 +58,149 @@ export default function Header() {
       ) {
         setDropdownOpen(false);
       }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+  
+  const handleLogout = async () => {
+    const { logoutAction } = await import("@/features/auth");
+    await logoutAction(tenant);
+  };
+  
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        className="size-8 md:size-10 bg-black rounded-full flex items-center justify-center text-white hover:bg-orange-500 transition-colors text-sm md:text-base font-medium"
+        onClick={() => setDropdownOpen(!dropdownOpen)}
+        aria-label="User menu"
+        aria-expanded={dropdownOpen}
+      >
+        {initials}
+      </button>
+
+      {dropdownOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-10"
+            onClick={() => setDropdownOpen(false)}
+          ></div>
+          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 py-1 border border-gray-200">
+            <div className="px-4 py-2 border-b border-gray-100">
+              <p className="text-sm font-medium">{user?.profile?.name || "User"}</p>
+              <p className="text-xs text-gray-500">{user?.email || "Unknown"}</p>
+            </div>
+            <a
+              href="#profile"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              Profile
+            </a>
+            <a
+              href="#settings"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              Settings
+            </a>
+            <button
+              onClick={handleLogout}
+              className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 font-medium"
+            >
+              Logout
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// Data Management Menu Component
+function DataManagementMenu() {
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const tenant = useParams().tenant as string;
+  
+  const menuItems = [
+    { href: "/data-mgmt/company", label: "Company", icon: Building2 },
+    { href: "/data-mgmt/division", label: "Division", icon: Menu },
+    { href: "/data-mgmt/buildings", label: "Building", icon: Building2 },
+    { href: "/data-mgmt/task", label: "Task", icon: ClipboardList },
+    { href: "/data-mgmt/document", label: "Document", icon: FileText },
+    { href: "/data-mgmt/person", label: "Person", icon: UserCircle },
+    { href: "/data-mgmt/team", label: "Team", icon: Users },
+  ];
+  
+  return (
+    <div className="relative" ref={menuRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center text-white text-sm hover:text-gray-300 transition-colors group whitespace-nowrap"
+        aria-expanded={isOpen}
+        aria-haspopup="true"
+      >
+        <span className="inline-flex items-center justify-center mr-1.5 text-gray-400 group-hover:text-gray-300">
+          <Database className="h-5 w-5" />
+        </span>
+        Data Mgmt
+        <ChevronDown className="h-4 w-4 ml-1" />
+      </button>
+
+      {isOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-0"
+            onClick={() => setIsOpen(false)}
+          ></div>
+          <div className="absolute left-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
+            {menuItems.map((item) => (
+              <Link
+                key={item.href}
+                href={generateTenantRedirectUrl(tenant, item.href)}
+                className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                onClick={() => setIsOpen(false)}
+              >
+                <span className="inline-flex items-center justify-center mr-2 text-gray-600">
+                  <item.icon className="h-4 w-4" />
+                </span>
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function Header() {
+  const paramsHook = useParams();
+  const pathname = usePathname();
+  const tenant = paramsHook.tenant as string;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dataMgmtOpen, setDataMgmtOpen] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  
+  const { user } = db.useAuth();
+  const { data } = db.useQuery({ 
+    $users: {
+      $: { where: { id: user?.id || "" } },
+      profile: {}
+    }
+  });
+  
+  const userWithProfile = data?.$users?.[0];
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
       if (
         mobileMenuRef.current &&
         !mobileMenuRef.current.contains(event.target as Node) &&
-        mobileMenuOpen // Only listen for outside clicks if mobile menu is open
+        mobileMenuOpen
       ) {
         setMobileMenuOpen(false);
       }
@@ -82,21 +232,12 @@ export default function Header() {
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
-    // Reset submenu states when closing the mobile menu
     setDataMgmtOpen(false);
-    setTemplateMgmtOpen(false);
   };
 
   const toggleDataMgmtMenu = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent event bubbling
+    e.stopPropagation();
     setDataMgmtOpen(!dataMgmtOpen);
-    if (templateMgmtOpen) setTemplateMgmtOpen(false);
-  };
-
-  const toggleTemplateMgmtMenu = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent event bubbling
-    setTemplateMgmtOpen(!templateMgmtOpen);
-    if (dataMgmtOpen) setDataMgmtOpen(false);
   };
 
   const isLoginPage = pathname.includes("/login");
@@ -122,252 +263,7 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-x-4 lg:gap-x-8">
-            <div className="relative" ref={dataMgmtRef}>
-              <button
-                onClick={toggleDataMgmtMenu}
-                className="flex items-center text-white text-sm hover:text-gray-300 transition-colors group whitespace-nowrap"
-                aria-expanded={dataMgmtOpen}
-                aria-haspopup="true"
-              >
-                <span className="inline-flex items-center justify-center mr-1.5 text-gray-400 group-hover:text-gray-300">
-                  <Database className="h-5 w-5" />
-                </span>
-                Data Mgmt
-                <ChevronDown className="h-4 w-4 ml-1" />
-              </button>
-
-              {dataMgmtOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-0"
-                    onClick={() => setDataMgmtOpen(false)}
-                  ></div>
-                  <div className="absolute left-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
-                    <Link
-                      href={generateTenantRedirectUrl(
-                        tenant,
-                        "/data-mgmt/company"
-                      )}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                      onClick={() => setDataMgmtOpen(false)}
-                    >
-                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                        <Building2 className="h-4 w-4" />
-                      </span>
-                      Company
-                    </Link>
-                    <Link
-                      href={generateTenantRedirectUrl(
-                        tenant,
-                        "/data-mgmt/division"
-                      )}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                      onClick={() => setDataMgmtOpen(false)}
-                    >
-                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                        <Menu className="h-4 w-4" />
-                      </span>
-                      Division
-                    </Link>
-                    <Link
-                      href={generateTenantRedirectUrl(
-                        tenant,
-                        "/data-mgmt/buildings"
-                      )}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                      onClick={() => setDataMgmtOpen(false)}
-                    >
-                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                        <Building2 className="h-4 w-4" />
-                      </span>
-                      Building
-                    </Link>
-                    <Link
-                      href={generateTenantRedirectUrl(
-                        tenant,
-                        "/data-mgmt/task"
-                      )}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                      onClick={() => setDataMgmtOpen(false)}
-                    >
-                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                        <ClipboardList className="h-4 w-4" />
-                      </span>
-                      Task
-                    </Link>
-                    <Link
-                      href={generateTenantRedirectUrl(
-                        tenant,
-                        "/data-mgmt/document"
-                      )}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                      onClick={() => setDataMgmtOpen(false)}
-                    >
-                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                        <FileText className="h-4 w-4" />
-                      </span>
-                      Document
-                    </Link>
-                    <Link
-                      href={generateTenantRedirectUrl(
-                        tenant,
-                        "/data-mgmt/person"
-                      )}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                      onClick={() => setDataMgmtOpen(false)}
-                    >
-                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                        <UserCircle className="h-4 w-4" />
-                      </span>
-                      Person
-                    </Link>
-                    <Link
-                      href={generateTenantRedirectUrl(
-                        tenant,
-                        "/data-mgmt/team"
-                      )}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                      onClick={() => setDataMgmtOpen(false)}
-                    >
-                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                        <Users className="h-4 w-4" />
-                      </span>
-                      Team
-                    </Link>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="relative" ref={templateMgmtRef}>
-              <button
-                onClick={toggleTemplateMgmtMenu}
-                className="flex items-center text-white text-sm hover:text-gray-300 transition-colors group whitespace-nowrap"
-                aria-expanded={templateMgmtOpen}
-                aria-haspopup="true"
-              >
-                <span className="inline-flex items-center justify-center mr-1.5 text-gray-400 group-hover:text-gray-300">
-                  <FileText className="h-5 w-5" />
-                </span>
-                Template Mgmt
-                <ChevronDown className="h-4 w-4 ml-1" />
-              </button>
-
-              {templateMgmtOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-0"
-                    onClick={() => setTemplateMgmtOpen(false)}
-                  ></div>
-                  <div className="absolute left-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
-                    <Link
-                      href={generateTenantRedirectUrl(
-                        tenant,
-                        "/template-mgmt/task-template"
-                      )}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                      onClick={() => setTemplateMgmtOpen(false)}
-                    >
-                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                        <ClipboardList className="h-4 w-4" />
-                      </span>
-                      Task Template
-                    </Link>
-                    <Link
-                      href={generateTenantRedirectUrl(
-                        tenant,
-                        "/template-mgmt/document-type-tmpl"
-                      )}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                      onClick={() => setTemplateMgmtOpen(false)}
-                    >
-                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                        <FileText className="h-4 w-4" />
-                      </span>
-                      Document Type Template
-                    </Link>
-                    <Link
-                      href={generateTenantRedirectUrl(
-                        tenant,
-                        "/template-mgmt/survey-type"
-                      )}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                      onClick={() => setTemplateMgmtOpen(false)}
-                    >
-                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                        <ClipboardList className="h-4 w-4" />
-                      </span>
-                      SurveyType
-                    </Link>
-                    <Link
-                      href={generateTenantRedirectUrl(
-                        tenant,
-                        "/template-mgmt/task-category"
-                      )}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                      onClick={() => setTemplateMgmtOpen(false)}
-                    >
-                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                        <Tag className="h-4 w-4" />
-                      </span>
-                      Task Category
-                    </Link>
-                    <Link
-                      href={generateTenantRedirectUrl(
-                        tenant,
-                        "/template-mgmt/risk-area"
-                      )}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                      onClick={() => setTemplateMgmtOpen(false)}
-                    >
-                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                        <Shield className="h-4 w-4" />
-                      </span>
-                      Risk Area
-                    </Link>
-                    <Link
-                      href={generateTenantRedirectUrl(
-                        tenant,
-                        "/template-mgmt/subsection"
-                      )}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                      onClick={() => setTemplateMgmtOpen(false)}
-                    >
-                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                        <Menu className="h-4 w-4" />
-                      </span>
-                      Subsection
-                    </Link>
-                    <Link
-                      href={generateTenantRedirectUrl(
-                        tenant,
-                        "/template-mgmt/legislation"
-                      )}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                      onClick={() => setTemplateMgmtOpen(false)}
-                    >
-                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                        <FileCheck className="h-4 w-4" />
-                      </span>
-                      Legislation
-                    </Link>
-                    <Link
-                      href={generateTenantRedirectUrl(
-                        tenant,
-                        "/template-mgmt/country"
-                      )}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                      onClick={() => setTemplateMgmtOpen(false)}
-                    >
-                      <span className="inline-flex items-center justify-center mr-2 text-gray-600">
-                        <Globe className="h-4 w-4" />
-                      </span>
-                      Country
-                    </Link>
-                  </div>
-                </>
-              )}
-            </div>
+            <DataManagementMenu />
 
             <Link
               href={generateTenantRedirectUrl(tenant, "/compliance-overview")}
@@ -396,49 +292,7 @@ export default function Header() {
         </div>
 
         {/* User Profile Icon */}
-        <div className="relative" ref={dropdownRef}>
-          <button
-            className="size-8 md:size-10 bg-black rounded-full flex items-center justify-center text-white hover:bg-orange-500 transition-colors text-sm md:text-base font-medium"
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            aria-label="User menu"
-            aria-expanded={dropdownOpen}
-          >
-            TT
-          </button>
-
-          {dropdownOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-10"
-                onClick={() => setDropdownOpen(false)}
-              ></div>
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 py-1 border border-gray-200">
-                <div className="px-4 py-2 border-b border-gray-100">
-                  <p className="text-sm font-medium">Admin User</p>
-                  <p className="text-xs text-gray-500">admin@procomply.com</p>
-                </div>
-                <a
-                  href="#profile"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  Profile
-                </a>
-                <a
-                  href="#settings"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  Settings
-                </a>
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 font-medium"
-                >
-                  Logout
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+        <UserAvatar user={userWithProfile} />
       </div>
 
       {/* Mobile Menu - Full Screen Overlay */}
@@ -560,69 +414,6 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Template Management Section */}
-            <div className="text-white">
-              <button
-                onClick={toggleTemplateMgmtMenu}
-                className="flex items-center justify-between w-full py-3 px-3 mb-2 rounded hover:bg-gray-800 active:bg-gray-700 border-b border-gray-700"
-                aria-expanded={templateMgmtOpen}
-                aria-controls="template-mgmt-submenu"
-              >
-                <div className="flex items-center">
-                  <span className="inline-flex items-center justify-center mr-3 text-gray-400">
-                    <FileText className="h-5 w-5" />
-                  </span>
-                  <span className="text-base font-medium">Template Mgmt</span>
-                </div>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`h-5 w-5 transform transition-transform duration-200 ${
-                    templateMgmtOpen ? "rotate-180" : ""
-                  }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-
-              {/* Template Management Submenu */}
-              <div
-                id="template-mgmt-submenu"
-                className={`pl-10 pb-2 space-y-1 overflow-hidden transition-all duration-300 ${
-                  templateMgmtOpen
-                    ? "max-h-[500px] opacity-100"
-                    : "max-h-0 opacity-0"
-                }`}
-              >
-                <Link
-                  href={generateTenantRedirectUrl(
-                    tenant,
-                    "/template-mgmt/task-template"
-                  )}
-                  onClick={closeMobileMenu}
-                  className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
-                >
-                  Task Template
-                </Link>
-                <Link
-                  href={generateTenantRedirectUrl(
-                    tenant,
-                    "/template-mgmt/document-type-tmpl"
-                  )}
-                  onClick={closeMobileMenu}
-                  className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
-                >
-                  Document Type Template
-                </Link>
-              </div>
-            </div>
 
             {/* Direct links */}
             <Link
