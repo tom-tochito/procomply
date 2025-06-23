@@ -1,10 +1,12 @@
 import SummaryCard from "@/features/dashboard/components/SummaryCard";
 import TaskChart from "@/features/dashboard/components/TaskChart";
 import ActivityFeed from "@/features/dashboard/components/ActivityFeed";
-import CompanyDocuments from "@/features/dashboard/components/CompanyDocuments";
-import LegislationSection from "@/features/dashboard/components/LegislationSection";
+import UpcomingInspections from "@/features/dashboard/components/UpcomingInspections";
+import ComplianceStatus from "@/features/dashboard/components/ComplianceStatus";
 import QuickActions from "@/features/dashboard/components/QuickActions";
 import { requireAuth } from "@/features/auth";
+import { dbAdmin } from "~/lib/db-admin";
+import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 
 interface DashboardPageProps {
   params: Promise<{
@@ -14,101 +16,156 @@ interface DashboardPageProps {
 
 export default async function DashboardPage({ params }: DashboardPageProps) {
   const { tenant } = await params;
-  await requireAuth(tenant);
+  const auth = await requireAuth(tenant);
+  
+  // Get tenant data
+  const tenantData = await findTenantBySlug(tenant);
+  if (!tenantData) {
+    throw new Error("Tenant not found");
+  }
 
-  // Sample activities data
-  const taskActivities = [
-    {
-      title: "Monthly H&S Visit (Includes Temp & Lights)",
-      location: "40050 Sidcup House",
-      status: "Created this task",
-    },
-    {
-      title: "Monthly H&S Visit (Includes Temp & Lights)",
-      location: "40050 Sidcup House",
-      team: "ASAP Comply Ltd",
-      assignee: "Mark Burchall (ASAP)",
-    },
-    {
-      title: "Quarterly Communal Fire Door Inspections",
-      location: "40126 Orion House",
-      status: "Visited awaiting report",
-    },
-    {
-      title: "Quarterly Communal Fire Door Inspections",
-      location: "40008 Stirling Court",
-      status: "Put on hold by Marta",
-    },
-    {
-      title: "Quarterly Communal Fire Door Inspections",
-      location: "40071 Gloucester Place",
-      status: "Removed from scope by Marta",
-    },
-  ];
+  // Fetch dashboard data from InstantDB
+  const [
+    buildingsResult,
+    tasksResult,
+    divisionsResult,
+    inspectionsResult,
+    documentsResult,
+    complianceChecksResult
+  ] = await Promise.all([
+    // Buildings count
+    dbAdmin.query({
+      buildings: {
+        $: {
+          where: { "tenant.id": tenantData.id },
+        },
+      },
+    }),
+    // Tasks data
+    dbAdmin.query({
+      tasks: {
+        $: {
+          where: { "tenant.id": tenantData.id },
+        },
+        building: {},
+        assignee: {},
+      },
+    }),
+    // Divisions for grouping
+    dbAdmin.query({
+      divisions: {
+        $: {
+          where: { "tenant.id": tenantData.id },
+        },
+        buildings: {},
+      },
+    }),
+    // Recent inspections
+    dbAdmin.query({
+      inspections: {
+        $: {
+          where: { "tenant.id": tenantData.id },
+          order: { createdAt: "desc" },
+          limit: 5,
+        },
+        building: {},
+      },
+    }),
+    // Recent documents
+    dbAdmin.query({
+      documents: {
+        $: {
+          where: { "tenant.id": tenantData.id },
+          order: { uploadedAt: "desc" },
+          limit: 5,
+        },
+        building: {},
+        uploader: {},
+      },
+    }),
+    // Compliance checks
+    dbAdmin.query({
+      complianceChecks: {
+        $: {
+          where: { "tenant.id": tenantData.id },
+        },
+        building: {},
+      },
+    }),
+  ]);
 
-  const jobActivities = [
-    {
-      title: "Fire Risk Assessment",
-      location: "40126 Orion House",
-      status: "Job assigned to London Fire Division",
-    },
-    {
-      title: "Asbestos Surveys",
-      location: "40008 Stirling Court",
-      status: "Survey completed, awaiting report",
-    },
-    {
-      title: "Fire Alarm Testing",
-      location: "40071 Gloucester Place",
-      status: "Job scheduled for next week",
-    },
-  ];
+  // Calculate statistics
+  const totalBuildings = buildingsResult.buildings.length;
+  const totalTasks = tasksResult.tasks.length;
+  const completedTasks = tasksResult.tasks.filter(
+    (task) => task.status === "completed"
+  ).length;
+  const outstandingTasks = totalTasks - completedTasks;
+  const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
-  const docActivities = [
-    {
-      title: "Fire Risk Assessment Report",
-      location: "40126 Orion House",
-      status: "Document uploaded by John Smith",
-    },
-    {
-      title: "Asbestos Survey Report",
-      location: "40008 Stirling Court",
-      status: "Document pending approval",
-    },
-    {
-      title: "Health & Safety Policy",
-      location: "Company-wide",
-      status: "Document updated by Admin",
-    },
-  ];
+  // Group tasks by division
+  const tasksByDivision: Record<string, { total: number; completed: number; inProgress: number; notStarted: number; onHold: number }> = {};
+  
+  divisionsResult.divisions.forEach((division) => {
+    const divisionBuildingIds = division.buildings?.map(b => b.id) || [];
+    const divisionTasks = tasksResult.tasks.filter(
+      task => task.building && divisionBuildingIds.includes(task.building.id)
+    );
+    
+    tasksByDivision[division.name] = {
+      total: divisionTasks.length,
+      completed: divisionTasks.filter(t => t.status === "completed").length,
+      inProgress: divisionTasks.filter(t => t.status === "in_progress").length,
+      notStarted: divisionTasks.filter(t => t.status === "pending").length,
+      onHold: divisionTasks.filter(t => t.status === "on_hold").length,
+    };
+  });
 
+  // Add "Leased" category for buildings without division
+  const leasedTasks = tasksResult.tasks.filter(
+    task => !task.building || !divisionsResult.divisions.some(
+      d => d.buildings?.some(b => b.id === task.building?.id)
+    )
+  );
+  
+  if (leasedTasks.length > 0) {
+    tasksByDivision["Leased"] = {
+      total: leasedTasks.length,
+      completed: leasedTasks.filter(t => t.status === "completed").length,
+      inProgress: leasedTasks.filter(t => t.status === "in_progress").length,
+      notStarted: leasedTasks.filter(t => t.status === "pending").length,
+      onHold: leasedTasks.filter(t => t.status === "on_hold").length,
+    };
+  }
+
+  // Prepare chart data
   const chartData = {
-    labels: ["Camden", "Hampstead", "Ealing", "Leased"],
+    labels: Object.keys(tasksByDivision),
     datasets: [
       {
-        label: "Completed - 891 tasks",
-        data: [312, 355, 217, 7],
+        label: `Completed - ${completedTasks} tasks`,
+        data: Object.values(tasksByDivision).map(d => d.completed),
         backgroundColor: "#4caf50",
         stack: "stack1",
         borderRadius: 4,
       },
       {
-        label: "Outstanding (In Progress) - 36 tasks",
-        data: [12, 10, 8, 6],
+        label: `Outstanding (In Progress) - ${Object.values(tasksByDivision).reduce((sum, d) => sum + d.inProgress, 0)} tasks`,
+        data: Object.values(tasksByDivision).map(d => d.inProgress),
         backgroundColor: "#f44336",
         stack: "stack1",
         borderRadius: 4,
       },
       {
-        label: "Outstanding (Not Started) - 68 tasks",
-        data: [25, 20, 18, 5],
+        label: `Outstanding (Not Started) - ${Object.values(tasksByDivision).reduce((sum, d) => sum + d.notStarted, 0)} tasks`,
+        data: Object.values(tasksByDivision).map(d => d.notStarted),
         backgroundColor: "#ff7575",
         stack: "stack1",
         borderRadius: 4,
       },
       {
-        label: "Outstanding (On Hold) - NaN tasks",
-        data: [0, 0, 0, 0],
+        label: `Outstanding (On Hold) - ${Object.values(tasksByDivision).reduce((sum, d) => sum + d.onHold, 0)} tasks`,
+        data: Object.values(tasksByDivision).map(d => d.onHold),
         backgroundColor: "#9999ff",
         stack: "stack1",
         borderRadius: 4,
@@ -116,6 +173,31 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     ],
   };
 
+  // Format recent activities
+  const taskActivities = tasksResult.tasks.slice(0, 5).map((task) => ({
+    title: task.title,
+    location: task.building?.name || "Unknown location",
+    status: task.status === "completed" ? "Completed" : 
+           task.status === "in_progress" ? "In Progress" :
+           task.status === "on_hold" ? "On Hold" : "Created",
+    ...(task.assignee && { assignee: task.assignee.email }),
+  }));
+
+  const jobActivities = inspectionsResult.inspections.map((inspection) => ({
+    title: inspection.type,
+    location: inspection.building?.name || "Unknown location",
+    status: inspection.status === "completed" ? "Completed" :
+           inspection.status === "scheduled" ? "Scheduled" :
+           inspection.status === "in_progress" ? "In Progress" : inspection.status,
+  }));
+
+  const docActivities = documentsResult.documents.map((doc) => ({
+    title: doc.name,
+    location: doc.building?.name || "Company-wide",
+    status: `Uploaded by ${doc.uploader?.email || "Unknown"}`,
+  }));
+
+  // Chart options
   const chartOptions = {
     indexAxis: "y" as const,
     responsive: true,
@@ -186,25 +268,25 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <SummaryCard
             title="Total Tasks"
-            value="995"
+            value={totalTasks.toString()}
             subtitle="Across all properties"
             accentColor="border-[#F30]"
           />
           <SummaryCard
             title="Completed"
-            value="891"
-            subtitle="89.5% completion rate"
+            value={completedTasks.toString()}
+            subtitle={`${completionRate.toFixed(1)}% completion rate`}
             accentColor="border-green-500"
           />
           <SummaryCard
             title="Outstanding"
-            value="104"
+            value={outstandingTasks.toString()}
             subtitle="Requires attention"
             accentColor="border-red-500"
           />
           <SummaryCard
             title="Properties"
-            value="4"
+            value={totalBuildings.toString()}
             subtitle="Under management"
             accentColor="border-purple-500"
           />
@@ -222,9 +304,9 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
         {/* Bottom cards grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          <CompanyDocuments />
-          <LegislationSection />
-          <QuickActions />
+          <UpcomingInspections inspections={inspectionsResult.inspections} tenant={tenant} />
+          <ComplianceStatus complianceChecks={complianceChecksResult.complianceChecks} tenant={tenant} />
+          <QuickActions tenant={tenant} />
         </div>
       </div>
     </div>
