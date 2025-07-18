@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import BuildingCard from "./BuildingCard";
 import BuildingsTable from "./BuildingsTable";
 import BuildingFilters from "./BuildingFilters";
@@ -8,30 +8,105 @@ import BuildingSearch from "./BuildingSearch";
 import AddBuildingModal from "./AddBuildingModalNew";
 import { BuildingWithStats } from "@/features/buildings/models";
 import { Tenant } from "@/features/tenant/models";
-import { Division } from "@/features/divisions/models";
+import { db } from "~/lib/db";
+import { getFileUrl } from "@/common/utils/file";
+import { COMPLIANCE_CHECK_TYPES } from "@/features/compliance/models";
 
 interface BuildingsListProps {
-  initialBuildings: BuildingWithStats[];
-  divisions: string[];
-  divisionsData?: Division[];
   tenant: Tenant;
 }
 
-export default function BuildingsList({
-  initialBuildings,
-  divisions,
-  divisionsData,
-  tenant,
-}: BuildingsListProps) {
+export default function BuildingsList({ tenant }: BuildingsListProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDivision, setSelectedDivision] = useState("Active Divisions");
   const [buildingUse, setBuildingUse] = useState("Building Use");
   const [availability, setAvailability] = useState("Availability");
   const [viewMode, setViewMode] = useState<"cards" | "table">("table");
+  const [pageNumber, setPageNumber] = useState(1);
+  const pageSize = 10;
+
+  // Fetch buildings with division and task data using InstantDB
+  const { data: buildingsData, isLoading: buildingsLoading, error: buildingsError } = db.useQuery({
+    buildings: {
+      $: {
+        where: { "tenant.id": tenant.id },
+        order: { createdAt: "desc" },
+        limit: pageSize,
+        offset: (pageNumber - 1) * pageSize,
+      },
+      divisionEntity: {},
+      tasks: {},
+      complianceChecks: {},
+    },
+  });
+
+  // Fetch divisions data
+  const { data: divisionsData, isLoading: divisionsLoading } = db.useQuery({
+    divisions: {
+      $: {
+        where: { "tenant.id": tenant.id },
+        order: { name: "asc" },
+      },
+      buildings: {},
+    },
+  });
+
+  // Transform buildings to include stats
+  const buildingsWithStats = useMemo(() => {
+    if (!buildingsData?.buildings) return [];
+    
+    return buildingsData.buildings.map((building): BuildingWithStats => {
+      // Calculate task-based compliance
+      const taskStats = {
+        total: building.tasks?.length || 0,
+        completed: building.tasks?.filter((task) => task.status === "completed").length || 0,
+      };
+      const taskCompliance = taskStats.total > 0
+        ? Math.round((taskStats.completed / taskStats.total) * 100)
+        : 100;
+
+      // Calculate compliance check-based compliance
+      const checksByType: Record<string, { status?: string; completedDate?: number; dueDate?: number }> = {};
+      (building.complianceChecks || []).forEach(check => {
+        if (!checksByType[check.checkType] || 
+            (check.completedDate || check.dueDate || 0) > 
+            (checksByType[check.checkType].completedDate || 
+             checksByType[check.checkType].dueDate || 0)) {
+          checksByType[check.checkType] = check;
+        }
+      });
+
+      const totalCheckTypes = Object.keys(COMPLIANCE_CHECK_TYPES).length;
+      const completedChecks = Object.values(checksByType).filter(
+        check => check.status === "success"
+      ).length;
+      const checkCompliance = totalCheckTypes > 0 
+        ? Math.round((completedChecks / totalCheckTypes) * 100) 
+        : 0;
+
+      // Use check-based compliance if available, otherwise use task-based
+      const compliance = building.complianceChecks?.length > 0 ? checkCompliance : taskCompliance;
+      
+      return {
+        ...building,
+        image: building.image ? getFileUrl(tenant.slug, building.image) : undefined,
+        division: building.divisionEntity?.name || building.division || "Unassigned",
+        status: "Active",
+        compliance,
+        inbox: { urgent: 0, warning: 0, email: false },
+      };
+    });
+  }, [buildingsData, tenant.slug]);
+
+  // Get unique divisions from database
+  const divisionNames = useMemo(() => {
+    const names = divisionsData?.divisions?.map((d) => d.name) || [];
+    return ["Active Divisions", ...names, "Archived"];
+  }, [divisionsData]);
 
   // Filter buildings based on search and filters
-  const filteredBuildings = initialBuildings.filter((building) => {
+  const filteredBuildings = buildingsWithStats.filter((building) => {
     // Search filter
     if (
       searchTerm &&
@@ -52,35 +127,35 @@ export default function BuildingsList({
       return false;
     }
 
-    // Building Use filter
+    // Building Use filter - TODO: Add actual building use field to schema
     if (buildingUse !== "Building Use") {
-      // Mock filter - would need actual building use data
-      if (buildingUse === "Residential" && building.id.startsWith("400")) {
-        return true;
-      } else if (
-        buildingUse === "Commercial" &&
-        !building.id.startsWith("400")
-      ) {
-        return true;
-      } else if (
-        buildingUse !== "Residential" &&
-        buildingUse !== "Commercial"
-      ) {
-        return true;
-      } else {
-        return false;
-      }
+      // Filter would be applied here once building use is added to schema
+      return true;
     }
 
     // Availability filter
-    if (availability !== "Availability") {
-      // Mock filter - would need actual availability data
-      return true;
+    if (availability !== "Availability" && building.availability !== availability) {
+      return false;
     }
 
     return true;
   });
 
+  if (buildingsLoading || divisionsLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="text-gray-500">Loading buildings...</div>
+      </div>
+    );
+  }
+
+  if (buildingsError) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="text-red-500">Error loading buildings: {buildingsError.message}</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -138,7 +213,7 @@ export default function BuildingsList({
 
       {/* Filter tags */}
       <div className="flex flex-wrap gap-2 mb-8">
-        {divisions.map((division) => (
+        {divisionNames.map((division) => (
           <button
             key={division}
             className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap flex-shrink-0 ${
@@ -205,22 +280,24 @@ export default function BuildingsList({
         </div>
       )}
 
-      {/* Pagination for card view */}
-      {viewMode === "cards" && filteredBuildings.length > 0 && (
+      {/* Pagination */}
+      {(filteredBuildings.length > 0 || pageNumber > 1) && (
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-4 text-sm gap-3">
           <div className="text-gray-500">
-            Showing {filteredBuildings.length} buildings
+            Showing {filteredBuildings.length} buildings {pageNumber > 1 && `(Page ${pageNumber})`}
           </div>
           <div className="flex space-x-2">
             <button
-              className="px-3 py-1 border rounded-md bg-gray-100 hover:bg-gray-200 focus:outline-none transition-colors"
-              onClick={() => alert("Previous page")}
+              className="px-3 py-1 border rounded-md bg-gray-100 hover:bg-gray-200 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => setPageNumber(pageNumber - 1)}
+              disabled={pageNumber <= 1}
             >
               Previous
             </button>
             <button
-              className="px-3 py-1 border rounded-md bg-[#F30] text-white hover:bg-[#E20] focus:outline-none transition-colors"
-              onClick={() => alert("Next page")}
+              className="px-3 py-1 border rounded-md bg-[#F30] text-white hover:bg-[#E20] focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => setPageNumber(pageNumber + 1)}
+              disabled={filteredBuildings.length < pageSize}
             >
               Next
             </button>
@@ -233,7 +310,7 @@ export default function BuildingsList({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         tenant={tenant}
-        divisions={divisionsData}
+        divisions={divisionsData?.divisions}
       />
     </>
   );

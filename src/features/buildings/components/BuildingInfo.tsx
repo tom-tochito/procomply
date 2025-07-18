@@ -2,13 +2,15 @@
 
 import React, { useState } from "react";
 import { Building } from "@/features/buildings/models";
+import { Division } from "@/features/divisions/models";
 import EditBuildingModal from "./EditBuildingModal";
 
 interface BuildingInfoProps {
   building: Building;
+  divisions?: Division[];
 }
 
-export default function BuildingInfo({ building }: BuildingInfoProps) {
+export default function BuildingInfo({ building, divisions = [] }: BuildingInfoProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   // Building data from database
   const buildingData = {
@@ -499,6 +501,7 @@ export default function BuildingInfo({ building }: BuildingInfoProps) {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         building={building}
+        divisions={divisions}
       />
     </div>
   );

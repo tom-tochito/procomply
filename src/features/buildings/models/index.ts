@@ -31,6 +31,13 @@ export type BuildingWithDivision = InstaQLEntity<
   { divisionEntity: object }
 >;
 
+// Division with related buildings
+export type DivisionWithBuildings = InstaQLEntity<
+  AppSchema,
+  "divisions",
+  { buildings: object }
+>;
+
 // Building with all relations
 export type BuildingWithRelations = InstaQLEntity<
   AppSchema,
@@ -54,6 +61,9 @@ export interface BuildingWithStats extends Building {
     email: boolean;
   };
 }
+
+// Division type
+export type Division = InstaQLEntity<AppSchema, "divisions">;
 
 // Other related types (moved to their respective feature models)
 export type Inspection = InstaQLEntity<AppSchema, "inspections">;

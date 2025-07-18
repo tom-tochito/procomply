@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Task } from "@/data/tasks";
+import { isDateOverdue } from "@/common/utils/date";
 
 interface TaskTableProps {
   tasks: Task[];
@@ -128,8 +129,11 @@ export default function TaskTable({
   };
 
   const renderDateBadge = (date: string) => {
+    const isOverdue = isDateOverdue(date);
     return (
-      <span className="inline-block rounded-md bg-red-100 text-red-800 px-2 py-1 text-xs font-medium">
+      <span className={`inline-block rounded-md px-2 py-1 text-xs font-medium ${
+        isOverdue ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'
+      }`}>
         {date}
       </span>
     );

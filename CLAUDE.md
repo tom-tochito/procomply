@@ -182,3 +182,12 @@ export interface BuildingWithStats extends Building {
   status?: string;
 }
 ```
+
+## 15. Server-Side Repository Pattern
+
+Only use server-side repositories for:
+- Authentication (auth)
+- Tenant operations (tenant)
+- File storage operations (storage)
+
+All other data operations should use client-side InstantDB queries with `db.useQuery`. Do NOT create server-side repositories for entities like buildings, divisions, tasks, etc.

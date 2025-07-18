@@ -1,12 +1,8 @@
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import BuildingsList from "@/features/buildings/components/BuildingsList";
-import { getBuildingsWithComplianceStats } from "@/features/buildings/repository/buildings.repository";
-import { getDivisionsByTenant } from "@/features/divisions/repository/divisions.repository";
 import { requireAuth } from "@/features/auth";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
-import { BuildingWithStats } from "@/features/buildings/models";
-import { getFileUrl } from "@/common/utils/file";
 
 interface BuildingsPageProps {
   params: Promise<{
@@ -15,47 +11,16 @@ interface BuildingsPageProps {
 }
 
 export default async function BuildingsPage({ params }: BuildingsPageProps) {
-  const { tenant } = await params;
+  const { tenant: tenantSlug } = await params;
 
   // Get tenant data
-  const tenantData = await findTenantBySlug(tenant);
-  if (!tenantData) {
+  const tenant = await findTenantBySlug(tenantSlug);
+  if (!tenant) {
     throw new Error("Tenant not found");
   }
 
   // Require authentication
-  await requireAuth(tenantData);
-
-  // Fetch buildings from InstantDB
-  const buildings = await getBuildingsWithComplianceStats(tenantData);
-
-  // Fetch divisions from InstantDB
-  const divisionsData = await getDivisionsByTenant(tenantData);
-
-  // Transform buildings to match expected format
-  const transformedBuildings: BuildingWithStats[] = buildings.map(
-    (building) => ({
-      ...building,
-      image: building.image ? getFileUrl(tenant, building.image) : undefined,
-      division:
-        building.divisionEntity?.name || building.division || "Unassigned",
-      status: "Active",
-      compliance:
-        building.taskStats.total > 0
-          ? Math.round(
-              (building.taskStats.completed / building.taskStats.total) * 100
-            )
-          : 100,
-      inbox: { urgent: 0, warning: 0, email: false }, // Default values for now
-    })
-  );
-
-  // Get unique divisions from database
-  const divisionNames = [
-    "Active Divisions",
-    ...divisionsData.map((d) => d.name),
-    "Archived",
-  ];
+  await requireAuth(tenant);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -67,7 +32,7 @@ export default async function BuildingsPage({ params }: BuildingsPageProps) {
           </h1>
           <div className="flex items-center text-sm text-gray-600 mt-2">
             <Link
-              href={generateTenantRedirectUrl(tenant, "/dashboard")}
+              href={generateTenantRedirectUrl(tenantSlug, "/dashboard")}
               className="hover:text-blue-600"
             >
               <span>Data Management</span>
@@ -78,12 +43,7 @@ export default async function BuildingsPage({ params }: BuildingsPageProps) {
         </div>
 
         {/* Buildings list component */}
-        <BuildingsList
-          initialBuildings={transformedBuildings}
-          divisions={divisionNames}
-          divisionsData={divisionsData}
-          tenant={tenantData}
-        />
+        <BuildingsList tenant={tenant} />
       </div>
     </div>
   );

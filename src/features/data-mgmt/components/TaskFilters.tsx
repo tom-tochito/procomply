@@ -15,9 +15,9 @@ interface TaskFiltersProps {
   setBuildingUse: (use: string) => void;
   onAddTaskClick: () => void;
   onColumnsMenuToggle: () => void;
+  divisions?: string[]; // Dynamic divisions from database
 }
 
-const divisions = ["Active Divisions", "Hampstead", "Ealing", "Camden", "Leased", "Archived"];
 const availableTeams = [
   "ASAP Comply Ltd",
   "Property Fire Protection",
@@ -38,6 +38,7 @@ export default function TaskFilters({
   setBuildingUse,
   onAddTaskClick,
   onColumnsMenuToggle,
+  divisions = ["All Divisions"], // Default if no divisions provided
 }: TaskFiltersProps) {
   const [teamsDropdownOpen, setTeamsDropdownOpen] = useState(false);
   const [assigneeDropdownOpen, setAssigneeDropdownOpen] = useState(false);
@@ -76,6 +77,16 @@ export default function TaskFilters({
 
         {/* Division pills for desktop */}
         <div className="hidden lg:flex flex-wrap gap-2 flex-1">
+          <button
+            className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+              selectedDivision === "All Divisions"
+                ? "bg-red-50 text-[#F30] font-medium border border-[#F30]"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+            onClick={() => setSelectedDivision("All Divisions")}
+          >
+            All Divisions
+          </button>
           {divisions.map(div => (
             <button
               key={div}
@@ -98,6 +109,7 @@ export default function TaskFilters({
             value={selectedDivision}
             onChange={(e) => setSelectedDivision(e.target.value)}
           >
+            <option value="All Divisions">All Divisions</option>
             {divisions.map(div => (
               <option key={div} value={div}>{div}</option>
             ))}

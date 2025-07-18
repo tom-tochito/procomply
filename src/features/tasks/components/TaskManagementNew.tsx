@@ -41,6 +41,27 @@ export default function TaskManagementNew({
     },
   });
 
+  // Fetch divisions for filters
+  const { data: divisionsData } = db.useQuery({
+    divisions: {
+      $: {
+        where: { "tenant.id": tenantId },
+        order: { name: "asc" }
+      },
+    },
+  });
+
+  // Create a mapping of task IDs to building data
+  const taskBuildingMap = new Map<string, { name: string; image?: string }>();
+  instantData?.tasks?.forEach((task) => {
+    if (task.building) {
+      taskBuildingMap.set(task.id, {
+        name: task.building.name,
+        image: task.building.image,
+      });
+    }
+  });
+
   // Transform InstantDB tasks to match Task interface
   const tasks: Task[] = (instantData?.tasks || []).map((task) => ({
     id: task.id,
@@ -65,7 +86,7 @@ export default function TaskManagementNew({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDivision, setSelectedDivision] = useState("Active Divisions");
+  const [selectedDivision, setSelectedDivision] = useState("All Divisions");
   const [selectedTeam, setSelectedTeam] = useState("");
   const [selectedAssignee, setSelectedAssignee] = useState("");
   const [buildingUse, setBuildingUse] = useState("");
@@ -118,8 +139,13 @@ export default function TaskManagementNew({
       return false;
     }
 
-    if (selectedDivision !== "Active Divisions") {
-      return true;
+    // Division filter
+    if (selectedDivision !== "All Divisions") {
+      // Find the building for this task
+      const taskBuilding = instantData?.tasks?.find(t => t.id === task.id)?.building;
+      if (!taskBuilding || taskBuilding.division !== selectedDivision) {
+        return false;
+      }
     }
 
     if (selectedTeam && task.team !== selectedTeam) {
@@ -223,7 +249,8 @@ export default function TaskManagementNew({
           isOpen={dialogOpen}
           onClose={handleDialogClose}
           task={selectedTask}
-          building={{ name: `Building ${selectedTask.building_id}` }}
+          building={taskBuildingMap.get(selectedTask.id) || { name: `Building ${selectedTask.building_id}` }}
+          onTaskUpdate={handleTaskSuccess}
         />
       )}
 
@@ -303,6 +330,7 @@ export default function TaskManagementNew({
               setBuildingUse={setBuildingUse}
               onAddTaskClick={handleAddTask}
               onColumnsMenuToggle={() => setColumnsMenuOpen(!columnsMenuOpen)}
+              divisions={(divisionsData?.divisions || []).map(d => d.name)}
             />
           </div>
 

@@ -1,6 +1,9 @@
+"use client";
+
 import React from "react";
 import { Task } from "@/data/tasks"; // Import Task type from data
 import Image from "next/image"; // Import next/image
+import { db } from "~/lib/db";
 import { 
   Info, 
   Image as ImageIcon, 
@@ -23,6 +26,7 @@ interface TaskDetailsDialogProps {
   task: Task; // The task data to display
   // Optional: Pass building data if not included directly in task
   building?: { name: string; image?: string };
+  onTaskUpdate?: () => void; // Callback when task is updated
 }
 
 // --- Icon Components (Using Lucide React icons) ---
@@ -67,6 +71,7 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
   onClose,
   task,
   building,
+  onTaskUpdate,
 }) => {
   const [activeTab, setActiveTab] = React.useState<"general" | "photos">(
     "general"
@@ -174,19 +179,47 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                 {getProgressPercentage(task.progress)}%
               </span>
             </div>
-            <button className="bg-teal-500 hover:bg-teal-600 text-white px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 rounded text-xs sm:text-sm font-medium whitespace-nowrap">
-              Start Job
+            <button 
+              className="bg-teal-500 hover:bg-teal-600 text-white px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 rounded text-xs sm:text-sm font-medium whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={task.progress === "in_progress" || task.progress === "completed"}
+              onClick={async () => {
+                try {
+                  await db.transact([
+                    db.tx.tasks[task.id].update({
+                      status: "in_progress",
+                      updatedAt: Date.now(),
+                    })
+                  ]);
+                  if (onTaskUpdate) {
+                    onTaskUpdate();
+                  }
+                } catch (error) {
+                  console.error("Error starting job:", error);
+                }
+              }}
+            >
+              {task.progress === "in_progress" ? "Job Started" : task.progress === "completed" ? "Job Completed" : "Start Job"}
             </button>
-            {/* Workflow / Assignee Icons (Placeholders) */}
+            {/* Workflow / Assignee Icons */}
             <button
-              title="Workflow"
-              className="text-gray-400 hover:text-white hidden sm:block"
+              title="View Workflow"
+              className="text-gray-400 hover:text-white hidden sm:block transition-colors"
+              onClick={() => {
+                alert("Workflow view would open here. This feature is coming soon!");
+              }}
             >
               <CogIcon className="h-5 w-5" />
             </button>
             <button
-              title="Main Assignee"
-              className="text-gray-400 hover:text-white hidden sm:block"
+              title={`Assigned to: ${task.assignee || "Unassigned"}`}
+              className="text-gray-400 hover:text-white hidden sm:block transition-colors"
+              onClick={() => {
+                if (task.assignee) {
+                  alert(`View profile for ${task.assignee}`);
+                } else {
+                  alert("No assignee set for this task");
+                }
+              }}
             >
               <UserGroupIcon className="h-5 w-5" />
             </button>
@@ -206,14 +239,28 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
           {renderDueDateBadge("Due Date", task.due_date)}
           {renderMetadataBadge("Priority", task.priority)}
           {renderMetadataBadge("Risk Level", task.risk_level)}
-          {/* Placeholder for Workflow/Assignee Text - align right */}
+          {/* Workflow/Assignee Text - align right */}
           <div className="hidden sm:flex flex-grow justify-end space-x-4">
-            <span className="flex items-center text-gray-300">
-              <CogIcon className="h-4 w-4 mr-1" /> Workflow: --
-            </span>
-            <span className="flex items-center text-gray-300">
-              <UserGroupIcon className="h-4 w-4 mr-1" /> Main Assignee: --
-            </span>
+            <button 
+              className="flex items-center text-gray-300 hover:text-white transition-colors"
+              onClick={() => {
+                alert("Workflow view would open here. This feature is coming soon!");
+              }}
+            >
+              <CogIcon className="h-4 w-4 mr-1" /> Workflow: Standard
+            </button>
+            <button 
+              className="flex items-center text-gray-300 hover:text-white transition-colors"
+              onClick={() => {
+                if (task.assignee) {
+                  alert(`View profile for ${task.assignee}`);
+                } else {
+                  alert("No assignee set for this task");
+                }
+              }}
+            >
+              <UserGroupIcon className="h-4 w-4 mr-1" /> Assignee: {task.assignee || "Unassigned"}
+            </button>
           </div>
         </div>
 
@@ -291,7 +338,7 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                 }`}
               >
                 <PhotoIcon className="h-4 sm:h-5 w-4 sm:w-5 mr-1 sm:mr-1.5" />{" "}
-                Task photos
+                Task Photos
               </button>
             </div>
             {/* Tab Content - Scrollable */}
@@ -335,8 +382,13 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                           <p className="text-gray-800 font-medium">
                             {buildingName}
                           </p>
-                          {buildingImage && (
-                            <div className="mt-2">
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">
+                            Property Photo:
+                          </p>
+                          {buildingImage ? (
+                            <div className="mt-1">
                               <Image
                                 src={buildingImage}
                                 alt={buildingName}
@@ -345,11 +397,24 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                                 className="w-full max-w-xs rounded-md border border-gray-200"
                               />
                             </div>
+                          ) : (
+                            <p className="text-gray-400 italic text-xs">No property photo available</p>
                           )}
                         </div>
                         <div>
                           <p className="text-gray-500 text-xs mb-0.5">Code:</p>
                           <p className="text-gray-800 font-medium">-</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-xs mb-0.5">Workflow:</p>
+                          <button 
+                            className="text-blue-600 hover:text-blue-800 font-medium underline text-left transition-colors"
+                            onClick={() => {
+                              alert("Workflow view would open here. This feature is coming soon!");
+                            }}
+                          >
+                            Standard Workflow
+                          </button>
                         </div>
                         <div>
                           <p className="text-gray-500 text-xs mb-0.5">Name:</p>
@@ -619,9 +684,18 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                           <p className="text-gray-500 text-xs mb-0.5">
                             Assignee:
                           </p>
-                          <p className="text-gray-800 font-medium">
-                            {task.assignee || "Mark Burchall (ASAP)"}
-                          </p>
+                          <button 
+                            className="text-blue-600 hover:text-blue-800 font-medium underline text-left transition-colors"
+                            onClick={() => {
+                              if (task.assignee) {
+                                alert(`View profile for ${task.assignee}`);
+                              } else {
+                                alert("No assignee set for this task");
+                              }
+                            }}
+                          >
+                            {task.assignee || "Unassigned"}
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -687,18 +761,34 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                 <div className="space-y-5">
                   <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-3 sm:mb-4 flex items-center text-gray-700">
                     <PhotoIcon className="h-4 sm:h-5 w-4 sm:w-5 mr-1.5 sm:mr-2 text-gray-600" />
-                    Task Photos
+                    Task-Specific Photos
                   </h3>
+
+                  <div className="mb-4">
+                    <p className="text-sm text-gray-600">
+                      Upload photos specific to this task&apos;s completion. For property photos, see the General Data tab.
+                    </p>
+                  </div>
 
                   {/* Empty state for photos */}
                   <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center text-center">
                     <PhotoIcon className="h-10 w-10 text-gray-400 mb-3" />
                     <p className="text-gray-500 text-sm mb-2">
-                      No photos have been added to this task yet
+                      No task photos have been uploaded yet
                     </p>
-                    <button className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-3 sm:px-4 py-1.5 rounded text-xs sm:text-sm font-medium">
-                      Upload Photos
+                    <p className="text-gray-400 text-xs mb-3">
+                      Task photos could include before/after images, work progress, or issue documentation
+                    </p>
+                    <button 
+                      className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-3 sm:px-4 py-1.5 rounded text-xs sm:text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={task.progress !== "in_progress"}
+                      title={task.progress !== "in_progress" ? "Start the job first to upload photos" : ""}
+                    >
+                      Upload Task Photos
                     </button>
+                    {task.progress !== "in_progress" && (
+                      <p className="text-xs text-gray-500 mt-2">Start the job to enable photo uploads</p>
+                    )}
                   </div>
                 </div>
               )}

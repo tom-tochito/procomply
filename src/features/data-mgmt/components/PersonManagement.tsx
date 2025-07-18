@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import PersonSearch from "./PersonSearch";
-import ContactCard, { Contact } from "@/features/common/components/ContactCard";
+import ContactCard, { Contact } from "@/features/contacts/components/ContactCard";
 import AddPersonModal from "@/features/user/components/AddPersonModal";
 import { Plus, User } from "lucide-react";
 import { Tenant } from "@/features/tenant/models";

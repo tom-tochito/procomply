@@ -7,14 +7,14 @@ import {
   deleteDocumentAction,
 } from "@/features/documents/actions/documents.actions";
 import { useRouter } from "next/navigation";
-import { DocumentWithRelations } from "@/features/documents/models";
+import { DocumentWithUploader } from "@/features/documents/models";
 import { getFileUrl } from "~/src/common/utils/file";
 
 interface DocumentsTabProps {
   buildingId: string;
   tenantId: string;
   tenant: string;
-  documents: DocumentWithRelations[]; // Documents from server
+  documents: DocumentWithUploader[]; // Documents from server
 }
 
 export default function DocumentsTab({
@@ -120,13 +120,13 @@ export default function DocumentsTab({
     }
   };
 
-  const handleDownload = (doc: DocumentWithRelations) => {
+  const handleDownload = (doc: DocumentWithUploader) => {
     // Generate download URL
     const downloadUrl = getFileUrl(tenant, doc.path);
     window.open(downloadUrl, "_blank");
   };
 
-  const handleView = (doc: DocumentWithRelations) => {
+  const handleView = (doc: DocumentWithUploader) => {
     // For PDFs and images, open in new tab
     const viewUrl = getFileUrl(tenant, doc.path);
     window.open(viewUrl, "_blank");

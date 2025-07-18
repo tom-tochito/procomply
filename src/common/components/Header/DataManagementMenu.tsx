@@ -23,9 +23,9 @@ const MENU_ITEMS: Array<{
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 }> = [
+  { href: "/data-mgmt/buildings", label: "Building", icon: Building2 },
   { href: "/data-mgmt/company", label: "Company", icon: Building2 },
   { href: "/data-mgmt/division", label: "Division", icon: Menu },
-  { href: "/data-mgmt/buildings", label: "Building", icon: Building2 },
   { href: "/data-mgmt/task", label: "Task", icon: ClipboardList },
   { href: "/data-mgmt/document", label: "Document", icon: FileText },
   { href: "/data-mgmt/person", label: "Person", icon: UserCircle },

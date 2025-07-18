@@ -3,6 +3,7 @@
 import React from "react";
 import { Task } from "@/data/tasks";
 import { db } from "~/lib/db";
+import { isDateOverdue } from "@/common/utils/date";
 
 interface TaskTableProps {
   tasks: Task[];
@@ -81,7 +82,9 @@ export default function TaskTable({ tasks, onTaskClick, onTaskEdit, onTaskUpdate
                   {task.priority}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td className={`px-6 py-4 whitespace-nowrap text-sm ${
+                isDateOverdue(task.due_date) && !task.completed ? 'text-red-600 font-semibold' : 'text-gray-500'
+              }`}>
                 {task.due_date}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

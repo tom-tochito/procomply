@@ -85,3 +85,33 @@ export function timestampToDateInput(timestamp: number): string {
 export function isValidTimestamp(timestamp: number): boolean {
   return !isNaN(timestamp) && timestamp > 0;
 }
+
+/**
+ * Parse a date string in DD/MM/YYYY format to timestamp
+ */
+export function parseDDMMYYYY(dateString: string): number | null {
+  const parts = dateString.split('/');
+  if (parts.length !== 3) return null;
+  
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
+  const year = parseInt(parts[2], 10);
+  
+  if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+  
+  const date = new Date(year, month, day);
+  return date.getTime();
+}
+
+/**
+ * Check if a date is overdue (before today)
+ */
+export function isDateOverdue(dateString: string): boolean {
+  const timestamp = parseDDMMYYYY(dateString);
+  if (!timestamp) return false;
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time to start of day
+  
+  return timestamp < today.getTime();
+}

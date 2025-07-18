@@ -1,17 +1,12 @@
 "use client";
 
-import React, { useState, useActionState } from "react";
+import React, { useState } from "react";
 import { Plus, Search, User, X, Trash2 } from "lucide-react";
-import ContactCard from "@/features/common/components/ContactCard";
+import ContactCard from "@/features/contacts/components/ContactCard";
 import { db } from "~/lib/db";
+import { id } from "@instantdb/react";
 import { BuildingWithRelations } from "@/features/buildings/models";
 import { Contact } from "@/features/contacts/models";
-import {
-  createContact,
-  updateContact,
-  deleteContact,
-} from "@/features/contacts/repository/contacts.repository";
-import type { FormState } from "@/common/types/form";
 
 interface ContactsTabProps {
   building: BuildingWithRelations;
@@ -22,6 +17,11 @@ export default function ContactsTab({ building }: ContactsTabProps) {
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Get current user
+  const { user } = db.useAuth();
   
   // Real-time subscription to contacts
   const { data, isLoading } = db.useQuery({
@@ -39,37 +39,60 @@ export default function ContactsTab({ building }: ContactsTabProps) {
   const contacts = data?.contacts || [];
   const departments = ["all", "Management", "Maintenance", "Security", "Compliance", "Emergency", "Other"];
 
-  // Form actions
-  const [addFormState, addFormAction, isAddPending] = useActionState(
-    async (prevState: FormState, formData: FormData) => {
-      try {
-        if (!building.tenant) {
-          return { error: "Building has no tenant", success: false };
-        }
-        await createContact(building, building.tenant, {
-          name: formData.get("name") as string,
-          role: formData.get("role") as string || undefined,
-          email: formData.get("email") as string || undefined,
-          phone: formData.get("phone") as string || undefined,
-          mobile: formData.get("mobile") as string || undefined,
-          department: formData.get("department") as string || undefined,
-          notes: formData.get("notes") as string || undefined,
-          isPrimary: formData.get("isPrimary") === "true",
-        });
-        setShowAddModal(false);
-        return { error: null, success: true };
-      } catch (err) {
-        return { error: err instanceof Error ? err.message : "Failed to add contact", success: false };
+  // Handle contact creation
+  const handleAddContact = async (formData: FormData) => {
+    try {
+      setError(null);
+      setIsSubmitting(true);
+      
+      if (!building.tenant || !user) {
+        setError("Missing required data");
+        return;
       }
-    },
-    { error: null, success: false }
-  );
 
-  const [editFormState, editFormAction, isEditPending] = useActionState(
-    async (prevState: FormState, formData: FormData) => {
-      if (!editingContact) return { error: "No contact selected", success: false };
-      try {
-        await updateContact(editingContact.id, {
+      const contactId = id();
+      const now = Date.now();
+
+      await db.transact([
+        db.tx.contacts[contactId]
+          .update({
+            name: formData.get("name") as string,
+            role: formData.get("role") as string || undefined,
+            email: formData.get("email") as string || undefined,
+            phone: formData.get("phone") as string || undefined,
+            mobile: formData.get("mobile") as string || undefined,
+            department: formData.get("department") as string || undefined,
+            notes: formData.get("notes") as string || undefined,
+            isPrimary: formData.get("isPrimary") === "true",
+            createdAt: now,
+            updatedAt: now,
+          })
+          .link({
+            building: building.id,
+            tenant: building.tenant.id,
+            creator: user.id,
+          }),
+      ]);
+      
+      setShowAddModal(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to add contact");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle contact update
+  const handleUpdateContact = async (formData: FormData) => {
+    if (!editingContact) return;
+    
+    try {
+      setError(null);
+      setIsSubmitting(true);
+      const now = Date.now();
+
+      await db.transact([
+        db.tx.contacts[editingContact.id].update({
           name: formData.get("name") as string,
           role: formData.get("role") as string || undefined,
           email: formData.get("email") as string || undefined,
@@ -78,41 +101,45 @@ export default function ContactsTab({ building }: ContactsTabProps) {
           department: formData.get("department") as string || undefined,
           notes: formData.get("notes") as string || undefined,
           isPrimary: formData.get("isPrimary") === "true",
-        });
-        setEditingContact(null);
-        return { error: null, success: true };
-      } catch (err) {
-        return { error: err instanceof Error ? err.message : "Failed to update contact", success: false };
-      }
-    },
-    { error: null, success: false }
-  );
+          updatedAt: now,
+        }),
+      ]);
+      
+      setEditingContact(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update contact");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleDeleteContact = async (contactId: string) => {
     if (!confirm("Are you sure you want to delete this contact?")) return;
     try {
-      await deleteContact(contactId);
+      await db.transact([db.tx.contacts[contactId].delete()]);
     } catch {
-      console.error("Failed to delete contact");
+      setError("Failed to delete contact");
     }
   };
 
   const filteredContacts = contacts.filter(contact => {
-    const matchesSearch = 
+    const matchesSearch = !searchTerm || 
       contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (contact.role && contact.role.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (contact.email && contact.email.toLowerCase().includes(searchTerm.toLowerCase()));
+      contact.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.phone?.includes(searchTerm) ||
+      contact.mobile?.includes(searchTerm);
+    
     const matchesDepartment = departmentFilter === "all" || contact.department === departmentFilter;
+    
     return matchesSearch && matchesDepartment;
   });
 
-
   return (
-    <div>
+    <div className="space-y-6">
       {/* Search and filters */}
-      <div className="bg-white shadow rounded-lg p-6 mb-6">
-        <div className="flex flex-wrap gap-4">
-          <div className="flex-1 min-w-0 sm:min-w-[300px]">
+      <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
@@ -120,7 +147,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                 placeholder="Search contacts..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30] focus:border-[#F30]"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30]"
               />
             </div>
           </div>
@@ -128,7 +155,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
           <select
             value={departmentFilter}
             onChange={(e) => setDepartmentFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30] focus:border-[#F30]"
+            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30]"
           >
             {departments.map(dept => (
               <option key={dept} value={dept}>
@@ -206,15 +233,21 @@ export default function ContactsTab({ building }: ContactsTabProps) {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Add Contact</h2>
               <button
-                onClick={() => setShowAddModal(false)}
+                onClick={() => {
+                  setShowAddModal(false);
+                  setError(null);
+                }}
                 className="text-gray-500 hover:text-gray-700"
               >
                 <X className="h-6 w-6" />
               </button>
             </div>
-            <form action={addFormAction}>
-              {addFormState.error && (
-                <div className="mb-4 p-3 bg-red-50 text-red-700 rounded">{addFormState.error}</div>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleAddContact(new FormData(e.currentTarget));
+            }}>
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 text-red-700 rounded">{error}</div>
               )}
               <div className="space-y-4">
                 <div>
@@ -222,7 +255,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                   <input
                     name="name"
                     required
-                    disabled={isAddPending}
+                    disabled={isSubmitting}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30]"
                   />
                 </div>
@@ -230,7 +263,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                   <input
                     name="role"
-                    disabled={isAddPending}
+                    disabled={isSubmitting}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30]"
                   />
                 </div>
@@ -238,7 +271,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
                   <select
                     name="department"
-                    disabled={isAddPending}
+                    disabled={isSubmitting}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30]"
                   >
                     <option value="">Select Department</option>
@@ -252,7 +285,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                   <input
                     name="email"
                     type="email"
-                    disabled={isAddPending}
+                    disabled={isSubmitting}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30]"
                   />
                 </div>
@@ -261,7 +294,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                   <input
                     name="phone"
                     type="tel"
-                    disabled={isAddPending}
+                    disabled={isSubmitting}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30]"
                   />
                 </div>
@@ -270,7 +303,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                   <input
                     name="mobile"
                     type="tel"
-                    disabled={isAddPending}
+                    disabled={isSubmitting}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30]"
                   />
                 </div>
@@ -279,7 +312,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                   <textarea
                     name="notes"
                     rows={3}
-                    disabled={isAddPending}
+                    disabled={isSubmitting}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30]"
                   />
                 </div>
@@ -288,7 +321,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                     name="isPrimary"
                     type="checkbox"
                     value="true"
-                    disabled={isAddPending}
+                    disabled={isSubmitting}
                     className="h-4 w-4 text-[#F30] focus:ring-[#F30] border-gray-300 rounded"
                   />
                   <label className="ml-2 text-sm text-gray-700">Primary Contact</label>
@@ -297,18 +330,21 @@ export default function ContactsTab({ building }: ContactsTabProps) {
               <div className="mt-6 flex justify-end gap-3">
                 <button
                   type="button"
-                  onClick={() => setShowAddModal(false)}
-                  disabled={isAddPending}
+                  onClick={() => {
+                    setShowAddModal(false);
+                    setError(null);
+                  }}
+                  disabled={isSubmitting}
                   className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={isAddPending}
+                  disabled={isSubmitting}
                   className="px-4 py-2 bg-[#F30] text-white rounded-md hover:bg-[#E62E00] disabled:opacity-50"
                 >
-                  {isAddPending ? "Adding..." : "Add Contact"}
+                  {isSubmitting ? "Adding..." : "Add Contact"}
                 </button>
               </div>
             </form>
@@ -323,15 +359,21 @@ export default function ContactsTab({ building }: ContactsTabProps) {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Edit Contact</h2>
               <button
-                onClick={() => setEditingContact(null)}
+                onClick={() => {
+                  setEditingContact(null);
+                  setError(null);
+                }}
                 className="text-gray-500 hover:text-gray-700"
               >
                 <X className="h-6 w-6" />
               </button>
             </div>
-            <form action={editFormAction}>
-              {editFormState.error && (
-                <div className="mb-4 p-3 bg-red-50 text-red-700 rounded">{editFormState.error}</div>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleUpdateContact(new FormData(e.currentTarget));
+            }}>
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 text-red-700 rounded">{error}</div>
               )}
               <div className="space-y-4">
                 <div>
@@ -340,7 +382,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                     name="name"
                     defaultValue={editingContact.name}
                     required
-                    disabled={isEditPending}
+                    disabled={isSubmitting}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30]"
                   />
                 </div>
@@ -349,7 +391,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                   <input
                     name="role"
                     defaultValue={editingContact.role || ""}
-                    disabled={isEditPending}
+                    disabled={isSubmitting}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30]"
                   />
                 </div>
@@ -358,7 +400,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                   <select
                     name="department"
                     defaultValue={editingContact.department || ""}
-                    disabled={isEditPending}
+                    disabled={isSubmitting}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30]"
                   >
                     <option value="">Select Department</option>
@@ -373,7 +415,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                     name="email"
                     type="email"
                     defaultValue={editingContact.email || ""}
-                    disabled={isEditPending}
+                    disabled={isSubmitting}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30]"
                   />
                 </div>
@@ -383,7 +425,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                     name="phone"
                     type="tel"
                     defaultValue={editingContact.phone || ""}
-                    disabled={isEditPending}
+                    disabled={isSubmitting}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30]"
                   />
                 </div>
@@ -393,7 +435,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                     name="mobile"
                     type="tel"
                     defaultValue={editingContact.mobile || ""}
-                    disabled={isEditPending}
+                    disabled={isSubmitting}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30]"
                   />
                 </div>
@@ -403,7 +445,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                     name="notes"
                     rows={3}
                     defaultValue={editingContact.notes || ""}
-                    disabled={isEditPending}
+                    disabled={isSubmitting}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F30]"
                   />
                 </div>
@@ -413,7 +455,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                     type="checkbox"
                     value="true"
                     defaultChecked={editingContact.isPrimary}
-                    disabled={isEditPending}
+                    disabled={isSubmitting}
                     className="h-4 w-4 text-[#F30] focus:ring-[#F30] border-gray-300 rounded"
                   />
                   <label className="ml-2 text-sm text-gray-700">Primary Contact</label>
@@ -422,18 +464,21 @@ export default function ContactsTab({ building }: ContactsTabProps) {
               <div className="mt-6 flex justify-end gap-3">
                 <button
                   type="button"
-                  onClick={() => setEditingContact(null)}
-                  disabled={isEditPending}
+                  onClick={() => {
+                    setEditingContact(null);
+                    setError(null);
+                  }}
+                  disabled={isSubmitting}
                   className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={isEditPending}
+                  disabled={isSubmitting}
                   className="px-4 py-2 bg-[#F30] text-white rounded-md hover:bg-[#E62E00] disabled:opacity-50"
                 >
-                  {isEditPending ? "Saving..." : "Save Changes"}
+                  {isSubmitting ? "Saving..." : "Save Changes"}
                 </button>
               </div>
             </form>
