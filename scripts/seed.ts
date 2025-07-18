@@ -18,7 +18,7 @@ async function seed() {
     const adminProfileId = id();
     console.log("Creating admin user...");
 
-    const dateString = new Date().toISOString();
+    const timestamp = Date.now();
 
     await db.transact([
       db.tx.$users[adminUserId].update({
@@ -27,8 +27,8 @@ async function seed() {
       db.tx.userProfiles[adminProfileId]
         .update({
           role: "admin",
-          createdAt: dateString,
-          updatedAt: dateString,
+          createdAt: timestamp,
+          updatedAt: timestamp,
         })
         .link({
           $user: adminUserId,
@@ -64,8 +64,8 @@ async function seed() {
         name: tenant.name,
         slug: tenant.slug,
         description: tenant.description,
-        createdAt: dateString,
-        updatedAt: dateString,
+        createdAt: timestamp,
+        updatedAt: timestamp,
       })
     );
 

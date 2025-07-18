@@ -152,9 +152,9 @@ export async function uploadDocumentForDataMgmtAction(
         "application/octet-stream",
       path: uploadedPath,
       size: file.size,
-      uploadedAt: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      uploadedAt: Date.now(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     };
 
     // Build transaction with links

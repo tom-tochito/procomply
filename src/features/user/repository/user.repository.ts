@@ -47,7 +47,7 @@ export async function createUser(data: {
   try {
     const userId = id();
     const profileId = id();
-    const now = new Date().toISOString();
+    const now = Date.now();
 
     const transactions = [
       // Create user
@@ -131,7 +131,7 @@ export async function updateUser(
 
       const userProfile = result.$users?.[0]?.profile;
       if (userProfile) {
-        profileUpdates.updatedAt = new Date().toISOString();
+        profileUpdates.updatedAt = Date.now();
         transactions.push(
           dbAdmin.tx.userProfiles[userProfile.id].update(profileUpdates)
         );

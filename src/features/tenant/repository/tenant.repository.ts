@@ -59,8 +59,8 @@ export async function createTenant(data: {
         name: data.name,
         slug: data.slug,
         description: data.description,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
       }),
     ]);
 
@@ -86,7 +86,7 @@ export async function updateTenant(
     await dbAdmin.transact([
       dbAdmin.tx.tenants[tenantId].update({
         ...data,
-        updatedAt: new Date().toISOString(),
+        updatedAt: Date.now(),
       }),
     ]);
     return true;

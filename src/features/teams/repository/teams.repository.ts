@@ -66,7 +66,7 @@ export async function createTeam(
   if (!auth) throw new Error("Unauthorized");
 
   const teamId = id();
-  const now = new Date().toISOString();
+  const now = Date.now();
 
   const transactions = [
     dbAdmin.tx.teams[teamId]
@@ -108,7 +108,7 @@ export async function updateTeam(
 
   try {
     const updates: Record<string, unknown> = {
-      updatedAt: new Date().toISOString(),
+      updatedAt: Date.now(),
     };
 
     if (data.code !== undefined) updates.code = data.code;

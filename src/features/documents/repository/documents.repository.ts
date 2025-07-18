@@ -20,7 +20,7 @@ export async function uploadDocument(
   if (!auth) throw new Error("Unauthorized");
 
   const documentId = id();
-  const now = new Date().toISOString();
+  const now = Date.now();
 
   // Generate file path
   const fileExtension = file.name.split(".").pop() || "";

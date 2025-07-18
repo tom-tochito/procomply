@@ -10,6 +10,7 @@ import {
   COMPLIANCE_CHECK_TYPES,
   ComplianceOverviewBuilding
 } from "../models";
+import { toTimestamp } from "@/common/utils/date";
 
 export async function getBuildingsWithComplianceData(tenantId: string) {
   const query = await dbAdmin.query({
@@ -36,7 +37,7 @@ export async function getBuildingsWithComplianceData(tenantId: string) {
     Object.values(COMPLIANCE_CHECK_TYPES).forEach(checkType => {
       const checksOfType = building.complianceChecks
         ?.filter(check => check.checkType === checkType)
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        .sort((a, b) => b.createdAt - a.createdAt);
       
       if (checksOfType && checksOfType.length > 0) {
         checksByType[checkType] = checksOfType[0];
@@ -68,15 +69,15 @@ export async function createComplianceCheck(
   notes?: string
 ) {
   const checkId = id();
-  const now = new Date().toISOString();
+  const now = Date.now();
 
   await dbAdmin.transact([
     dbAdmin.tx.complianceChecks[checkId]
       .update({
         checkType,
         status,
-        dueDate: dueDate.toISOString(),
-        completedDate: completedDate?.toISOString(),
+        dueDate: toTimestamp(dueDate),
+        completedDate: completedDate ? toTimestamp(completedDate) : undefined,
         notes,
         createdAt: now,
         updatedAt: now,
@@ -99,13 +100,13 @@ export async function updateComplianceCheck(
     notes?: string;
   }
 ) {
-  const updateData: Record<string, string> = {
-    updatedAt: new Date().toISOString()
+  const updateData: Record<string, string | number | undefined> = {
+    updatedAt: Date.now()
   };
 
   if (updates.status !== undefined) updateData.status = updates.status;
-  if (updates.completedDate !== undefined) updateData.completedDate = updates.completedDate.toISOString();
-  if (updates.dueDate !== undefined) updateData.dueDate = updates.dueDate.toISOString();
+  if (updates.completedDate !== undefined) updateData.completedDate = toTimestamp(updates.completedDate);
+  if (updates.dueDate !== undefined) updateData.dueDate = toTimestamp(updates.dueDate);
   if (updates.notes !== undefined) updateData.notes = updates.notes;
 
   await dbAdmin.transact([
@@ -139,7 +140,7 @@ export async function getUpcomingComplianceChecks(tenantId: string, daysAhead: n
       $: {
         where: {
           "tenant.id": tenantId,
-          dueDate: { $lte: futureDate.toISOString() },
+          dueDate: { $lte: toTimestamp(futureDate) },
           status: { $not: "success" }
         },
         order: {

@@ -6,6 +6,7 @@ import { getAuthCookies } from "@/features/auth/repository/auth.repository";
 import type { FullUser } from "@/features/user/repository/user.repository";
 import type { Task, TaskWithRelations } from "@/features/tasks/models";
 import type { Tenant } from "@/features/tenant/models";
+import { dateInputToTimestamp } from "@/common/utils/date";
 
 async function validateUserAccess(
   user: FullUser,
@@ -80,7 +81,7 @@ export async function createTask(
   if (!auth) throw new Error("Unauthorized");
 
   const taskId = id();
-  const now = new Date().toISOString();
+  const now = Date.now();
 
   const linkData: {
     creator: string;
@@ -107,7 +108,7 @@ export async function createTask(
         description: data.description,
         status: data.status,
         priority: data.priority,
-        dueDate: data.dueDate,
+        dueDate: dateInputToTimestamp(data.dueDate),
         createdAt: now,
         updatedAt: now,
       })
@@ -141,10 +142,16 @@ export async function updateTask(
   if (!auth) throw new Error("Unauthorized");
 
   try {
-    const updates = {
-      ...data,
-      updatedAt: new Date().toISOString(),
+    const updates: Record<string, string | number | undefined> = {
+      updatedAt: Date.now(),
     };
+    
+    if (data.title !== undefined) updates.title = data.title;
+    if (data.description !== undefined) updates.description = data.description;
+    if (data.status !== undefined) updates.status = data.status;
+    if (data.priority !== undefined) updates.priority = data.priority;
+    if (data.dueDate !== undefined) updates.dueDate = dateInputToTimestamp(data.dueDate);
+    if (data.completedDate !== undefined) updates.completedDate = dateInputToTimestamp(data.completedDate);
 
     const transactions = [dbAdmin.tx.tasks[taskId].update(updates)];
 

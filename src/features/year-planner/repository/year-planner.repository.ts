@@ -6,6 +6,7 @@ import { getAuthCookies } from "@/features/auth/repository/auth.repository";
 import type { YearPlannerEventWithRelations } from "@/features/year-planner/models";
 import type { Building, BuildingWithRelations } from "@/features/buildings/models";
 import type { Tenant } from "@/features/tenant/models";
+import { toTimestamp } from "@/common/utils/date";
 
 export async function createYearPlannerEvent(
   building: Building | BuildingWithRelations,
@@ -26,7 +27,7 @@ export async function createYearPlannerEvent(
   if (!auth) throw new Error("Unauthorized");
 
   const eventId = id();
-  const now = new Date().toISOString();
+  const now = Date.now();
 
   await dbAdmin.transact([
     dbAdmin.tx.yearPlannerEvents[eventId]
@@ -34,8 +35,8 @@ export async function createYearPlannerEvent(
         title: data.title,
         description: data.description,
         eventType: data.eventType,
-        startDate: typeof data.startDate === "string" ? data.startDate : data.startDate.toISOString(),
-        endDate: data.endDate ? (typeof data.endDate === "string" ? data.endDate : data.endDate.toISOString()) : undefined,
+        startDate: toTimestamp(data.startDate),
+        endDate: data.endDate ? toTimestamp(data.endDate) : undefined,
         allDay: data.allDay || false,
         status: data.status || "scheduled",
         reminder: data.reminder || false,
@@ -70,14 +71,14 @@ export async function updateYearPlannerEvent(
   const auth = await getAuthCookies();
   if (!auth) throw new Error("Unauthorized");
 
-  const now = new Date().toISOString();
+  const now = Date.now();
   interface UpdateData {
-    updatedAt: string;
+    updatedAt: number;
     title?: string;
     description?: string;
     eventType?: string;
-    startDate?: string;
-    endDate?: string;
+    startDate?: number;
+    endDate?: number;
     allDay?: boolean;
     status?: string;
     reminder?: boolean;
@@ -90,10 +91,10 @@ export async function updateYearPlannerEvent(
   if (data.description !== undefined) updateData.description = data.description;
   if (data.eventType !== undefined) updateData.eventType = data.eventType;
   if (data.startDate !== undefined) {
-    updateData.startDate = typeof data.startDate === "string" ? data.startDate : data.startDate.toISOString();
+    updateData.startDate = toTimestamp(data.startDate);
   }
   if (data.endDate !== undefined) {
-    updateData.endDate = data.endDate ? (typeof data.endDate === "string" ? data.endDate : data.endDate.toISOString()) : undefined;
+    updateData.endDate = data.endDate ? toTimestamp(data.endDate) : undefined;
   }
   if (data.allDay !== undefined) updateData.allDay = data.allDay;
   if (data.status !== undefined) updateData.status = data.status;
@@ -122,10 +123,10 @@ export async function getYearPlannerEventsByBuilding(
   const where: Record<string, any> = { "building.id": building.id };
   
   if (options?.startDate) {
-    where.startDate = { $gte: options.startDate.toISOString() };
+    where.startDate = { $gte: toTimestamp(options.startDate) };
   }
   if (options?.endDate) {
-    where.startDate = { ...where.startDate, $lte: options.endDate.toISOString() };
+    where.startDate = { ...where.startDate, $lte: toTimestamp(options.endDate) };
   }
   if (options?.eventType) {
     where.eventType = options.eventType;

@@ -33,7 +33,7 @@ export async function createDivision(
   await validateUserAccess(tenant, auth.user);
 
   const divisionId = id();
-  const now = new Date().toISOString();
+  const now = Date.now();
 
   await dbAdmin.transact([
     dbAdmin.tx.divisions[divisionId]
@@ -80,7 +80,7 @@ export async function updateDivision(
   await dbAdmin.transact([
     dbAdmin.tx.divisions[divisionId].update({
       ...data,
-      updatedAt: new Date().toISOString(),
+      updatedAt: Date.now(),
     }),
   ]);
 }

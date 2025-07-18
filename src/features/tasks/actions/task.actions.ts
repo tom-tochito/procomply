@@ -82,7 +82,7 @@ export async function updateTaskAction(
     }
 
     if (status === "completed") {
-      updates.completedDate = new Date().toISOString();
+      updates.completedDate = Date.now().toString();
     }
 
     await updateTaskRepo(taskId, updates);

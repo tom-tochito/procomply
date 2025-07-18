@@ -193,10 +193,10 @@ export default function BuildingDetails({ building, tenant, users: initialUsers 
           description: editTask.notes?.join("\n") || "",
           status: editTask.progress,
           priority: editTask.priority === "H" ? "high" : editTask.priority === "L" ? "low" : "medium",
-          dueDate: editTask.due_date ? new Date(editTask.due_date.split('/').reverse().join('-')).toISOString() : new Date().toISOString(),
-          completedDate: editTask.completed ? new Date().toISOString() : undefined,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          dueDate: editTask.due_date ? new Date(editTask.due_date.split('/').reverse().join('-')).getTime() : Date.now(),
+          completedDate: editTask.completed ? Date.now() : undefined,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
           building: { 
             id: building.id,
             name: building.name,
@@ -219,8 +219,8 @@ export default function BuildingDetails({ building, tenant, users: initialUsers 
             name: "",
             slug: "",
             description: "",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            createdAt: Date.now(),
+            updatedAt: Date.now()
           },
         } : undefined}
         mode={modalMode}

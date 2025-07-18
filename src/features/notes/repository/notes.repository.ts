@@ -21,7 +21,7 @@ export async function createNote(
   if (!auth) throw new Error("Unauthorized");
 
   const noteId = id();
-  const now = new Date().toISOString();
+  const now = Date.now();
 
   await dbAdmin.transact([
     dbAdmin.tx.notes[noteId]
@@ -55,7 +55,7 @@ export async function updateNote(
   const auth = await getAuthCookies();
   if (!auth) throw new Error("Unauthorized");
 
-  const now = new Date().toISOString();
+  const now = Date.now();
 
   await dbAdmin.transact([
     dbAdmin.tx.notes[noteId].update({

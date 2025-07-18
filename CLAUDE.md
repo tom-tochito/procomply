@@ -152,7 +152,14 @@ All entity types must be derived from InstantDB schema using InstaQLEntity:
 - Each feature should have a `models/index.ts` file that exports InstantDB types for reuse
 - UI-specific types that extend database entities should be interfaces extending the base type
 - Common form types (like FormState) should be defined in `src/common/types/`
-- InstantDB date fields accept ISO string format (e.g., new Date().toISOString())
+- InstantDB date fields are stored as timestamps (milliseconds since epoch)
+- Always use the date utility functions from `src/common/utils/date.ts` for date conversions:
+  - `toTimestamp()` - Convert Date or string to timestamp before storing
+  - `fromTimestamp()` - Convert timestamp to Date for manipulation
+  - `formatTimestamp()` - Format timestamp for display
+  - `getCurrentTimestamp()` - Get current time as timestamp
+  - `dateInputToTimestamp()` - Convert HTML date input to timestamp
+  - `timestampToDateInput()` - Convert timestamp to HTML date input value
 - Always pass full entity models to functions/components instead of just IDs (e.g., pass full Tenant object, not tenantId)
 
 Example pattern:

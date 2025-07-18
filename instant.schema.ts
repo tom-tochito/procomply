@@ -11,15 +11,15 @@ const _schema = i.schema({
       phone: i.string().optional(),
       phoneMobile: i.string().optional(),
       position: i.string().optional(), // job title/position
-      createdAt: i.date().indexed(),
-      updatedAt: i.date().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
     }),
     tenants: i.entity({
       name: i.string(),
       slug: i.string().unique().indexed(),
       description: i.string(),
-      createdAt: i.date().indexed(),
-      updatedAt: i.date().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
     }),
     buildings: i.entity({
       // Basic Information
@@ -47,7 +47,7 @@ const _schema = i.schema({
       condition: i.string().optional(),
       criticality: i.string().optional(),
       fireRiskRating: i.string().optional(),
-      lastCheckDate: i.date().optional(),
+      lastCheckDate: i.number().optional(),
 
       // Dimensional Data
       totalGrossArea: i.number().optional(),
@@ -65,45 +65,45 @@ const _schema = i.schema({
       telephone: i.string().optional(),
 
       // Timestamps
-      createdAt: i.date().indexed(),
-      updatedAt: i.date().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
     }),
     templates: i.entity({
       name: i.string(),
       type: i.string().indexed(),
       content: i.json(),
       isActive: i.boolean().indexed(),
-      createdAt: i.date().indexed(),
-      updatedAt: i.date().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
     }),
     inspections: i.entity({
       type: i.string().indexed(),
       status: i.string().indexed(),
-      scheduledDate: i.date().indexed(),
-      completedDate: i.date().optional(),
+      scheduledDate: i.number().indexed(),
+      completedDate: i.number().optional(),
       results: i.json().optional(),
       notes: i.string().optional(),
-      createdAt: i.date().indexed(),
-      updatedAt: i.date().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
     }),
     tasks: i.entity({
       title: i.string(),
       description: i.string().optional(),
       status: i.string().indexed(),
       priority: i.string().indexed(),
-      dueDate: i.date().indexed(),
-      completedDate: i.date().optional(),
-      createdAt: i.date().indexed(),
-      updatedAt: i.date().indexed(),
+      dueDate: i.number().indexed(),
+      completedDate: i.number().optional(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
     }),
     documents: i.entity({
       name: i.string(),
       type: i.string().indexed(),
       path: i.string(), // Storage path
       size: i.number(),
-      uploadedAt: i.date().indexed(),
-      createdAt: i.date().indexed(),
-      updatedAt: i.date().indexed(),
+      uploadedAt: i.number().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
     }),
     companies: i.entity({
       name: i.string(),
@@ -113,30 +113,30 @@ const _schema = i.schema({
       phone: i.string().optional(),
       postcode: i.string().optional(),
       numberOfEmployees: i.number().optional(),
-      createdAt: i.date().indexed(),
-      updatedAt: i.date().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
     }),
     divisions: i.entity({
       name: i.string().indexed(),
       type: i.string().indexed(), // "Active", "Archived", "Leased"
       description: i.string().optional(),
-      createdAt: i.date().indexed(),
-      updatedAt: i.date().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
     }),
     teams: i.entity({
       code: i.string().optional(),
       description: i.string(),
-      createdAt: i.date().indexed(),
-      updatedAt: i.date().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
     }),
     complianceChecks: i.entity({
       checkType: i.string().indexed(), // annualFlatDoor, asbestosReinspections, etc.
       status: i.string().indexed(), // success, warning, overdue, pending
-      dueDate: i.date().indexed(),
-      completedDate: i.date().optional(),
+      dueDate: i.number().indexed(),
+      completedDate: i.number().optional(),
       notes: i.string().optional(),
-      createdAt: i.date().indexed(),
-      updatedAt: i.date().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
     }),
     contacts: i.entity({
       name: i.string(),
@@ -147,29 +147,29 @@ const _schema = i.schema({
       department: i.string().optional(),
       notes: i.string().optional(),
       isPrimary: i.boolean().indexed(),
-      createdAt: i.date().indexed(),
-      updatedAt: i.date().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
     }),
     notes: i.entity({
       title: i.string(),
       content: i.string(),
       category: i.string().indexed(), // general, maintenance, compliance, etc.
       priority: i.string().indexed(), // low, medium, high
-      createdAt: i.date().indexed(),
-      updatedAt: i.date().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
     }),
     yearPlannerEvents: i.entity({
       title: i.string(),
       description: i.string().optional(),
       eventType: i.string().indexed(), // inspection, maintenance, compliance, meeting, etc.
-      startDate: i.date().indexed(),
-      endDate: i.date().optional(),
+      startDate: i.number().indexed(),
+      endDate: i.number().optional(),
       allDay: i.boolean(),
       status: i.string().indexed(), // scheduled, completed, cancelled
       reminder: i.boolean(),
       reminderDays: i.number().optional(),
-      createdAt: i.date().indexed(),
-      updatedAt: i.date().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
     }),
   },
   links: {

@@ -25,7 +25,7 @@ export async function createContact(
   if (!auth) throw new Error("Unauthorized");
 
   const contactId = id();
-  const now = new Date().toISOString();
+  const now = Date.now();
 
   await dbAdmin.transact([
     dbAdmin.tx.contacts[contactId]
@@ -61,7 +61,7 @@ export async function updateContact(
   const auth = await getAuthCookies();
   if (!auth) throw new Error("Unauthorized");
 
-  const now = new Date().toISOString();
+  const now = Date.now();
 
   await dbAdmin.transact([
     dbAdmin.tx.contacts[contactId].update({

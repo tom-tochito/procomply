@@ -14,6 +14,7 @@ import {
   uploadFile,
   deleteFile,
 } from "@/common/services/storage/storage.service";
+import { dateInputToTimestamp } from "@/common/utils/date";
 
 async function validateUserAccess(
   tenant: Tenant,
@@ -75,7 +76,7 @@ export async function createBuilding(
   await validateUserAccess(tenant, auth.user);
 
   const finalBuildingId = buildingId || id();
-  const now = new Date().toISOString();
+  const now = Date.now();
 
   // Handle image upload if provided
   let imagePath: string | undefined;
@@ -115,7 +116,7 @@ export async function createBuilding(
       ...(data.criticality && { criticality: data.criticality }),
       ...(data.fireRiskRating && { fireRiskRating: data.fireRiskRating }),
       ...(lastCheckDate && {
-        lastCheckDate: new Date(lastCheckDate).toISOString(),
+        lastCheckDate: dateInputToTimestamp(lastCheckDate),
       }),
       ...(data.outOfHourContact && {
         outOfHourContact: data.outOfHourContact,
@@ -236,9 +237,9 @@ export async function updateBuilding(
     ...buildingData,
     ...(imagePath && { image: imagePath }),
     ...(lastCheckDate && {
-      lastCheckDate: new Date(lastCheckDate).toISOString(),
+      lastCheckDate: dateInputToTimestamp(lastCheckDate),
     }),
-    updatedAt: new Date().toISOString(),
+    updatedAt: Date.now(),
   });
 
   // Handle division linking separately

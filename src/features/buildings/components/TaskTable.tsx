@@ -98,8 +98,8 @@ export default function TaskTable({ tasks, onTaskClick, onTaskEdit, onTaskUpdate
                       await db.transact([
                         db.tx.tasks[task.id].update({
                           status: newStatus,
-                          updatedAt: new Date().toISOString(),
-                          completedDate: newStatus === "completed" ? new Date().toISOString() : undefined,
+                          updatedAt: Date.now(),
+                          completedDate: newStatus === "completed" ? Date.now() : undefined,
                         })
                       ]);
                       

@@ -37,7 +37,7 @@ export async function createCompany(
   await validateUserAccess(tenant, auth.user);
 
   const companyId = id();
-  const now = new Date().toISOString();
+  const now = Date.now();
 
   await dbAdmin.transact([
     dbAdmin.tx.companies[companyId]
@@ -92,7 +92,7 @@ export async function updateCompany(
   await dbAdmin.transact([
     dbAdmin.tx.companies[companyId].update({
       ...data,
-      updatedAt: new Date().toISOString(),
+      updatedAt: Date.now(),
     }),
   ]);
 }

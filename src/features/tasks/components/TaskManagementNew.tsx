@@ -163,10 +163,10 @@ export default function TaskManagementNew({
       description: task.notes?.join("\n") || "",
       status: task.progress,
       priority: task.priority === "H" ? "high" : task.priority === "L" ? "low" : "medium",
-      dueDate: task.due_date ? new Date(task.due_date.split('/').reverse().join('-')).toISOString() : new Date().toISOString(),
-      completedDate: task.completed ? new Date().toISOString() : undefined,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      dueDate: task.due_date ? new Date(task.due_date.split('/').reverse().join('-')).getTime() : Date.now(),
+      completedDate: task.completed ? Date.now() : undefined,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
       building: task.building_id ? { 
         id: task.building_id,
         name: "",
@@ -176,8 +176,8 @@ export default function TaskManagementNew({
         zipCode: "",
         floors: 0,
         archived: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        createdAt: Date.now(),
+        updatedAt: Date.now()
       } : undefined,
       assignee: undefined, // We don't have assignee ID from the Task type
       creator: {
@@ -189,8 +189,8 @@ export default function TaskManagementNew({
         name: "",
         slug: "",
         description: "",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        createdAt: Date.now(),
+        updatedAt: Date.now()
       },
     };
     
