@@ -1,15 +1,13 @@
-import BuildingRedirect from "@/features/data-mgmt/components/BuildingRedirect";
+import { redirect } from "next/navigation";
 
-interface BuildingRedirectPageProps {
-  params: Promise<{
-    tenant: string;
-  }>;
+import { generateTenantRedirectUrl } from "@/features/tenant/utils/tenant.utils";
+
+interface PageProps {
+  params: Promise<{ tenant: string }>;
 }
 
-export default async function BuildingRedirectPage({
-  params,
-}: BuildingRedirectPageProps) {
+export default async function Page({ params }: PageProps) {
   const { tenant } = await params;
 
-  return <BuildingRedirect tenant={tenant} />;
+  redirect(generateTenantRedirectUrl(tenant, "/buildings"));
 }
