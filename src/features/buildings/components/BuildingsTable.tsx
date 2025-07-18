@@ -159,7 +159,7 @@ export default function BuildingsTable({
         enableSorting: false,
       },
     ],
-    []
+    [tenant]
   );
 
   const handleRowClick = (building: BuildingWithStats) => {

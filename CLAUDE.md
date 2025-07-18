@@ -35,7 +35,7 @@ Component filenames must be descriptive of their function (e.g., ProfileCard.tsx
 
 - Language: All code must be written in TypeScript (.tsx).
 - Package Manager: The project must be configured to use pnpm.
-- Build Integrity: The generated code and file structure must be valid and able to pass a pnpm lint command without errors.
+- Build Integrity: The generated code and file structure must be valid and able to pass both `pnpm lint` and `pnpm build` commands without errors or warnings. Always run `pnpm build` after making significant changes to ensure the application compiles successfully.
 
 ## 8. Shadcn
 
@@ -136,7 +136,13 @@ All custom React hooks (i.e., functions starting with `use`) must be located in 
 - **Separation of Concerns**: Hooks should not be placed in `repositories`, `services`, or other directories. This practice ensures a clear separation between data-fetching logic, business logic, and UI-related state management.
 - **Naming Convention**: Hook files should be named descriptively based on their function, for example, `useUserProfile.ts`.
 
-## 13. Type System Guidelines
+## 13. Naming Conventions
+
+- **Constants**: Top-level constants should use UPPERCASE_SNAKE_CASE naming convention (e.g., `MENU_ITEMS`, `API_ENDPOINTS`, `DEFAULT_VALUES`).
+- **Variables and Functions**: Use camelCase for variables and function names.
+- **Components and Types**: Use PascalCase for React components and TypeScript types/interfaces.
+
+## 14. Type System Guidelines
 
 All entity types must be derived from InstantDB schema using InstaQLEntity:
 
