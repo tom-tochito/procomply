@@ -45,16 +45,15 @@ export default async function BuildingDetailsPage({
     );
   }
 
-
   // Fetch users for assignee dropdown
   let users: Array<{ id: string; email: string }> = [];
   if (building.tenant?.id) {
     const result = await dbAdmin.query({
-      "$users": {
+      $users: {
         $: {
-          where: { "tenant.id": building.tenant.id }
-        }
-      }
+          where: { "tenant.id": building.tenant.id },
+        },
+      },
     });
     users = result.$users || [];
   }
@@ -62,7 +61,7 @@ export default async function BuildingDetailsPage({
   // Transform building image URL to use file service
   const buildingWithImageUrl = {
     ...building,
-    image: building.image ? getFileUrl(tenant, building.image as `/${string}`) : undefined,
+    image: building.image ? getFileUrl(tenant, building.image) : undefined,
   };
 
   return (

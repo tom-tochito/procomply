@@ -30,8 +30,9 @@ export default function BuildingCard({ building, tenant }: BuildingCardProps) {
           <div className="relative w-48 h-48 flex-shrink-0 bg-gray-100">
             <Image
               src={
-                getFileUrl(tenant, building.image as `/${string}`) ||
-                "/placeholder-building.jpg"
+                building.image
+                  ? getFileUrl(tenant, building.image)
+                  : "/placeholder-building.jpg"
               }
               alt={building.name}
               fill

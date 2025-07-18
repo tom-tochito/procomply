@@ -30,7 +30,7 @@ export default function BuildingsTable({
           <div className="w-16 h-16 relative overflow-hidden rounded-lg">
             {row.original.image ? (
               <Image
-                src={getFileUrl(tenant, row.original.image as `/${string}`)}
+                src={getFileUrl(tenant, row.original.image)}
                 alt={row.original.name}
                 fill
                 className="object-cover"

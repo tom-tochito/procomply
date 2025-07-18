@@ -83,7 +83,8 @@ export async function createBuilding(
     // Preserve original filename
     const originalFileName = data.imageFile.name;
     imagePath = await uploadFile(
-      `/tenant/${tenant.slug}/buildings/${finalBuildingId}/${originalFileName}` as `/${string}`,
+      tenant.slug,
+      `/buildings/${finalBuildingId}/${originalFileName}`,
       data.imageFile
     );
   }
@@ -137,9 +138,9 @@ export async function createBuilding(
       createdAt: now,
       updatedAt: now,
     })
-    .link({ 
+    .link({
       tenant: tenant.id,
-      ...(data.divisionId && { divisionEntity: data.divisionId })
+      ...(data.divisionId && { divisionEntity: data.divisionId }),
     });
 
   await dbAdmin.transact([transaction]);
@@ -213,7 +214,7 @@ export async function updateBuilding(
     // Delete old image if exists
     if (building.image) {
       try {
-        await deleteFile(building.image as `/${string}`);
+        await deleteFile(building.tenant.slug, building.image);
       } catch (error) {
         console.error("Failed to delete old image:", error);
       }
@@ -222,7 +223,8 @@ export async function updateBuilding(
     // Upload new image with original filename
     const originalFileName = data.imageFile.name;
     imagePath = await uploadFile(
-      `/tenant/${building.tenant.slug}/buildings/${buildingId}/${originalFileName}` as `/${string}`,
+      building.tenant.slug,
+      `/buildings/${buildingId}/${originalFileName}`,
       data.imageFile
     );
   }
@@ -241,7 +243,7 @@ export async function updateBuilding(
 
   // Handle division linking separately
   const transactions = [updateTransaction];
-  
+
   if (divisionId !== undefined) {
     if (divisionId) {
       // Link to new division
@@ -253,14 +255,14 @@ export async function updateBuilding(
       const currentBuilding = await dbAdmin.query({
         buildings: {
           $: { where: { id: buildingId } },
-          divisionEntity: {}
-        }
+          divisionEntity: {},
+        },
       });
-      
+
       if (currentBuilding.buildings[0]?.divisionEntity) {
         transactions.push(
-          dbAdmin.tx.buildings[buildingId].unlink({ 
-            divisionEntity: currentBuilding.buildings[0].divisionEntity.id 
+          dbAdmin.tx.buildings[buildingId].unlink({
+            divisionEntity: currentBuilding.buildings[0].divisionEntity.id,
           })
         );
       }
@@ -392,10 +394,11 @@ export async function searchBuildings(
   return (result.buildings || []) as BuildingWithTenant[];
 }
 
-export async function getBuildingsWithComplianceStats(
-  tenant: Tenant
-): Promise<
-  (BuildingWithTenant & BuildingWithDivision & { taskStats: { total: number; completed: number } })[]
+export async function getBuildingsWithComplianceStats(tenant: Tenant): Promise<
+  (BuildingWithTenant &
+    BuildingWithDivision & {
+      taskStats: { total: number; completed: number };
+    })[]
 > {
   const auth = await getAuthCookies();
   if (!auth) throw new Error("Unauthorized");

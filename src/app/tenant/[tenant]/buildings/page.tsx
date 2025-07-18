@@ -28,7 +28,7 @@ export default async function BuildingsPage({ params }: BuildingsPageProps) {
 
   // Fetch buildings from InstantDB
   const buildings = await getBuildingsWithComplianceStats(tenantData);
-  
+
   // Fetch divisions from InstantDB
   const divisionsData = await getDivisionsByTenant(tenantData);
 
@@ -36,8 +36,9 @@ export default async function BuildingsPage({ params }: BuildingsPageProps) {
   const transformedBuildings: BuildingWithStats[] = buildings.map(
     (building) => ({
       ...building,
-      image: building.image ? getFileUrl(tenant, building.image as `/${string}`) : undefined,
-      division: building.divisionEntity?.name || building.division || "Unassigned",
+      image: building.image ? getFileUrl(tenant, building.image) : undefined,
+      division:
+        building.divisionEntity?.name || building.division || "Unassigned",
       status: "Active",
       compliance:
         building.taskStats.total > 0
@@ -52,8 +53,8 @@ export default async function BuildingsPage({ params }: BuildingsPageProps) {
   // Get unique divisions from database
   const divisionNames = [
     "Active Divisions",
-    ...divisionsData.map(d => d.name),
-    "Archived"
+    ...divisionsData.map((d) => d.name),
+    "Archived",
   ];
 
   return (

@@ -1,6 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useActionState, startTransition } from "react";
+import React, {
+  useState,
+  useEffect,
+  useActionState,
+  startTransition,
+} from "react";
 import { db } from "~/lib/db";
 import { Document } from "@/data/documents"; // Use the legacy Document type
 import DocumentDetailsDialog from "./DocumentDetailsDialog";
@@ -78,17 +83,17 @@ export default function DocumentManagement({
   const handleDialogClose = () => {
     setDialogOpen(false);
   };
-  
+
   const handleDelete = async (document: Document) => {
     const formData = new FormData();
-    formData.append('documentId', document.id);
-    formData.append('tenantSlug', tenant.slug);
-    
+    formData.append("documentId", document.id);
+    formData.append("tenantSlug", tenant.slug);
+
     startTransition(() => {
       deleteAction(formData);
     });
   };
-  
+
   // Show error if delete fails
   React.useEffect(() => {
     if (deleteState.error) {
@@ -109,16 +114,16 @@ export default function DocumentManagement({
     file_type: doc.type,
     category: doc.type, // Will be enhanced with proper categories
     document_category: "Miscellaneous", // Default for now
-    upload_date: new Date(doc.uploadedAt).toLocaleDateString('en-GB'),
-    uploaded_by: doc.uploader?.email || 'Unknown',
+    upload_date: new Date(doc.uploadedAt).toLocaleDateString("en-GB"),
+    uploaded_by: doc.uploader?.email || "Unknown",
     size: `${(doc.size / 1024 / 1024).toFixed(1)} MB`,
     status: "Active" as const,
-    building_id: doc.building?.id || '',
-    task_id: '',
-    description: '',
+    building_id: doc.building?.id || "",
+    task_id: "",
+    description: "",
     tags: [],
-    last_accessed: new Date(doc.updatedAt).toLocaleDateString('en-GB'),
-    version: '1.0',
+    last_accessed: new Date(doc.updatedAt).toLocaleDateString("en-GB"),
+    version: "1.0",
   }));
 
   const filteredDocuments = transformedDocuments.filter((document) => {
@@ -156,8 +161,12 @@ export default function DocumentManagement({
     return true;
   });
 
-  const categories = Array.from(new Set(transformedDocuments.map((doc) => doc.category)));
-  const fileTypes = Array.from(new Set(transformedDocuments.map((doc) => doc.file_type)));
+  const categories = Array.from(
+    new Set(transformedDocuments.map((doc) => doc.category))
+  );
+  const fileTypes = Array.from(
+    new Set(transformedDocuments.map((doc) => doc.file_type))
+  );
 
   if (isLoading) {
     return (
@@ -184,13 +193,13 @@ export default function DocumentManagement({
           document={selectedDocument}
           onDownload={(document) => {
             // Find the original document to get the path
-            const originalDoc = documents.find(d => d.id === document.id);
+            const originalDoc = documents.find((d) => d.id === document.id);
             if (originalDoc?.path) {
               // Generate download URL using the utility function
-              const downloadUrl = getFileUrl(tenant.slug, originalDoc.path as `/${string}`);
-              window.open(downloadUrl, '_blank');
+              const downloadUrl = getFileUrl(tenant.slug, originalDoc.path);
+              window.open(downloadUrl, "_blank");
             } else {
-              alert('File path not available');
+              alert("File path not available");
             }
           }}
         />
@@ -397,13 +406,13 @@ export default function DocumentManagement({
             onRowClick={handleDocumentClick}
             onDownload={(document) => {
               // Find the original document to get the path
-              const originalDoc = documents.find(d => d.id === document.id);
+              const originalDoc = documents.find((d) => d.id === document.id);
               if (originalDoc?.path) {
                 // Generate download URL using the utility function
-                const downloadUrl = getFileUrl(tenant.slug, originalDoc.path as `/${string}`);
-                window.open(downloadUrl, '_blank');
+                const downloadUrl = getFileUrl(tenant.slug, originalDoc.path);
+                window.open(downloadUrl, "_blank");
               } else {
-                alert('File path not available');
+                alert("File path not available");
               }
             }}
             onDelete={handleDelete}

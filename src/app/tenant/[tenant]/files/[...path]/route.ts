@@ -16,25 +16,22 @@ export async function GET(
     return NextResponse.json({ error: "Path is required" }, { status: 400 });
   }
 
-  const filePath = `/tenant/${tenant}/${
-    Array.isArray(path) ? path.join("/") : path
-  }`;
+  const filePath = Array.isArray(path) ? path.join("/") : path;
 
   try {
     const context = await getCloudflareContext({ async: true });
     const bucket = context.env.PROCOMPLY_BUCKET;
-    const object = await bucket.get(filePath);
+    const object = await bucket.get(`/tenant/${tenant}/${filePath}`);
 
     if (object === null) {
       return new Response("Object Not Found", { status: 404 });
     }
 
     const headers = new Headers();
-    headers.set("etag", object.httpEtag || "");
-    headers.set(
-      "content-type",
-      object.httpMetadata?.contentType || "application/octet-stream"
-    );
+    headers.set("etag", object.httpEtag);
+    if (object.httpMetadata?.contentType) {
+      headers.set("content-type", object.httpMetadata.contentType);
+    }
 
     return new Response(object.body, { headers });
   } catch (error) {

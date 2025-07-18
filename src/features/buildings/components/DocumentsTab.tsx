@@ -122,13 +122,13 @@ export default function DocumentsTab({
 
   const handleDownload = (doc: DocumentWithRelations) => {
     // Generate download URL
-    const downloadUrl = getFileUrl(tenant, doc.path as `/${string}`);
+    const downloadUrl = getFileUrl(tenant, doc.path);
     window.open(downloadUrl, "_blank");
   };
 
   const handleView = (doc: DocumentWithRelations) => {
     // For PDFs and images, open in new tab
-    const viewUrl = getFileUrl(tenant, doc.path as `/${string}`);
+    const viewUrl = getFileUrl(tenant, doc.path);
     window.open(viewUrl, "_blank");
   };
 

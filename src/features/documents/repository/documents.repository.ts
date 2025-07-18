@@ -25,18 +25,17 @@ export async function uploadDocument(
   // Generate file path
   const fileExtension = file.name.split(".").pop() || "";
   const fileName = `${documentId}.${fileExtension}`;
-  const path =
-    `/tenant/${tenant.slug}/buildings/${building.id}/documents/${fileName}` as `/${string}`;
+  const path = `/buildings/${building.id}/documents/${fileName}`;
 
   // Upload file to storage
-  await uploadFile(path, file);
+  await uploadFile(tenant.slug, path, file);
 
   // Create document record
   await dbAdmin.transact([
     dbAdmin.tx.documents[documentId]
       .update({
         name: file.name,
-        type: file.type || "application/octet-stream",
+        type: file.type,
         path,
         size: file.size,
         uploadedAt: now,
@@ -71,7 +70,7 @@ export async function getDocumentsByBuilding(
     },
   });
 
-  return result.documents || [];
+  return result.documents ?? [];
 }
 
 export async function getDocumentsByTenant(
@@ -132,7 +131,9 @@ export async function deleteDocument(documentId: string): Promise<void> {
   }
 
   // Delete from storage
-  await deleteFile(document.path as `/${string}`);
+  if (document.building?.tenant?.slug) {
+    await deleteFile(document.building.tenant.slug, document.path);
+  }
 
   // Delete record
   await dbAdmin.transact([dbAdmin.tx.documents[documentId].delete()]);
