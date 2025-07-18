@@ -16,13 +16,14 @@ interface DashboardPageProps {
 
 export default async function DashboardPage({ params }: DashboardPageProps) {
   const { tenant } = await params;
-  await requireAuth(tenant);
   
-  // Get tenant data
+  // Get tenant data first
   const tenantData = await findTenantBySlug(tenant);
   if (!tenantData) {
     throw new Error("Tenant not found");
   }
+  
+  await requireAuth(tenantData);
 
   // Fetch dashboard data from InstantDB
   const [

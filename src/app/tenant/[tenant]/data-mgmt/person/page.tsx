@@ -2,7 +2,7 @@ import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import PersonManagement from "@/features/data-mgmt/components/PersonManagement";
 import { findUsersWithProfilesByTenant } from "@/features/user/repository/user.repository";
-import { requireAuth } from "@/features/auth/repository/auth.repository";
+import { requireAuth } from "@/features/auth";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 import { getCompaniesByTenant } from "@/features/companies/repository/companies.repository";
 
@@ -15,14 +15,14 @@ interface PersonPageProps {
 export default async function PersonPage({ params }: PersonPageProps) {
   const { tenant } = await params;
 
-  // Require authentication
-  await requireAuth(tenant);
-
   // Get tenant data
   const tenantData = await findTenantBySlug(tenant);
   if (!tenantData) {
     throw new Error("Tenant not found");
   }
+
+  // Require authentication
+  await requireAuth(tenantData);
 
   // Fetch persons (users with profiles) and companies from InstantDB
   const [personsFromDB, companies] = await Promise.all([

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import DivisionManagement from "@/features/data-mgmt/components/DivisionManagement";
 import { getDivisionsByTenant } from "@/features/divisions/repository/divisions.repository";
-import { requireAuth } from "@/features/auth/repository/auth.repository";
+import { requireAuth } from "@/features/auth";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 
 interface DivisionPageProps {
@@ -14,14 +14,14 @@ interface DivisionPageProps {
 export default async function DivisionPage({ params }: DivisionPageProps) {
   const { tenant } = await params;
 
-  // Require authentication
-  await requireAuth(tenant);
-
   // Get tenant data
   const tenantData = await findTenantBySlug(tenant);
   if (!tenantData) {
     throw new Error("Tenant not found");
   }
+
+  // Require authentication
+  await requireAuth(tenantData);
 
   // Fetch divisions from InstantDB
   const divisions = await getDivisionsByTenant(tenantData);

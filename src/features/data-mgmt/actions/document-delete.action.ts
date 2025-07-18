@@ -2,7 +2,8 @@
 
 import { dbAdmin } from "~/lib/db-admin";
 import { deleteFile } from "@/common/services/storage/storage.service";
-import { requireAuth } from "@/features/auth/repository/auth.repository";
+import { requireAuth } from "@/features/auth";
+import { findTenantBySlug } from "@/features/tenant/repository";
 import { FormState } from "@/common/types/form";
 
 export async function deleteDocumentAction(
@@ -20,8 +21,15 @@ export async function deleteDocumentAction(
       };
     }
 
-    // Require authentication
-    await requireAuth(tenantSlug);
+    // Get tenant and require authentication
+    const tenant = await findTenantBySlug(tenantSlug);
+    if (!tenant) {
+      return {
+        error: "Tenant not found",
+        success: false,
+      };
+    }
+    await requireAuth(tenant);
 
     // Get document to retrieve the file path
     const result = await dbAdmin.query({
@@ -45,7 +53,7 @@ export async function deleteDocumentAction(
     // Delete file from storage
     if (document.path) {
       try {
-        await deleteFile(tenantSlug, document.path);
+        await deleteFile(tenant.slug, document.path);
       } catch (error) {
         console.error("Error deleting file from storage:", error);
         // Continue with database deletion even if storage deletion fails

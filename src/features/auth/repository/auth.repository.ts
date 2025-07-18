@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import type { Tenant } from "@/features/tenant/models";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import type { FullUser } from "@/features/user/repository";
 
@@ -69,20 +70,20 @@ export async function isAuthenticated(): Promise<boolean> {
  * Require authentication for a page
  * Redirects to login if not authenticated
  */
-export async function requireAuth(tenantSlug: string): Promise<AuthCookieData> {
+export async function requireAuth(tenant: Tenant): Promise<AuthCookieData> {
   const auth = await getAuthCookies();
 
   if (!auth) {
-    redirect(generateTenantRedirectUrl(tenantSlug, "/login"));
+    redirect(generateTenantRedirectUrl(tenant.slug, "/login"));
   }
 
   // Validate tenant relationship
-  const userBelongsToTenant = auth.user.tenant?.slug === tenantSlug;
+  const userBelongsToTenant = auth.user.tenant?.id === tenant.id;
   const isAdmin = auth.user.profile?.role === "admin";
 
   if (!userBelongsToTenant && !isAdmin) {
     // User doesn't have access to this tenant
-    redirect(generateTenantRedirectUrl(tenantSlug, "/login"));
+    redirect(generateTenantRedirectUrl(tenant.slug, "/login"));
   }
 
   return auth;

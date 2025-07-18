@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import TaskManagementNew from "@/features/tasks/components/TaskManagementNew";
-import { requireAuth } from "@/features/auth/repository/auth.repository";
+import { requireAuth } from "@/features/auth";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 import { getBuildingsByTenant } from "@/features/buildings/repository/buildings.repository";
 import { dbAdmin } from "~/lib/db-admin";
@@ -15,14 +15,14 @@ interface TaskPageProps {
 export default async function TaskPage({ params }: TaskPageProps) {
   const { tenant } = await params;
 
-  // Require authentication
-  await requireAuth(tenant);
-
   // Get tenant data
   const tenantData = await findTenantBySlug(tenant);
   if (!tenantData) {
     throw new Error("Tenant not found");
   }
+
+  // Require authentication
+  await requireAuth(tenantData);
   
   // Fetch buildings for the dropdown
   const buildings = await getBuildingsByTenant(tenantData);

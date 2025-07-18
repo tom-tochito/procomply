@@ -21,17 +21,23 @@ import {
   LogOut,
   X,
 } from "lucide-react";
+import type { Tenant } from "@/features/tenant/models";
 
 // Avatar Component
-function UserAvatar({ user }: { user?: { email?: string; profile?: { name?: string } } }) {
+function UserAvatar({
+  user,
+  tenant,
+}: {
+  user?: { email?: string; profile?: { name?: string } };
+  tenant: Tenant;
+}) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const tenant = useParams().tenant as string;
-  
+
   // Get initials from profile name first, then email, then fallback to "UN"
   const getInitials = () => {
     if (user?.profile?.name) {
-      const names = user.profile.name.trim().split(' ');
+      const names = user.profile.name.trim().split(" ");
       if (names.length >= 2) {
         return `${names[0][0]}${names[1][0]}`.toUpperCase();
       }
@@ -42,9 +48,9 @@ function UserAvatar({ user }: { user?: { email?: string; profile?: { name?: stri
     }
     return "UN";
   };
-  
+
   const initials = getInitials();
-  
+
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -61,12 +67,13 @@ function UserAvatar({ user }: { user?: { email?: string; profile?: { name?: stri
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  
+
   const handleLogout = async () => {
+    if (!tenant) return;
     const { logoutAction } = await import("@/features/auth");
     await logoutAction(tenant);
   };
-  
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
@@ -86,8 +93,12 @@ function UserAvatar({ user }: { user?: { email?: string; profile?: { name?: stri
           ></div>
           <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 py-1 border border-gray-200">
             <div className="px-4 py-2 border-b border-gray-100">
-              <p className="text-sm font-medium">{user?.profile?.name || "User"}</p>
-              <p className="text-xs text-gray-500">{user?.email || "Unknown"}</p>
+              <p className="text-sm font-medium">
+                {user?.profile?.name || "User"}
+              </p>
+              <p className="text-xs text-gray-500">
+                {user?.email || "Unknown"}
+              </p>
             </div>
             <a
               href="#profile"
@@ -115,12 +126,15 @@ function UserAvatar({ user }: { user?: { email?: string; profile?: { name?: stri
 }
 
 // Data Management Menu Component
-function DataManagementMenu() {
+function DataManagementMenu({ tenantSlug }: { tenantSlug: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const tenant = useParams().tenant as string;
-  
-  const menuItems: Array<{ href: `/${string}`; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+
+  const menuItems: Array<{
+    href: `/${string}`;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }> = [
     { href: "/data-mgmt/company", label: "Company", icon: Building2 },
     { href: "/data-mgmt/division", label: "Division", icon: Menu },
     { href: "/data-mgmt/buildings", label: "Building", icon: Building2 },
@@ -129,7 +143,7 @@ function DataManagementMenu() {
     { href: "/data-mgmt/person", label: "Person", icon: UserCircle },
     { href: "/data-mgmt/team", label: "Team", icon: Users },
   ];
-  
+
   return (
     <div className="relative" ref={menuRef}>
       <button
@@ -155,7 +169,7 @@ function DataManagementMenu() {
             {menuItems.map((item) => (
               <Link
                 key={item.href}
-                href={generateTenantRedirectUrl(tenant, item.href)}
+                href={generateTenantRedirectUrl(tenantSlug, item.href)}
                 className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                 onClick={() => setIsOpen(false)}
               >
@@ -175,20 +189,24 @@ function DataManagementMenu() {
 export default function Header() {
   const paramsHook = useParams();
   const pathname = usePathname();
-  const tenant = paramsHook.tenant as string;
+  const tenantSlug = paramsHook.tenant as string;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dataMgmtOpen, setDataMgmtOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
-  
+
   const { user } = db.useAuth();
-  const { data } = db.useQuery({ 
+  const { data } = db.useQuery({
     $users: {
       $: { where: { id: user?.id || "" } },
-      profile: {}
-    }
+      profile: {},
+    },
+    tenants: {
+      $: { where: { slug: tenantSlug } },
+    },
   });
-  
+
   const userWithProfile = data?.$users?.[0];
+  const tenant = data?.tenants?.[0];
 
   // Close mobile menu when clicking outside
   useEffect(() => {
@@ -222,6 +240,7 @@ export default function Header() {
   }, [mobileMenuOpen]);
 
   const handleLogout = async () => {
+    if (!tenant) return;
     const { logoutAction } = await import("@/features/auth");
     await logoutAction(tenant);
   };
@@ -244,7 +263,7 @@ export default function Header() {
       <div className="max-w-[1400px] mx-auto flex justify-between items-center">
         <div className="flex items-center gap-x-4 md:gap-x-16">
           <Link
-            href={generateTenantRedirectUrl(tenant, "/dashboard")}
+            href={generateTenantRedirectUrl(tenantSlug, "/dashboard")}
             className="flex-shrink-0"
           >
             <Image
@@ -259,10 +278,13 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-x-4 lg:gap-x-8">
-            <DataManagementMenu />
+            <DataManagementMenu tenantSlug={tenantSlug} />
 
             <Link
-              href={generateTenantRedirectUrl(tenant, "/compliance-overview")}
+              href={generateTenantRedirectUrl(
+                tenantSlug,
+                "/compliance-overview"
+              )}
               className="flex items-center text-white text-sm hover:text-gray-300 transition-colors group whitespace-nowrap"
             >
               <span className="inline-flex items-center justify-center mr-1.5 text-gray-400 group-hover:text-gray-300">
@@ -288,7 +310,7 @@ export default function Header() {
         </div>
 
         {/* User Profile Icon */}
-        <UserAvatar user={userWithProfile} />
+        {tenant && <UserAvatar user={userWithProfile} tenant={tenant} />}
       </div>
 
       {/* Mobile Menu - Full Screen Overlay */}
@@ -350,7 +372,10 @@ export default function Header() {
                 }`}
               >
                 <Link
-                  href={generateTenantRedirectUrl(tenant, "/data-mgmt/company")}
+                  href={generateTenantRedirectUrl(
+                    tenantSlug,
+                    "/data-mgmt/company"
+                  )}
                   onClick={closeMobileMenu}
                   className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
@@ -358,7 +383,7 @@ export default function Header() {
                 </Link>
                 <Link
                   href={generateTenantRedirectUrl(
-                    tenant,
+                    tenantSlug,
                     "/data-mgmt/division"
                   )}
                   onClick={closeMobileMenu}
@@ -368,7 +393,7 @@ export default function Header() {
                 </Link>
                 <Link
                   href={generateTenantRedirectUrl(
-                    tenant,
+                    tenantSlug,
                     "/data-mgmt/buildings"
                   )}
                   onClick={closeMobileMenu}
@@ -377,7 +402,10 @@ export default function Header() {
                   Building
                 </Link>
                 <Link
-                  href={generateTenantRedirectUrl(tenant, "/data-mgmt/task")}
+                  href={generateTenantRedirectUrl(
+                    tenantSlug,
+                    "/data-mgmt/task"
+                  )}
                   onClick={closeMobileMenu}
                   className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
@@ -385,7 +413,7 @@ export default function Header() {
                 </Link>
                 <Link
                   href={generateTenantRedirectUrl(
-                    tenant,
+                    tenantSlug,
                     "/data-mgmt/document"
                   )}
                   onClick={closeMobileMenu}
@@ -394,14 +422,20 @@ export default function Header() {
                   Document
                 </Link>
                 <Link
-                  href={generateTenantRedirectUrl(tenant, "/data-mgmt/person")}
+                  href={generateTenantRedirectUrl(
+                    tenantSlug,
+                    "/data-mgmt/person"
+                  )}
                   onClick={closeMobileMenu}
                   className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
                   Person
                 </Link>
                 <Link
-                  href={generateTenantRedirectUrl(tenant, "/data-mgmt/team")}
+                  href={generateTenantRedirectUrl(
+                    tenantSlug,
+                    "/data-mgmt/team"
+                  )}
                   onClick={closeMobileMenu}
                   className="block py-2 px-2 my-1 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 active:bg-gray-700"
                 >
@@ -410,10 +444,12 @@ export default function Header() {
               </div>
             </div>
 
-
             {/* Direct links */}
             <Link
-              href={generateTenantRedirectUrl(tenant, "/compliance-overview")}
+              href={generateTenantRedirectUrl(
+                tenantSlug,
+                "/compliance-overview"
+              )}
               onClick={closeMobileMenu}
               className="flex items-center py-3 px-3 my-2 rounded hover:bg-gray-800 active:bg-gray-700 text-white border-b border-gray-700"
             >
@@ -424,7 +460,7 @@ export default function Header() {
             </Link>
 
             <Link
-              href={generateTenantRedirectUrl(tenant, "/dashboard")}
+              href={generateTenantRedirectUrl(tenantSlug, "/dashboard")}
               onClick={closeMobileMenu}
               className="flex items-center py-3 px-3 my-2 rounded hover:bg-gray-800 active:bg-gray-700 text-white border-b border-gray-700"
             >

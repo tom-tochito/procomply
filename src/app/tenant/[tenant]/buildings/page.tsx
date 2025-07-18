@@ -3,7 +3,7 @@ import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.ut
 import BuildingsList from "@/features/buildings/components/BuildingsList";
 import { getBuildingsWithComplianceStats } from "@/features/buildings/repository/buildings.repository";
 import { getDivisionsByTenant } from "@/features/divisions/repository/divisions.repository";
-import { requireAuth } from "@/features/auth/repository/auth.repository";
+import { requireAuth } from "@/features/auth";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 import { BuildingWithStats } from "@/features/buildings/models";
 import { getFileUrl } from "@/common/utils/file";
@@ -17,14 +17,14 @@ interface BuildingsPageProps {
 export default async function BuildingsPage({ params }: BuildingsPageProps) {
   const { tenant } = await params;
 
-  // Require authentication
-  await requireAuth(tenant);
-
   // Get tenant data
   const tenantData = await findTenantBySlug(tenant);
   if (!tenantData) {
     throw new Error("Tenant not found");
   }
+
+  // Require authentication
+  await requireAuth(tenantData);
 
   // Fetch buildings from InstantDB
   const buildings = await getBuildingsWithComplianceStats(tenantData);

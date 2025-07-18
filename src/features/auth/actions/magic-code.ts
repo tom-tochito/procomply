@@ -1,6 +1,8 @@
 "use server";
 
+import type { Tenant } from "@/features/tenant/models";
 import { findUserByEmail } from "@/features/user/repository";
+
 import { setAuthCookies } from "../repository";
 
 export interface CheckUserResult {
@@ -20,11 +22,11 @@ export interface SetAuthCookiesResult {
  */
 export async function checkUserExistsAction(
   email: string,
-  tenantId: string
+  tenant: Tenant
 ): Promise<CheckUserResult> {
   try {
     const user = await findUserByEmail(email);
-    
+
     if (!user) {
       return {
         success: true,
@@ -33,9 +35,9 @@ export async function checkUserExistsAction(
     }
 
     // Check if user belongs to the tenant or is an admin
-    const belongsToTenant = user.tenant?.id === tenantId;
+    const belongsToTenant = user.tenant?.id === tenant.id;
     const isAdmin = user.profile?.role === "admin";
-    
+
     return {
       success: true,
       exists: belongsToTenant || isAdmin,
@@ -56,11 +58,11 @@ export async function checkUserExistsAction(
  */
 export async function setAuthCookiesAction(
   email: string,
-  tenantId: string
+  tenant: Tenant
 ): Promise<SetAuthCookiesResult> {
   try {
     const user = await findUserByEmail(email);
-    
+
     if (!user) {
       return {
         success: false,
@@ -69,9 +71,9 @@ export async function setAuthCookiesAction(
     }
 
     // Check if user belongs to the tenant or is an admin
-    const belongsToTenant = user.tenant?.id === tenantId;
+    const belongsToTenant = user.tenant?.id === tenant.id;
     const isAdmin = user.profile?.role === "admin";
-    
+
     if (!belongsToTenant && !isAdmin) {
       return {
         success: false,

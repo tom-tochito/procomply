@@ -2,7 +2,7 @@ import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import TeamManagement from "@/features/data-mgmt/components/TeamManagement";
 import { getTeamsByTenant } from "@/features/teams/repository/teams.repository";
-import { requireAuth } from "@/features/auth/repository/auth.repository";
+import { requireAuth } from "@/features/auth";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 import { getCompaniesByTenant } from "@/features/companies/repository/companies.repository";
 import { findUsersByTenant } from "@/features/user/repository/user.repository";
@@ -16,14 +16,14 @@ interface TeamPageProps {
 export default async function TeamPage({ params }: TeamPageProps) {
   const { tenant } = await params;
 
-  // Require authentication
-  await requireAuth(tenant);
-
   // Get tenant data
   const tenantData = await findTenantBySlug(tenant);
   if (!tenantData) {
     throw new Error("Tenant not found");
   }
+
+  // Require authentication
+  await requireAuth(tenantData);
 
   // Fetch teams, companies and supervisors from InstantDB
   const [teamsFromDB, companies, supervisors] = await Promise.all([

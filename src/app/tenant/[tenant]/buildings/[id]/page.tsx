@@ -3,7 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import { getBuildingById } from "@/features/buildings/repository/buildings.repository";
-import { requireAuth } from "@/features/auth/repository/auth.repository";
+import { requireAuth } from "@/features/auth";
+import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 import { getFileUrl } from "@/common/utils/file";
 import { dbAdmin } from "~/lib/db-admin";
 
@@ -19,8 +20,14 @@ export default async function BuildingDetailsPage({
 }: BuildingDetailsPageProps) {
   const { tenant, id } = await params;
 
+  // Get tenant data
+  const tenantData = await findTenantBySlug(tenant);
+  if (!tenantData) {
+    throw new Error("Tenant not found");
+  }
+
   // Require authentication
-  await requireAuth(tenant);
+  await requireAuth(tenantData);
 
   // Fetch building from InstantDB
   const building = await getBuildingById(id);

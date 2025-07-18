@@ -1,10 +1,13 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { clearAuthCookies } from "../repository";
-import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 
-export async function logoutAction(tenantSlug: string) {
+import type { Tenant } from "@/features/tenant/models";
+import { generateTenantRedirectUrl } from "@/features/tenant/utils/tenant.utils";
+
+import { clearAuthCookies } from "../repository";
+
+export async function logoutAction(tenant: Tenant) {
   await clearAuthCookies();
-  redirect(generateTenantRedirectUrl(tenantSlug, "/login"));
+  redirect(generateTenantRedirectUrl(tenant.slug, "/login"));
 }

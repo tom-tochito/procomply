@@ -34,7 +34,7 @@ export function LoginForm({ tenant }: LoginFormProps) {
 
     try {
       // Check if user exists in our database
-      const checkResult = await checkUserExistsAction(email, tenant.id);
+      const checkResult = await checkUserExistsAction(email, tenant);
 
       if (!checkResult.success) {
         setError(checkResult.error || "Failed to verify email");
@@ -73,7 +73,7 @@ export function LoginForm({ tenant }: LoginFormProps) {
       await db.auth.signInWithMagicCode({ email, code });
 
       // Set server-side auth cookies
-      const cookieResult = await setAuthCookiesAction(email, tenant.id);
+      const cookieResult = await setAuthCookiesAction(email, tenant);
 
       if (!cookieResult.success) {
         setError(cookieResult.error || "Failed to complete login");

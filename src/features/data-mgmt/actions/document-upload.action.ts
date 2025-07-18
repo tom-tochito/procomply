@@ -2,7 +2,7 @@
 
 import { dbAdmin } from "~/lib/db-admin";
 import { uploadFile } from "@/common/services/storage/storage.service";
-import { requireAuth } from "@/features/auth/repository/auth.repository";
+import { requireAuth } from "@/features/auth";
 import { findTenantById } from "@/features/tenant/repository/tenant.repository";
 import { getBuildingById } from "@/features/buildings/repository/buildings.repository";
 import { FormState } from "@/common/types/form";
@@ -117,7 +117,7 @@ export async function uploadDocumentForDataMgmtAction(
     }
 
     // Get authenticated user
-    const authData = await requireAuth(tenant.slug);
+    const authData = await requireAuth(tenant);
     const user = authData.user;
 
     // Get building if specified
