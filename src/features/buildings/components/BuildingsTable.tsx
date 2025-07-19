@@ -3,10 +3,11 @@
 import React, { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+
 import { Table, ColumnDef } from "@/common/components/Table";
+
 import { BuildingWithStats } from "@/features/buildings/models";
-import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
-import { getFileUrl } from "~/src/common/utils/file";
+import { generateTenantRedirectUrl } from "@/features/tenant/utils/tenant.utils";
 
 interface BuildingsTableProps {
   buildings: BuildingWithStats[];
@@ -26,22 +27,25 @@ export default function BuildingsTable({
       {
         accessorKey: "image",
         header: "",
-        cell: ({ row }) => (
-          <div className="w-16 h-16 relative overflow-hidden rounded-lg">
-            {row.original.image ? (
-              <Image
-                src={getFileUrl(tenant, row.original.image)}
-                alt={row.original.name}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-400 text-xs">No image</span>
-              </div>
-            )}
-          </div>
-        ),
+        cell: ({ row }) => {
+          console.log("row.original.image", row.original.image);
+          return (
+            <div className="w-16 h-16 relative overflow-hidden rounded-lg">
+              {row.original.image ? (
+                <Image
+                  src={row.original.image}
+                  alt={row.original.name}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-400 text-xs">No image</span>
+                </div>
+              )}
+            </div>
+          );
+        },
         enableSorting: false,
       },
       {

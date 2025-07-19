@@ -21,7 +21,9 @@ export async function GET(
   try {
     const context = await getCloudflareContext({ async: true });
     const bucket = context.env.PROCOMPLY_BUCKET;
-    const object = await bucket.get(`/tenant/${tenant}/${filePath}`);
+
+    const key = `tenant/${tenant}/${filePath}`;
+    const object = await bucket.get(key);
 
     if (object === null) {
       return new Response("Object Not Found", { status: 404 });
