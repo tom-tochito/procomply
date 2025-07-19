@@ -646,32 +646,86 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                   {activeSidebarItem === "legislation" && (
                     <div className="space-y-4 text-sm">
                       <div className="grid grid-cols-1 gap-y-3">
-                        <div className="bg-gray-100 rounded-md p-3 flex items-center">
+                        <a 
+                          href="https://www.legislation.gov.uk/ukpga/1974/37/contents"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-gray-100 rounded-md p-3 flex items-center hover:bg-gray-200 transition-colors group no-underline"
+                        >
                           <div className="flex-grow">
-                            <p className="font-medium text-gray-800">
+                            <p className="font-medium text-gray-800 group-hover:text-blue-600">
                               Health and Safety at Work etc Act 1974
                             </p>
                             <p className="text-xs text-gray-500">HASAWA 1974</p>
                           </div>
-                        </div>
-                        <div className="bg-gray-100 rounded-md p-3 flex items-center">
+                          <svg
+                            className="h-4 w-4 text-gray-400 group-hover:text-blue-600 ml-2"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
+                          </svg>
+                        </a>
+                        <a 
+                          href="https://www.legislation.gov.uk/uksi/1999/3242/contents/made"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-gray-100 rounded-md p-3 flex items-center hover:bg-gray-200 transition-colors group no-underline"
+                        >
                           <div className="flex-grow">
-                            <p className="font-medium text-gray-800">
+                            <p className="font-medium text-gray-800 group-hover:text-blue-600">
                               The Management of Health & Safety at Work
                               Regulations 1999
                             </p>
                             <p className="text-xs text-gray-500">MHSWR 1999</p>
                           </div>
-                        </div>
-                        <div className="bg-gray-100 rounded-md p-3 flex items-center">
+                          <svg
+                            className="h-4 w-4 text-gray-400 group-hover:text-blue-600 ml-2"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
+                          </svg>
+                        </a>
+                        <a 
+                          href="https://www.legislation.gov.uk/uksi/1992/3004/contents/made"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-gray-100 rounded-md p-3 flex items-center hover:bg-gray-200 transition-colors group no-underline"
+                        >
                           <div className="flex-grow">
-                            <p className="font-medium text-gray-800">
+                            <p className="font-medium text-gray-800 group-hover:text-blue-600">
                               The Workplace (Health, Safety and Welfare)
                               Regulations 1992
                             </p>
                             <p className="text-xs text-gray-500">WHSWR 1992</p>
                           </div>
-                        </div>
+                          <svg
+                            className="h-4 w-4 text-gray-400 group-hover:text-blue-600 ml-2"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
+                          </svg>
+                        </a>
                       </div>
                     </div>
                   )}

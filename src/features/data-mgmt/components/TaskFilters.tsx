@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { Task } from "@/data/tasks";
+import { db } from "~/lib/db";
+import { Tenant } from "@/features/tenant/models";
 
 interface TaskFiltersProps {
   searchTerm: string;
@@ -18,14 +20,8 @@ interface TaskFiltersProps {
   onColumnsMenuToggle: () => void;
   divisions?: string[]; // Dynamic divisions from database
   tasks?: Task[]; // Tasks for CSV export
+  tenant: Tenant; // Pass full tenant object
 }
-
-const availableTeams = [
-  "ASAP Comply Ltd",
-  "Property Fire Protection",
-  "UK Fire Protection",
-  "All Teams",
-];
 
 export default function TaskFilters({
   searchTerm,
@@ -42,10 +38,32 @@ export default function TaskFilters({
   onColumnsMenuToggle,
   divisions = ["All Divisions"], // Default if no divisions provided
   tasks = [],
+  tenant,
 }: TaskFiltersProps) {
   const [teamsDropdownOpen, setTeamsDropdownOpen] = useState(false);
   const [assigneeDropdownOpen, setAssigneeDropdownOpen] = useState(false);
   const [buildingUseDropdownOpen, setBuildingUseDropdownOpen] = useState(false);
+
+  // Fetch teams from database
+  const { data: teamsData } = db.useQuery({
+    teams: {
+      $: {
+        where: { "tenant.id": tenant.id },
+        order: { description: "asc" }
+      },
+      company: {}
+    }
+  });
+
+  // Fetch users who can be assignees
+  const { data: usersData } = db.useQuery({
+    $users: {
+      $: {
+        where: { "tenant.id": tenant.id }
+      },
+      profile: {}
+    }
+  });
 
   const generateCSV = () => {
     const headers = ['ID', 'Description', 'Risk Area', 'Priority', 'Risk Level', 'Due Date', 'Team', 'Assignee', 'Progress', 'Building ID'];
@@ -163,7 +181,9 @@ export default function TaskFilters({
             className="inline-flex items-center justify-between border px-3 py-1.5 rounded-md text-sm hover:bg-gray-50 min-w-[160px]"
             onClick={() => setTeamsDropdownOpen(!teamsDropdownOpen)}
           >
-            {selectedTeam || "Filter by team"}
+            {selectedTeam 
+              ? teamsData?.teams?.find(t => t.id === selectedTeam)?.description || "Filter by team"
+              : "Filter by team"}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-4 w-4 ml-2"
@@ -182,16 +202,25 @@ export default function TaskFilters({
 
           {teamsDropdownOpen && (
             <div className="absolute left-0 mt-1 w-48 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
-              {availableTeams.map((team) => (
+              <div
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                onClick={() => {
+                  setSelectedTeam("");
+                  setTeamsDropdownOpen(false);
+                }}
+              >
+                All Teams
+              </div>
+              {(teamsData?.teams || []).map((team) => (
                 <div
-                  key={team}
+                  key={team.id}
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
-                    setSelectedTeam(team === "All Teams" ? "" : team);
+                    setSelectedTeam(team.id);
                     setTeamsDropdownOpen(false);
                   }}
                 >
-                  {team}
+                  {team.description}{team.company ? ` (${team.company.name})` : ''}
                 </div>
               ))}
             </div>
@@ -204,7 +233,11 @@ export default function TaskFilters({
             className="inline-flex items-center justify-between border px-3 py-1.5 rounded-md text-sm hover:bg-gray-50 min-w-[180px]"
             onClick={() => setAssigneeDropdownOpen(!assigneeDropdownOpen)}
           >
-            {selectedAssignee || "Filter by assignee"}
+            {selectedAssignee 
+              ? usersData?.$users?.find(u => u.id === selectedAssignee)?.profile?.name || 
+                usersData?.$users?.find(u => u.id === selectedAssignee)?.email || 
+                "Filter by assignee"
+              : "Filter by assignee"}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-4 w-4 ml-2"
@@ -222,7 +255,7 @@ export default function TaskFilters({
           </button>
 
           {assigneeDropdownOpen && (
-            <div className="absolute left-0 mt-1 w-48 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
+            <div className="absolute left-0 mt-1 w-48 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200 max-h-60 overflow-y-auto">
               <div
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                 onClick={() => {
@@ -232,15 +265,19 @@ export default function TaskFilters({
               >
                 All Assignees
               </div>
-              <div
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  setSelectedAssignee("Mark Burchall (ASAP)");
-                  setAssigneeDropdownOpen(false);
-                }}
-              >
-                Mark Burchall (ASAP)
-              </div>
+              {(usersData?.$users || []).map((user) => (
+                <div
+                  key={user.id}
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    setSelectedAssignee(user.id);
+                    setAssigneeDropdownOpen(false);
+                  }}
+                >
+                  {user.profile?.name || user.email}
+                  {user.profile?.position ? ` (${user.profile.position})` : ''}
+                </div>
+              ))}
             </div>
           )}
         </div>

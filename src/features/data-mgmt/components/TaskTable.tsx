@@ -13,6 +13,9 @@ interface TaskTableProps {
   buildingNames?: Map<string, string>; // Map of building ID to name
 }
 
+type SortField = 'description' | 'risk_area' | 'priority' | 'risk_level' | 'due_date' | 'team' | 'assignee' | 'progress';
+type SortOrder = 'asc' | 'desc';
+
 const initialVisibleColumns = {
   description: true,
   riskArea: true,
@@ -40,6 +43,8 @@ export default function TaskTable({
   const [visibleColumns, setVisibleColumns] = useState<VisibleColumnsState>(
     initialVisibleColumns
   );
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -145,6 +150,65 @@ export default function TaskTable({
 
   const toggleTaskComplete = (taskId: string | number) => {
     console.log(`Toggling completion status of task ${taskId}`);
+  };
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const sortedTasks = [...tasks].sort((a, b) => {
+    if (!sortField) return 0;
+
+    let aValue: string | number = a[sortField] || '';
+    let bValue: string | number = b[sortField] || '';
+
+    // Handle due dates specially
+    if (sortField === 'due_date') {
+      // Convert dd/mm/yyyy to sortable format
+      aValue = a.due_date ? new Date(a.due_date.split('/').reverse().join('-')).getTime() : 0;
+      bValue = b.due_date ? new Date(b.due_date.split('/').reverse().join('-')).getTime() : 0;
+    }
+
+    // Handle priority and risk level specially
+    if (sortField === 'priority' || sortField === 'risk_level') {
+      const priorityOrder: { [key: string]: number } = { H: 3, M: 2, L: 1 };
+      aValue = priorityOrder[aValue] || 0;
+      bValue = priorityOrder[bValue] || 0;
+    }
+
+    // Handle empty values
+    if (!aValue && !bValue) return 0;
+    if (!aValue) return 1;
+    if (!bValue) return -1;
+
+    // Compare values
+    if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const renderSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return (
+        <svg className="w-3 h-3 ml-1 opacity-40" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M7 10l5-5 5 5H7zM7 14l5 5 5-5H7z"/>
+        </svg>
+      );
+    }
+    return sortOrder === 'asc' ? (
+      <svg className="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M7 14l5-5 5 5H7z"/>
+      </svg>
+    ) : (
+      <svg className="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M7 10l5 5 5-5H7z"/>
+      </svg>
+    );
   };
 
   return (
@@ -253,9 +317,9 @@ export default function TaskTable({
 
       <div className="bg-white rounded-md shadow-sm overflow-hidden">
         <div className="block sm:hidden">
-          {tasks.length > 0 ? (
+          {sortedTasks.length > 0 ? (
             <div className="divide-y divide-gray-200">
-              {tasks.map((task, index) => (
+              {sortedTasks.map((task, index) => (
                 <div
                   key={task.id || index}
                   className="p-4 cursor-pointer hover:bg-gray-50"
@@ -415,64 +479,96 @@ export default function TaskTable({
                   ></th>
                   <th
                     scope="col"
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('description')}
                   >
-                    Description
+                    <div className="flex items-center">
+                      Description
+                      {renderSortIcon('description')}
+                    </div>
                   </th>
                   {visibleColumns.riskArea && (
                     <th
                       scope="col"
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleSort('risk_area')}
                     >
-                      Risk Area
+                      <div className="flex items-center">
+                        Risk Area
+                        {renderSortIcon('risk_area')}
+                      </div>
                     </th>
                   )}
                   {visibleColumns.priority && (
                     <th
                       scope="col"
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12"
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12 cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleSort('priority')}
                     >
-                      PR
+                      <div className="flex items-center">
+                        PR
+                        {renderSortIcon('priority')}
+                      </div>
                     </th>
                   )}
                   {visibleColumns.riskLevel && (
                     <th
                       scope="col"
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12"
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12 cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleSort('risk_level')}
                     >
-                      RL
+                      <div className="flex items-center">
+                        RL
+                        {renderSortIcon('risk_level')}
+                      </div>
                     </th>
                   )}
                   {visibleColumns.dueDate && (
                     <th
                       scope="col"
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleSort('due_date')}
                     >
-                      Due Date
+                      <div className="flex items-center">
+                        Due Date
+                        {renderSortIcon('due_date')}
+                      </div>
                     </th>
                   )}
                   {visibleColumns.team && (
                     <th
                       scope="col"
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleSort('team')}
                     >
-                      Team
+                      <div className="flex items-center">
+                        Team
+                        {renderSortIcon('team')}
+                      </div>
                     </th>
                   )}
                   {visibleColumns.assignee && (
                     <th
                       scope="col"
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleSort('assignee')}
                     >
-                      Assignee
+                      <div className="flex items-center">
+                        Assignee
+                        {renderSortIcon('assignee')}
+                      </div>
                     </th>
                   )}
                   {visibleColumns.progress && (
                     <th
                       scope="col"
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleSort('progress')}
                     >
-                      Progress
+                      <div className="flex items-center">
+                        Progress
+                        {renderSortIcon('progress')}
+                      </div>
                     </th>
                   )}
                   {visibleColumns.latestNote && (
@@ -502,8 +598,8 @@ export default function TaskTable({
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {tasks.length > 0 ? (
-                  tasks.map((task, index) => (
+                {sortedTasks.length > 0 ? (
+                  sortedTasks.map((task, index) => (
                     <tr
                       key={task.id || index}
                       className="hover:bg-gray-50 transition-colors cursor-pointer"

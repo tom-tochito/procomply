@@ -166,12 +166,18 @@ export default function TaskManagement({
       }
     }
 
-    if (selectedTeam && task.team !== selectedTeam) {
+    // Team filter - tasks don't have teams in current schema, so skip for now
+    if (selectedTeam) {
+      // TODO: Implement team filtering when tasks are linked to teams
       return false;
     }
 
-    if (selectedAssignee && task.assignee !== selectedAssignee) {
-      return false;
+    // Assignee filter - match by user ID
+    if (selectedAssignee) {
+      const taskAssignee = instantData?.tasks?.find(t => t.id === task.id)?.assignee;
+      if (!taskAssignee || taskAssignee.id !== selectedAssignee) {
+        return false;
+      }
     }
 
     if (
@@ -341,6 +347,7 @@ export default function TaskManagement({
               onColumnsMenuToggle={() => setColumnsMenuOpen(!columnsMenuOpen)}
               divisions={(divisionsData?.divisions || []).map(d => d.name)}
               tasks={filteredTasks}
+              tenant={tenant}
             />
           </div>
 
