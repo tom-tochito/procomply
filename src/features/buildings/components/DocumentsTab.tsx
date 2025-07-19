@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Search, Upload } from "lucide-react";
 import { useDocuments } from "@/features/documents/hooks/useDocuments";
 import DocumentTable from "@/features/documents/components/DocumentTable";
+import DocumentViewer from "@/features/documents/components/DocumentViewer";
 import UploadDocumentDialog from "@/features/data-mgmt/components/UploadDocumentDialog";
 import { Building } from "@/features/buildings/models";
 import { Tenant } from "@/features/tenant/models";
@@ -23,6 +24,8 @@ export default function DocumentsTab({
 }: DocumentsTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentWithRelations | null>(null);
 
   // Use shared document hook with building filter
   const { documents, isLoading, error } = useDocuments({
@@ -32,11 +35,8 @@ export default function DocumentsTab({
   });
 
   const handleDocumentClick = (document: DocumentWithRelations) => {
-    // Open document in new tab
-    if (document.path) {
-      const viewUrl = getFileUrl(tenant.slug, document.path);
-      window.open(viewUrl, "_blank");
-    }
+    setSelectedDocument(document);
+    setViewerOpen(true);
   };
 
   const handleDownload = (document: DocumentWithRelations) => {
@@ -76,6 +76,13 @@ export default function DocumentsTab({
 
   return (
     <div>
+      <DocumentViewer
+        document={selectedDocument}
+        tenantSlug={tenant.slug}
+        isOpen={viewerOpen}
+        onClose={() => setViewerOpen(false)}
+        onDownload={handleDownload}
+      />
       {/* Search and upload controls */}
       <div className="bg-white shadow rounded-lg p-6 mb-6">
         <div className="flex flex-wrap gap-4">

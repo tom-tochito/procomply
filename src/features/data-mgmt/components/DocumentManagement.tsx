@@ -7,9 +7,9 @@ import React, {
   startTransition,
 } from "react";
 import { db } from "~/lib/db";
-import DocumentDetailsDialog from "./DocumentDetailsDialog";
 import UploadDocumentDialog from "./UploadDocumentDialog";
 import DocumentTable from "@/features/documents/components/DocumentTable";
+import DocumentViewer from "@/features/documents/components/DocumentViewer";
 import DocumentSidebar from "./DocumentSidebar";
 import DocumentActionBar from "./DocumentActionBar";
 import { Tenant } from "@/features/tenant/models";
@@ -17,7 +17,6 @@ import { getFileUrl } from "@/common/utils/file";
 import { deleteDocumentAction } from "@/features/data-mgmt/actions/document-delete.action";
 import { FormState } from "@/common/types/form";
 import { DocumentWithRelations } from "@/features/documents/models";
-import { useDocumentCounts } from "@/features/documents/hooks/useDocuments";
 
 interface DocumentManagementProps {
   tenant: Tenant;
@@ -29,10 +28,11 @@ export default function DocumentManagement({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedDocCategory, setSelectedDocCategory] = useState<string | null>(
-    null
-  );
   const [selectedFileType, setSelectedFileType] = useState<string | null>(null);
+  const [selectedStatutory, setSelectedStatutory] = useState<boolean | null>(null);
+  const [selectedBuilding, setSelectedBuilding] = useState<string | null>(null);
+  const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
+  const [selectedComplex, setSelectedComplex] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -60,7 +60,9 @@ export default function DocumentManagement({
         limit: pageSize,
         offset: (pageNumber - 1) * pageSize,
       },
-      building: {},
+      building: {
+        divisionEntity: {},
+      },
       uploader: {
         profile: {},
       },
@@ -69,7 +71,21 @@ export default function DocumentManagement({
   });
 
   // Get document counts for categories
-  const docCategoryCounts = useDocumentCounts(tenant);
+  // const docCategoryCounts = useDocumentCounts(tenant);
+
+  // Get buildings data for filters
+  const { data: buildingsData } = db.useQuery({
+    buildings: {
+      $: {
+        where: {
+          tenant: tenant.id,
+        },
+      },
+      divisionEntity: {},
+    },
+  });
+
+  const allBuildings = buildingsData?.buildings || [];
 
   useEffect(() => {
     const handleResize = () => {
@@ -129,10 +145,24 @@ export default function DocumentManagement({
     );
   }
 
-  // Doc category filter
-  if (selectedDocCategory) {
+  // Building filter
+  if (selectedBuilding) {
     filteredDocuments = filteredDocuments.filter(
-      (doc) => doc.docCategory === selectedDocCategory
+      (doc) => doc.building?.id === selectedBuilding
+    );
+  }
+
+  // Division filter
+  if (selectedDivision) {
+    filteredDocuments = filteredDocuments.filter(
+      (doc) => doc.building?.divisionEntity?.name === selectedDivision
+    );
+  }
+
+  // Complex filter
+  if (selectedComplex) {
+    filteredDocuments = filteredDocuments.filter(
+      (doc) => doc.building?.complex === selectedComplex
     );
   }
 
@@ -152,6 +182,13 @@ export default function DocumentManagement({
         default:
           return true;
       }
+    });
+  }
+
+  // Statutory filter
+  if (selectedStatutory !== null) {
+    filteredDocuments = filteredDocuments.filter((doc) => {
+      return doc.isStatutory === selectedStatutory;
     });
   }
 
@@ -199,6 +236,14 @@ export default function DocumentManagement({
     new Set(documents.map((doc) => doc.category).filter((cat): cat is string => Boolean(cat)))
   );
   const fileTypes = ["pdf", "doc", "xls", "image"];
+  
+  // Get unique divisions and complexes from buildings
+  const divisions = Array.from(
+    new Set(allBuildings.map((b) => b.divisionEntity?.name).filter((d): d is string => Boolean(d)))
+  );
+  const complexes = Array.from(
+    new Set(allBuildings.map((b) => b.complex).filter((c): c is string => Boolean(c)))
+  );
 
   // For now, we'll show the count of current page
   // TODO: Implement proper total count query when InstantDB supports it
@@ -222,30 +267,13 @@ export default function DocumentManagement({
 
   return (
     <>
-      {selectedDocument && (
-        <DocumentDetailsDialog
-          isOpen={dialogOpen}
-          onClose={handleDialogClose}
-          document={{
-            id: selectedDocument.id,
-            name: selectedDocument.name,
-            file_type: selectedDocument.type,
-            category: selectedDocument.category || "",
-            document_category: selectedDocument.docCategory || "Miscellaneous",
-            upload_date: new Date(selectedDocument.uploadedAt).toLocaleDateString("en-GB"),
-            uploaded_by: selectedDocument.uploader?.email || "Unknown",
-            size: `${(selectedDocument.size / 1024 / 1024).toFixed(1)} MB`,
-            status: selectedDocument.isActive ? "Active" : "Archived",
-            building_id: selectedDocument.building?.id || "",
-            task_id: "",
-            description: selectedDocument.description || "",
-            tags: [],
-            last_accessed: new Date(selectedDocument.updatedAt).toLocaleDateString("en-GB"),
-            version: "1.0",
-          }}
-          onDownload={() => handleDownload(selectedDocument)}
-        />
-      )}
+      <DocumentViewer
+        document={selectedDocument}
+        tenantSlug={tenant.slug}
+        isOpen={dialogOpen}
+        onClose={handleDialogClose}
+        onDownload={handleDownload}
+      />
 
       <UploadDocumentDialog
         isOpen={uploadDialogOpen}
@@ -303,17 +331,25 @@ export default function DocumentManagement({
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {sidebarOpen && (
           <DocumentSidebar
-            selectedDocCategory={selectedDocCategory}
-            setSelectedDocCategory={setSelectedDocCategory}
             selectedStatus={selectedStatus}
             setSelectedStatus={setSelectedStatus}
             selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}
             selectedFileType={selectedFileType}
             setSelectedFileType={setSelectedFileType}
+            selectedStatutory={selectedStatutory}
+            setSelectedStatutory={setSelectedStatutory}
+            selectedBuilding={selectedBuilding}
+            setSelectedBuilding={setSelectedBuilding}
+            selectedDivision={selectedDivision}
+            setSelectedDivision={setSelectedDivision}
+            selectedComplex={selectedComplex}
+            setSelectedComplex={setSelectedComplex}
             categories={categories}
             fileTypes={fileTypes}
-            docCategoryCounts={docCategoryCounts}
+            buildings={allBuildings.map(b => ({ id: b.id, name: b.name }))}
+            divisions={divisions}
+            complexes={complexes}
           />
         )}
 

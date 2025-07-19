@@ -10,6 +10,7 @@ interface UseDocumentsParams {
   searchTerm?: string;
   categoryFilter?: string;
   fileTypeFilter?: string;
+  statutoryFilter?: boolean | null;
 }
 
 export function useDocuments({
@@ -18,6 +19,7 @@ export function useDocuments({
   searchTerm,
   categoryFilter,
   fileTypeFilter,
+  statutoryFilter,
 }: UseDocumentsParams) {
   // Build where clause based on filters
   const whereClause: Record<string, string> = {};
@@ -78,6 +80,13 @@ export function useDocuments({
         default:
           return true;
       }
+    });
+  }
+
+  // Statutory filter
+  if (statutoryFilter !== null && statutoryFilter !== undefined) {
+    filteredDocuments = filteredDocuments.filter((doc) => {
+      return doc.isStatutory === statutoryFilter;
     });
   }
 
