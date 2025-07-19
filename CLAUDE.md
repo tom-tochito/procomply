@@ -97,52 +97,22 @@ db.transact([
 ]);
 ```
 
-## 11. Instant DB Type System Guidelines
-
-To maintain type safety and consistency with your InstantDB schema, all entity types must be derived using `InstaQLEntity`.
-
-- **Derive, Don't Define**: Never manually create custom type definitions for database entities. Always derive types directly from the schema.
-- **Base Entities**: For entities without any relations, use `InstaQLEntity<AppSchema, "entityName">`.
-- **Entities with Relations**: When querying an entity with relations, use `object` for the relation to avoid linting errors. Using an empty object (`{}`) is discouraged as it can cause type issues.
-
-  **Correct:**
-
-  ```typescript
-  // For a nested relation:
-  export type ClassificationWithResults = InstaQLEntity<
-    AppSchema,
-    "classifications",
-    { results: { prompt: object } }
-  >;
-  ```
-
-  **Incorrect:**
-
-  ```typescript
-  // This may cause linting errors.
-  export type ClassificationWithResults = InstaQLEntity<
-    AppSchema,
-    "classifications",
-    { results: { prompt: {} } }
-  >;
-  ```
-
 - **Centralized Models**: Each feature should have a `models/index.ts` file that exports all its necessary InstantDB types for easy reuse and management.
 
-## 12. React Hooks Organization
+## 11. React Hooks Organization
 
 All custom React hooks (i.e., functions starting with `use`) must be located in a `hooks` directory within their corresponding feature folder (e.g., `src/features/example/hooks/`).
 
 - **Separation of Concerns**: Hooks should not be placed in `repositories`, `services`, or other directories. This practice ensures a clear separation between data-fetching logic, business logic, and UI-related state management.
 - **Naming Convention**: Hook files should be named descriptively based on their function, for example, `useUserProfile.ts`.
 
-## 13. Naming Conventions
+## 12. Naming Conventions
 
 - **Constants**: Top-level constants should use UPPERCASE_SNAKE_CASE naming convention (e.g., `MENU_ITEMS`, `API_ENDPOINTS`, `DEFAULT_VALUES`).
 - **Variables and Functions**: Use camelCase for variables and function names.
 - **Components and Types**: Use PascalCase for React components and TypeScript types/interfaces.
 
-## 14. Type System Guidelines
+## 13. Type System Guidelines
 
 All entity types must be derived from InstantDB schema using InstaQLEntity:
 
@@ -160,7 +130,11 @@ All entity types must be derived from InstantDB schema using InstaQLEntity:
   - `getCurrentTimestamp()` - Get current time as timestamp
   - `dateInputToTimestamp()` - Convert HTML date input to timestamp
   - `timestampToDateInput()` - Convert timestamp to HTML date input value
-- Always pass full entity models to functions/components instead of just IDs (e.g., pass full Tenant object, not tenantId)
+- Always pass full entity models to functions/components instead of just IDs
+  - Pass full `Tenant` object, not `tenantId`
+  - Pass full `Building` object, not `buildingId`
+  - Pass full `User` object, not `userId`
+  - This pattern improves type safety and reduces the need for additional queries
 
 Example pattern:
 
@@ -183,9 +157,10 @@ export interface BuildingWithStats extends Building {
 }
 ```
 
-## 15. Server-Side Repository Pattern
+## 14. Server-Side Repository Pattern
 
 Only use server-side repositories for:
+
 - Authentication (auth)
 - Tenant operations (tenant)
 - File storage operations (storage)

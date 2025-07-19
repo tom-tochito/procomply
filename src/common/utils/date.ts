@@ -115,3 +115,31 @@ export function isDateOverdue(dateString: string): boolean {
   
   return timestamp < today.getTime();
 }
+
+/**
+ * Get date status category for a task
+ */
+export function getDateStatus(dateString: string): 'overdue' | 'due_imminent' | 'future' | null {
+  const timestamp = parseDDMMYYYY(dateString);
+  if (!timestamp) return null;
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayTime = today.getTime();
+  
+  // Check if overdue
+  if (timestamp < todayTime) {
+    return 'overdue';
+  }
+  
+  // Check if due imminent (within 7 days)
+  const sevenDaysFromNow = new Date(today);
+  sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+  
+  if (timestamp <= sevenDaysFromNow.getTime()) {
+    return 'due_imminent';
+  }
+  
+  // Otherwise it's future
+  return 'future';
+}

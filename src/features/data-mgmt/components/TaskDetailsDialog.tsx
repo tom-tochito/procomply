@@ -4,6 +4,7 @@ import React from "react";
 import { Task } from "@/data/tasks"; // Import Task type from data
 import Image from "next/image"; // Import next/image
 import { db } from "~/lib/db";
+import { isDateOverdue } from "@/common/utils/date";
 import { 
   Info, 
   Image as ImageIcon, 
@@ -142,10 +143,13 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
   };
 
   const renderDueDateBadge = (label: string, value: string) => {
+    const isOverdue = isDateOverdue(value);
     return (
       <div className="flex items-center">
         <span className="text-gray-300 mr-1.5">{label}:</span>
-        <span className="font-semibold bg-red-500 text-white px-2 py-0.5 rounded text-xs uppercase leading-none">
+        <span className={`font-semibold px-2 py-0.5 rounded text-xs uppercase leading-none ${
+          isOverdue ? 'bg-red-500 text-white' : 'bg-gray-500 text-white'
+        }`}>
           {value}
         </span>
       </div>
@@ -463,7 +467,9 @@ const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                           <p className="text-gray-500 text-xs mb-0.5">
                             Due Date:
                           </p>
-                          <p className="font-semibold bg-blue-500 text-white px-2 py-0.5 rounded inline-block text-xs">
+                          <p className={`font-semibold px-2 py-0.5 rounded inline-block text-xs ${
+                            isDateOverdue(task.due_date) ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
+                          }`}>
                             {task.due_date}
                           </p>
                         </div>

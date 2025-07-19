@@ -8,15 +8,15 @@ import { TaskWithRelations } from "@/features/tasks/models";
 import { FormState } from "@/common/types/form";
 import { createTaskAction, updateTaskAction } from "@/features/tasks/actions/task.actions";
 import { usePathname } from "next/navigation";
+import { Tenant } from "@/features/tenant/models";
+import { db } from "~/lib/db";
 
 interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  tenantId: string;
-  buildings?: Building[];
-  users?: Array<{ id: string; email: string }>;
-  buildingId?: string;
+  tenant: Tenant;
+  building?: Building;
   task?: TaskWithRelations;
   mode: "create" | "edit";
 }
@@ -25,25 +25,41 @@ export function TaskModal({
   isOpen,
   onClose,
   onSuccess,
-  tenantId,
-  buildings = [],
-  users = [],
-  buildingId,
+  tenant,
+  building,
   task,
   mode,
 }: TaskModalProps) {
   const pathname = usePathname();
   const tenantSlug = pathname.split('/')[2];
+  
+  // Fetch buildings and users data from InstantDB
+  const { data } = db.useQuery({
+    buildings: {
+      $: {
+        where: { "tenant.id": tenant.id },
+        order: { name: "asc" }
+      }
+    },
+    $users: {
+      $: {
+        where: { "tenant.id": tenant.id }
+      }
+    }
+  });
+  
+  const buildings = data?.buildings || [];
+  const users = data?.$users || [];
 
   async function handleSubmit(prevState: FormState, formData: FormData): Promise<FormState> {
-    formData.append("tenantId", tenantId);
+    formData.append("tenantId", tenant.id);
     formData.append("tenantSlug", tenantSlug);
     
     if (mode === "edit" && task) {
       formData.append("taskId", task.id);
     }
     
-    const selectedBuildingId = formData.get("buildingId") as string || buildingId || "";
+    const selectedBuildingId = formData.get("buildingId") as string || building?.id || "";
     if (selectedBuildingId && !formData.has("buildingId")) {
       formData.append("buildingId", selectedBuildingId);
     }
@@ -67,9 +83,9 @@ export function TaskModal({
     priority: task.priority,
     status: task.status,
     dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : "",
-    buildingId: task.building?.id || buildingId || "",
+    buildingId: task.building?.id || building?.id || "",
     assigneeId: task.assignee?.id || "",
-  } : buildingId ? { buildingId } : undefined;
+  } : building ? { buildingId: building.id } : undefined;
 
   return (
     <Transition show={isOpen} as={Fragment}>

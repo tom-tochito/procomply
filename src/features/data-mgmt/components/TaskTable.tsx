@@ -10,6 +10,7 @@ interface TaskTableProps {
   onTaskEdit?: (task: Task) => void;
   columnsMenuOpen: boolean;
   setColumnsMenuOpen: (open: boolean) => void;
+  buildingNames?: Map<string, string>; // Map of building ID to name
 }
 
 const initialVisibleColumns = {
@@ -34,6 +35,7 @@ export default function TaskTable({
   onTaskEdit,
   columnsMenuOpen,
   setColumnsMenuOpen,
+  buildingNames,
 }: TaskTableProps) {
   const [visibleColumns, setVisibleColumns] = useState<VisibleColumnsState>(
     initialVisibleColumns
@@ -129,6 +131,8 @@ export default function TaskTable({
   };
 
   const renderDateBadge = (date: string) => {
+    if (!date) return <span className="text-gray-500">—</span>;
+    
     const isOverdue = isDateOverdue(date);
     return (
       <span className={`inline-block rounded-md px-2 py-1 text-xs font-medium ${
@@ -261,7 +265,7 @@ export default function TaskTable({
                     {task.description}
                   </div>
                   <div className="text-gray-500 text-sm mb-2">
-                    Building: {task.building_id}
+                    Building: {buildingNames?.get(task.building_id) || task.building_id || "—"}
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-sm mb-3">
@@ -531,7 +535,7 @@ export default function TaskTable({
                           {task.description}
                         </div>
                         <div className="text-gray-500 text-sm">
-                          Building: {task.building_id}
+                          Building: {buildingNames?.get(task.building_id) || task.building_id || "—"}
                         </div>
                       </td>
                       {visibleColumns.riskArea && (

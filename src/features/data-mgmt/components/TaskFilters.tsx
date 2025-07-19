@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { Task } from "@/data/tasks";
 
 interface TaskFiltersProps {
   searchTerm: string;
@@ -16,6 +17,7 @@ interface TaskFiltersProps {
   onAddTaskClick: () => void;
   onColumnsMenuToggle: () => void;
   divisions?: string[]; // Dynamic divisions from database
+  tasks?: Task[]; // Tasks for CSV export
 }
 
 const availableTeams = [
@@ -39,10 +41,46 @@ export default function TaskFilters({
   onAddTaskClick,
   onColumnsMenuToggle,
   divisions = ["All Divisions"], // Default if no divisions provided
+  tasks = [],
 }: TaskFiltersProps) {
   const [teamsDropdownOpen, setTeamsDropdownOpen] = useState(false);
   const [assigneeDropdownOpen, setAssigneeDropdownOpen] = useState(false);
   const [buildingUseDropdownOpen, setBuildingUseDropdownOpen] = useState(false);
+
+  const generateCSV = () => {
+    const headers = ['ID', 'Description', 'Risk Area', 'Priority', 'Risk Level', 'Due Date', 'Team', 'Assignee', 'Progress', 'Building ID'];
+    const rows = tasks.map(task => [
+      task.id,
+      task.description,
+      task.risk_area,
+      task.priority,
+      task.risk_level,
+      task.due_date,
+      task.team || '',
+      task.assignee || '',
+      task.progress,
+      task.building_id
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+    
+    return csvContent;
+  };
+
+  const downloadCSV = (content: string, filename: string) => {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="bg-white rounded-md shadow-sm p-4 sm:p-6 mb-6">
@@ -402,7 +440,10 @@ export default function TaskFilters({
           
           <button
             className="bg-white border border-gray-300 px-3 py-1.5 rounded-md text-sm font-medium hover:bg-gray-50"
-            onClick={() => alert("CSV export would start here")}
+            onClick={() => {
+              const csvContent = generateCSV();
+              downloadCSV(csvContent, 'tasks.csv');
+            }}
           >
             CSV
           </button>

@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { Task } from "@/data/tasks";
-import { Building } from "@/features/buildings/models";
 import { TaskModal } from "./TaskModal";
 import { TaskWithRelations } from "@/features/tasks/models";
 import TaskDetailsDialog from "@/features/data-mgmt/components/TaskDetailsDialog";
@@ -11,30 +10,30 @@ import TaskFilters from "@/features/data-mgmt/components/TaskFilters";
 import TaskTable from "@/features/data-mgmt/components/TaskTable";
 import TaskStatusFilters from "@/features/data-mgmt/components/TaskStatusFilters";
 import { db } from "~/lib/db";
+import { getDateStatus } from "@/common/utils/date";
+import { Tenant } from "@/features/tenant/models";
+import { Building } from "@/features/buildings/models";
 
-interface TaskManagementNewProps {
-  tenant?: string;
-  tenantId: string;
-  buildings?: Building[];
-  users?: Array<{ id: string; email: string }>;
-  buildingId?: string; // For building details page
+interface TaskManagementProps {
+  tenant: Tenant;
+  building?: Building; // For building details page
 }
 
-export default function TaskManagementNew({ 
-  tenantId,
-  buildings = [],
-  users: initialUsers = [],
-  buildingId 
-}: TaskManagementNewProps) {
+export default function TaskManagement({ 
+  tenant,
+  building 
+}: TaskManagementProps) {
   
   // Fetch tasks from InstantDB client-side
   const { data: instantData } = db.useQuery({
     tasks: {
       $: {
-        where: { "tenant.id": tenantId },
+        where: { "tenant.id": tenant.id },
         order: { dueDate: "asc" }
       },
-      building: {},
+      building: {
+        divisionEntity: {}
+      },
       assignee: {},
       creator: {},
       tenant: {},
@@ -45,7 +44,7 @@ export default function TaskManagementNew({
   const { data: divisionsData } = db.useQuery({
     divisions: {
       $: {
-        where: { "tenant.id": tenantId },
+        where: { "tenant.id": tenant.id },
         order: { name: "asc" }
       },
     },
@@ -53,31 +52,51 @@ export default function TaskManagementNew({
 
   // Create a mapping of task IDs to building data
   const taskBuildingMap = new Map<string, { name: string; image?: string }>();
+  // Create a mapping of building IDs to names
+  const buildingIdToNameMap = new Map<string, string>();
+  
   instantData?.tasks?.forEach((task) => {
     if (task.building) {
       taskBuildingMap.set(task.id, {
         name: task.building.name,
         image: task.building.image,
       });
+      buildingIdToNameMap.set(task.building.id, task.building.name);
     }
   });
 
   // Transform InstantDB tasks to match Task interface
-  const tasks: Task[] = (instantData?.tasks || []).map((task) => ({
-    id: task.id,
-    description: task.title,
-    risk_area: "Fire", // Default as no risk area in schema
-    priority: (task.priority === "high" ? "H" : task.priority === "low" ? "L" : "M") as "H" | "M" | "L",
-    risk_level: "M" as "H" | "M" | "L", // Default as no risk level in schema
-    due_date: task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-GB') : '',
-    team: '', // No team association in current schema
-    assignee: task.assignee?.email || '',
-    progress: task.status,
-    notes: [],
-    completed: task.status === 'completed',
-    groups: [],
-    building_id: task.building?.id || '',
-  }));
+  const tasks: Task[] = (instantData?.tasks || []).map((task) => {
+    const dueDateStr = task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-GB') : '';
+    
+    // Determine the progress status
+    let progress = task.status;
+    
+    // If task is not started and not completed, check if it should be categorized by date
+    if (task.status === 'pending' && dueDateStr) {
+      const dateStatus = getDateStatus(dueDateStr);
+      if (dateStatus === 'future') {
+        progress = 'future';
+      }
+      // For overdue and due_imminent, keep as 'pending' (inbox)
+    }
+    
+    return {
+      id: task.id,
+      description: task.title,
+      risk_area: "Fire", // Default as no risk area in schema
+      priority: (task.priority === "high" ? "H" : task.priority === "low" ? "L" : "M") as "H" | "M" | "L",
+      risk_level: "M" as "H" | "M" | "L", // Default as no risk level in schema
+      due_date: dueDateStr,
+      team: '', // No team association in current schema
+      assignee: task.assignee?.email || '',
+      progress: progress,
+      notes: [],
+      completed: task.status === 'completed',
+      groups: [],
+      building_id: task.building?.id || '',
+    };
+  });
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
@@ -93,7 +112,6 @@ export default function TaskManagementNew({
   const [columnsMenuOpen, setColumnsMenuOpen] = useState(false);
   const [labels] = useState<{ name: string; color: string }[]>([]);
   const [labelModalOpen, setLabelModalOpen] = useState(false);
-  const [users] = useState<Array<{ id: string; email: string }>>(initialUsers);
   const [statusFilters, setStatusFilters] = useState({
     inProgress: true,
     inbox: true,
@@ -210,14 +228,7 @@ export default function TaskManagementNew({
         id: "",
         email: ""
       },
-      tenant: { 
-        id: tenantId,
-        name: "",
-        slug: "",
-        description: "",
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      },
+      tenant: tenant,
     };
     
     setEditTask(taskWithRelations);
@@ -258,10 +269,8 @@ export default function TaskManagementNew({
         isOpen={taskModalOpen}
         onClose={() => setTaskModalOpen(false)}
         onSuccess={handleTaskSuccess}
-        tenantId={tenantId}
-        buildings={buildings}
-        users={users}
-        buildingId={buildingId}
+        tenant={tenant}
+        building={building}
         task={editTask}
         mode={modalMode}
       />
@@ -331,6 +340,7 @@ export default function TaskManagementNew({
               onAddTaskClick={handleAddTask}
               onColumnsMenuToggle={() => setColumnsMenuOpen(!columnsMenuOpen)}
               divisions={(divisionsData?.divisions || []).map(d => d.name)}
+              tasks={filteredTasks}
             />
           </div>
 
@@ -346,6 +356,7 @@ export default function TaskManagementNew({
             onTaskEdit={handleEditTask}
             columnsMenuOpen={columnsMenuOpen}
             setColumnsMenuOpen={setColumnsMenuOpen}
+            buildingNames={buildingIdToNameMap}
           />
         </div>
       </div>

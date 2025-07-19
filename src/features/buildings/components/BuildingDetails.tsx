@@ -63,15 +63,6 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
     },
   });
 
-  // Fetch users for the tenant
-  const { data: usersData } = db.useQuery({
-    $users: {
-      $: {
-        where: { "tenant.id": tenant.id },
-      },
-    },
-  });
-
   // Fetch divisions for the tenant
   const { data: divisionsData } = db.useQuery({
     divisions: {
@@ -188,7 +179,6 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
     building_id: building.id,
   }));
 
-  const users = usersData?.$users || [];
   const divisions = divisionsData?.divisions || [];
 
   const addNewTask = () => {
@@ -361,10 +351,8 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
             isOpen={isAddTaskModalOpen}
             onClose={() => setIsAddTaskModalOpen(false)}
             onSuccess={handleTaskSuccess}
-            tenantId={building.tenant?.id || ""}
-            buildings={[buildingWithImageUrl]}
-            users={users}
-            buildingId={building.id}
+            tenant={building.tenant || { id: "", name: "", slug: "", description: "", createdAt: Date.now(), updatedAt: Date.now() }}
+            building={buildingWithImageUrl}
             task={editTask ? {
               id: editTask.id,
               title: editTask.description,

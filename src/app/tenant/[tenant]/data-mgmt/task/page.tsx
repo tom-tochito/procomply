@@ -1,10 +1,8 @@
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
-import TaskManagementNew from "@/features/tasks/components/TaskManagementNew";
+import { TaskManagement } from "@/features/tasks/components";
 import { requireAuth } from "@/features/auth";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
-import { getBuildingsByTenant } from "@/features/buildings/repository/buildings.repository";
-import { dbAdmin } from "~/lib/db-admin";
 
 interface TaskPageProps {
   params: Promise<{
@@ -13,30 +11,16 @@ interface TaskPageProps {
 }
 
 export default async function TaskPage({ params }: TaskPageProps) {
-  const { tenant } = await params;
+  const { tenant: tenantSlug } = await params;
 
   // Get tenant data
-  const tenantData = await findTenantBySlug(tenant);
-  if (!tenantData) {
+  const tenant = await findTenantBySlug(tenantSlug);
+  if (!tenant) {
     throw new Error("Tenant not found");
   }
 
   // Require authentication
-  await requireAuth(tenantData);
-  
-  // Fetch buildings for the dropdown
-  const buildings = await getBuildingsByTenant(tenantData);
-  
-  // Fetch users for assignee dropdown
-  const result = await dbAdmin.query({
-    "$users": {
-      $: {
-        where: { "tenant.id": tenantData.id }
-      }
-    }
-  });
-  const users = result.$users || [];
-  
+  await requireAuth(tenant);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -47,7 +31,7 @@ export default async function TaskPage({ params }: TaskPageProps) {
           </h1>
           <div className="flex items-center text-sm text-gray-600 mt-2">
             <Link
-              href={generateTenantRedirectUrl(tenant, "/dashboard")}
+              href={generateTenantRedirectUrl(tenantSlug, "/dashboard")}
               className="hover:text-blue-600"
             >
               <span>Data Mgmt</span>
@@ -57,11 +41,8 @@ export default async function TaskPage({ params }: TaskPageProps) {
           </div>
         </div>
 
-        <TaskManagementNew 
-          tenant={tenant} 
-          tenantId={tenantData.id}
-          buildings={buildings}
-          users={users}
+        <TaskManagement 
+          tenant={tenant}
         />
       </div>
     </div>

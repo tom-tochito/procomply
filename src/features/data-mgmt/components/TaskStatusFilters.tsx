@@ -22,81 +22,76 @@ interface TaskStatusFiltersProps {
 
 export default function TaskStatusFilters({ filters, onChange, counts = {} }: TaskStatusFiltersProps) {
   return (
-    <div className="flex flex-wrap gap-4 mb-4">
-      <label className="flex items-center cursor-pointer select-none">
-        <input
-          type="checkbox"
-          checked={filters.inProgress}
-          onChange={(e) => onChange('inProgress', e.target.checked)}
-          className="w-4 h-4 text-[#F30] bg-white border-gray-300 rounded focus:ring-2 focus:ring-[#F30] focus:ring-offset-0 checked:bg-[#F30] checked:border-[#F30] checked:hover:bg-[#E62E00] checked:hover:border-[#E62E00] checked:focus:bg-[#F30] checked:focus:border-[#F30]"
-        />
-        <span className="ml-2 text-sm text-gray-700">
-          In Progress
-          {counts.inProgress !== undefined && (
-            <span className="ml-1 text-xs text-gray-500">({counts.inProgress})</span>
-          )}
-        </span>
-      </label>
+    <div className="flex flex-wrap gap-3 mb-4">
+      <button
+        onClick={() => onChange('inProgress', !filters.inProgress)}
+        className={`px-4 py-2 rounded-lg border transition-all cursor-pointer ${
+          filters.inProgress 
+            ? 'bg-blue-50 border-blue-300 text-blue-700' 
+            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+        }`}
+      >
+        <span className="font-medium">In Progress</span>
+        {counts.inProgress !== undefined && (
+          <span className="ml-2 text-sm">({counts.inProgress})</span>
+        )}
+      </button>
       
-      <label className="flex items-center cursor-pointer select-none">
-        <input
-          type="checkbox"
-          checked={filters.inbox}
-          onChange={(e) => onChange('inbox', e.target.checked)}
-          className="w-4 h-4 text-[#F30] bg-white border-gray-300 rounded focus:ring-2 focus:ring-[#F30] focus:ring-offset-0 checked:bg-[#F30] checked:border-[#F30] checked:hover:bg-[#E62E00] checked:hover:border-[#E62E00] checked:focus:bg-[#F30] checked:focus:border-[#F30]"
-        />
-        <span className="ml-2 text-sm text-gray-700">
-          Inbox
-          {counts.inbox !== undefined && (
-            <span className="ml-1 text-xs text-gray-500">({counts.inbox})</span>
-          )}
-        </span>
-      </label>
+      <button
+        onClick={() => onChange('inbox', !filters.inbox)}
+        className={`px-4 py-2 rounded-lg border transition-all cursor-pointer ${
+          filters.inbox 
+            ? 'bg-orange-50 border-orange-300 text-orange-700' 
+            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+        }`}
+      >
+        <span className="font-medium">Inbox</span>
+        {counts.inbox !== undefined && (
+          <span className="ml-2 text-sm">({counts.inbox})</span>
+        )}
+      </button>
       
-      <label className="flex items-center cursor-pointer select-none">
-        <input
-          type="checkbox"
-          checked={filters.future}
-          onChange={(e) => onChange('future', e.target.checked)}
-          className="w-4 h-4 text-[#F30] bg-white border-gray-300 rounded focus:ring-2 focus:ring-[#F30] focus:ring-offset-0 checked:bg-[#F30] checked:border-[#F30] checked:hover:bg-[#E62E00] checked:hover:border-[#E62E00] checked:focus:bg-[#F30] checked:focus:border-[#F30]"
-        />
-        <span className="ml-2 text-sm text-gray-700">
-          Future
-          {counts.future !== undefined && (
-            <span className="ml-1 text-xs text-gray-500">({counts.future})</span>
-          )}
-        </span>
-      </label>
+      <button
+        onClick={() => onChange('future', !filters.future)}
+        className={`px-4 py-2 rounded-lg border transition-all cursor-pointer ${
+          filters.future 
+            ? 'bg-purple-50 border-purple-300 text-purple-700' 
+            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+        }`}
+      >
+        <span className="font-medium">Future</span>
+        {counts.future !== undefined && (
+          <span className="ml-2 text-sm">({counts.future})</span>
+        )}
+      </button>
       
-      <label className="flex items-center cursor-pointer select-none">
-        <input
-          type="checkbox"
-          checked={filters.completed}
-          onChange={(e) => onChange('completed', e.target.checked)}
-          className="w-4 h-4 text-[#F30] bg-white border-gray-300 rounded focus:ring-2 focus:ring-[#F30] focus:ring-offset-0 checked:bg-[#F30] checked:border-[#F30] checked:hover:bg-[#E62E00] checked:hover:border-[#E62E00] checked:focus:bg-[#F30] checked:focus:border-[#F30]"
-        />
-        <span className="ml-2 text-sm text-gray-700">
-          Completed
-          {counts.completed !== undefined && (
-            <span className="ml-1 text-xs text-gray-500">({counts.completed})</span>
-          )}
-        </span>
-      </label>
+      <button
+        onClick={() => onChange('completed', !filters.completed)}
+        className={`px-4 py-2 rounded-lg border transition-all cursor-pointer ${
+          filters.completed 
+            ? 'bg-green-50 border-green-300 text-green-700' 
+            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+        }`}
+      >
+        <span className="font-medium">Completed</span>
+        {counts.completed !== undefined && (
+          <span className="ml-2 text-sm">({counts.completed})</span>
+        )}
+      </button>
       
-      <label className="flex items-center cursor-pointer select-none">
-        <input
-          type="checkbox"
-          checked={filters.onHold}
-          onChange={(e) => onChange('onHold', e.target.checked)}
-          className="w-4 h-4 text-[#F30] bg-white border-gray-300 rounded focus:ring-2 focus:ring-[#F30] focus:ring-offset-0 checked:bg-[#F30] checked:border-[#F30] checked:hover:bg-[#E62E00] checked:hover:border-[#E62E00] checked:focus:bg-[#F30] checked:focus:border-[#F30]"
-        />
-        <span className="ml-2 text-sm text-gray-700">
-          On Hold
-          {counts.onHold !== undefined && (
-            <span className="ml-1 text-xs text-gray-500">({counts.onHold})</span>
-          )}
-        </span>
-      </label>
+      <button
+        onClick={() => onChange('onHold', !filters.onHold)}
+        className={`px-4 py-2 rounded-lg border transition-all cursor-pointer ${
+          filters.onHold 
+            ? 'bg-gray-100 border-gray-400 text-gray-700' 
+            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+        }`}
+      >
+        <span className="font-medium">On Hold</span>
+        {counts.onHold !== undefined && (
+          <span className="ml-2 text-sm">({counts.onHold})</span>
+        )}
+      </button>
     </div>
   );
 }
