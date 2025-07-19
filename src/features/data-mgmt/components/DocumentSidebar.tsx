@@ -13,22 +13,8 @@ interface DocumentSidebarProps {
   fileTypes: string[];
 }
 
-const docCategories = [
-  "Asbestos",
-  "Electrical",
-  "Energy",
-  "Environmental",
-  "Equality / Disability",
-  "Fire",
-  "Gas",
-  "Health and Safety",
-  "Legionella",
-  "Lift",
-  "Miscellaneous",
-  "Operation",
-  "Third Party",
-];
-
+// TODO: Fetch categories from database instead of hardcoding
+// For now, we'll show categories dynamically based on actual document data
 export default function DocumentSidebar({
   selectedDocCategory,
   setSelectedDocCategory,

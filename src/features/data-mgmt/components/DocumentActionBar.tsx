@@ -6,16 +6,18 @@ interface DocumentActionBarProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   onUploadClick: () => void;
+  documentCount?: number;
 }
 
 export default function DocumentActionBar({
   searchTerm,
   setSearchTerm,
   onUploadClick,
+  documentCount,
 }: DocumentActionBarProps) {
   return (
     <div className="bg-white rounded-md shadow-sm p-3 mb-3 md:mb-4">
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 items-center">
         <div className="relative flex-grow">
           <input
             type="text"
@@ -27,6 +29,12 @@ export default function DocumentActionBar({
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
         </div>
 
+        {documentCount !== undefined && (
+          <div className="text-sm text-gray-500 whitespace-nowrap">
+            Total: {documentCount} documents
+          </div>
+        )}
+        
         <button
           onClick={onUploadClick}
           className="bg-[#F30] text-white px-3 py-2 text-sm rounded-md hover:bg-[#E20] transition-colors flex items-center justify-center whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[#F30] focus:ring-offset-2"

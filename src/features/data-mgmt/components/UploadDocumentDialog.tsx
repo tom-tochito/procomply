@@ -8,12 +8,14 @@ import { uploadDocumentForDataMgmtAction } from "@/features/data-mgmt/actions/do
 import { FormState } from "@/common/types/form";
 import { db } from "~/lib/db";
 import { Tenant } from "@/features/tenant/models";
+import { Building } from "@/features/buildings/models";
 
 // Props definition
 interface UploadDocumentDialogProps {
   isOpen: boolean;
   onClose: () => void;
   tenant?: Tenant;
+  defaultBuilding?: Building;
 }
 
 
@@ -21,13 +23,14 @@ export default function UploadDocumentDialog({
   isOpen,
   onClose,
   tenant,
+  defaultBuilding,
 }: UploadDocumentDialogProps) {
   // Form state
   const [file, setFile] = useState<File | null>(null);
   const [docType, setDocType] = useState("");
   const [code, setCode] = useState("");
   const [reference, setReference] = useState("");
-  const [building, setBuilding] = useState("");
+  const [building, setBuilding] = useState(defaultBuilding?.id || "");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [subCategory, setSubCategory] = useState("");
@@ -66,7 +69,7 @@ export default function UploadDocumentDialog({
     setDocType("");
     setCode("");
     setReference("");
-    setBuilding("");
+    setBuilding(defaultBuilding?.id || "");
     setDescription("");
     setCategory("");
     setSubCategory("");
@@ -326,10 +329,11 @@ export default function UploadDocumentDialog({
                           name="buildingId"
                           value={building}
                           onChange={(e) => setBuilding(e.target.value)}
-                          disabled={isPending}
+                          required
+                          disabled={isPending || !!defaultBuilding}
                         >
                           <option value="">
-                            {buildingsLoading ? "Loading..." : "Select Building (Optional)"}
+                            {buildingsLoading ? "Loading..." : "Select Building (Required)"}
                           </option>
                           {!buildingsLoading && buildings.map((b) => (
                             <option key={b.id} value={b.id}>

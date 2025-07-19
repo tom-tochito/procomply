@@ -7,16 +7,17 @@ import React, {
   startTransition,
 } from "react";
 import { db } from "~/lib/db";
-import { Document } from "@/data/documents"; // Use the legacy Document type
 import DocumentDetailsDialog from "./DocumentDetailsDialog";
 import UploadDocumentDialog from "./UploadDocumentDialog";
-import DocumentTable from "./DocumentTable";
+import DocumentTable from "@/features/documents/components/DocumentTable";
 import DocumentSidebar from "./DocumentSidebar";
 import DocumentActionBar from "./DocumentActionBar";
 import { Tenant } from "@/features/tenant/models";
 import { getFileUrl } from "@/common/utils/file";
 import { deleteDocumentAction } from "@/features/data-mgmt/actions/document-delete.action";
 import { FormState } from "@/common/types/form";
+import { DocumentWithRelations } from "@/features/documents/models";
+import { useDocumentCounts } from "@/features/documents/hooks/useDocuments";
 
 interface DocumentManagementProps {
   tenant: Tenant;
@@ -35,9 +36,12 @@ export default function DocumentManagement({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(
+  const [selectedDocument, setSelectedDocument] = useState<DocumentWithRelations | null>(
     null
   );
+  const [pageNumber, setPageNumber] = useState(1);
+  const pageSize = 10;
+
   // Delete action state
   const initialDeleteState: FormState = { error: null, success: false };
   const [deleteState, deleteAction] = useActionState(
@@ -45,19 +49,27 @@ export default function DocumentManagement({
     initialDeleteState
   );
 
-  // Subscribe to documents using InstantDB
+  // Subscribe to documents using InstantDB with pagination
   const { data, isLoading, error } = db.useQuery({
     documents: {
       $: {
         where: {
           tenant: tenant.id,
         },
+        order: { uploadedAt: "desc" },
+        limit: pageSize,
+        offset: (pageNumber - 1) * pageSize,
       },
       building: {},
-      uploader: {},
+      uploader: {
+        profile: {},
+      },
       tenant: {},
     },
   });
+
+  // Get document counts for categories
+  const docCategoryCounts = useDocumentCounts(tenant);
 
   useEffect(() => {
     const handleResize = () => {
@@ -75,7 +87,75 @@ export default function DocumentManagement({
 
   const documents = data?.documents || [];
 
-  const handleDocumentClick = (document: Document) => {
+  // Apply client-side filters
+  let filteredDocuments = documents;
+
+  // Search filter
+  if (searchTerm) {
+    const searchLower = searchTerm.toLowerCase();
+    filteredDocuments = filteredDocuments.filter(
+      (doc) =>
+        doc.name.toLowerCase().includes(searchLower) ||
+        doc.type.toLowerCase().includes(searchLower) ||
+        doc.description?.toLowerCase().includes(searchLower) ||
+        doc.reference?.toLowerCase().includes(searchLower)
+    );
+  }
+
+  // Status filter
+  if (selectedStatus) {
+    filteredDocuments = filteredDocuments.filter((doc) => {
+      const now = Date.now();
+      const isExpired = doc.expiryDate && doc.expiryDate < now;
+      const isActive = doc.isActive !== false;
+      
+      switch (selectedStatus) {
+        case "Active":
+          return isActive && !isExpired;
+        case "Pending":
+          return doc.expiryDate && doc.expiryDate < now + 30 * 24 * 60 * 60 * 1000; // 30 days
+        case "Archived":
+          return !isActive;
+        default:
+          return true;
+      }
+    });
+  }
+
+  // Category filter
+  if (selectedCategory) {
+    filteredDocuments = filteredDocuments.filter(
+      (doc) => doc.category === selectedCategory
+    );
+  }
+
+  // Doc category filter
+  if (selectedDocCategory) {
+    filteredDocuments = filteredDocuments.filter(
+      (doc) => doc.docCategory === selectedDocCategory
+    );
+  }
+
+  // File type filter
+  if (selectedFileType) {
+    filteredDocuments = filteredDocuments.filter((doc) => {
+      const extension = doc.name.split(".").pop()?.toLowerCase() || "";
+      switch (selectedFileType) {
+        case "pdf":
+          return extension === "pdf";
+        case "doc":
+          return ["doc", "docx"].includes(extension);
+        case "xls":
+          return ["xls", "xlsx"].includes(extension);
+        case "image":
+          return ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"].includes(extension);
+        default:
+          return true;
+      }
+    });
+  }
+
+  const handleDocumentClick = (document: DocumentWithRelations) => {
     setSelectedDocument(document);
     setDialogOpen(true);
   };
@@ -84,7 +164,7 @@ export default function DocumentManagement({
     setDialogOpen(false);
   };
 
-  const handleDelete = async (document: Document) => {
+  const handleDelete = async (document: DocumentWithRelations) => {
     const formData = new FormData();
     formData.append("documentId", document.id);
     formData.append("tenantSlug", tenant.slug);
@@ -105,70 +185,26 @@ export default function DocumentManagement({
     setUploadDialogOpen(true);
   };
 
-  // Upload is now handled directly by the server action in UploadDocumentDialog
-
-  // Transform documents to match UI expectations
-  const transformedDocuments: Document[] = documents.map((doc) => ({
-    id: doc.id,
-    name: doc.name,
-    file_type: doc.type,
-    category: doc.type, // Will be enhanced with proper categories
-    document_category: "Miscellaneous", // Default for now
-    upload_date: new Date(doc.uploadedAt).toLocaleDateString("en-GB"),
-    uploaded_by: doc.uploader?.email || "Unknown",
-    size: `${(doc.size / 1024 / 1024).toFixed(1)} MB`,
-    status: "Active" as const,
-    building_id: doc.building?.id || "",
-    task_id: "",
-    description: "",
-    tags: [],
-    last_accessed: new Date(doc.updatedAt).toLocaleDateString("en-GB"),
-    version: "1.0",
-  }));
-
-  const filteredDocuments = transformedDocuments.filter((document) => {
-    if (
-      searchTerm &&
-      !document.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !(
-        document.description &&
-        document.description.toLowerCase().includes(searchTerm.toLowerCase())
-      ) &&
-      !document.id.includes(searchTerm)
-    ) {
-      return false;
+  const handleDownload = (document: DocumentWithRelations) => {
+    if (document.path) {
+      const downloadUrl = getFileUrl(tenant.slug, document.path);
+      window.open(downloadUrl, "_blank");
+    } else {
+      alert("File path not available");
     }
+  };
 
-    if (selectedStatus && document.status !== selectedStatus) {
-      return false;
-    }
-
-    if (selectedCategory && document.category !== selectedCategory) {
-      return false;
-    }
-
-    if (
-      selectedDocCategory &&
-      document.document_category !== selectedDocCategory
-    ) {
-      return false;
-    }
-
-    if (selectedFileType && document.file_type !== selectedFileType) {
-      return false;
-    }
-
-    return true;
-  });
-
+  // Get unique categories and file types from current documents
   const categories = Array.from(
-    new Set(transformedDocuments.map((doc) => doc.category))
+    new Set(documents.map((doc) => doc.category).filter((cat): cat is string => Boolean(cat)))
   );
-  const fileTypes = Array.from(
-    new Set(transformedDocuments.map((doc) => doc.file_type))
-  );
+  const fileTypes = ["pdf", "doc", "xls", "image"];
 
-  if (isLoading) {
+  // For now, we'll show the count of current page
+  // TODO: Implement proper total count query when InstantDB supports it
+  const totalDocuments = filteredDocuments.length;
+
+  if (isLoading && pageNumber === 1) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F30]"></div>
@@ -190,18 +226,24 @@ export default function DocumentManagement({
         <DocumentDetailsDialog
           isOpen={dialogOpen}
           onClose={handleDialogClose}
-          document={selectedDocument}
-          onDownload={(document) => {
-            // Find the original document to get the path
-            const originalDoc = documents.find((d) => d.id === document.id);
-            if (originalDoc?.path) {
-              // Generate download URL using the utility function
-              const downloadUrl = getFileUrl(tenant.slug, originalDoc.path);
-              window.open(downloadUrl, "_blank");
-            } else {
-              alert("File path not available");
-            }
+          document={{
+            id: selectedDocument.id,
+            name: selectedDocument.name,
+            file_type: selectedDocument.type,
+            category: selectedDocument.category || "",
+            document_category: selectedDocument.docCategory || "Miscellaneous",
+            upload_date: new Date(selectedDocument.uploadedAt).toLocaleDateString("en-GB"),
+            uploaded_by: selectedDocument.uploader?.email || "Unknown",
+            size: `${(selectedDocument.size / 1024 / 1024).toFixed(1)} MB`,
+            status: selectedDocument.isActive ? "Active" : "Archived",
+            building_id: selectedDocument.building?.id || "",
+            task_id: "",
+            description: selectedDocument.description || "",
+            tags: [],
+            last_accessed: new Date(selectedDocument.updatedAt).toLocaleDateString("en-GB"),
+            version: "1.0",
           }}
+          onDownload={() => handleDownload(selectedDocument)}
         />
       )}
 
@@ -251,7 +293,14 @@ export default function DocumentManagement({
         </button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
+      <DocumentActionBar
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onUploadClick={handleUploadClick}
+        documentCount={totalDocuments}
+      />
+
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {sidebarOpen && (
           <DocumentSidebar
             selectedDocCategory={selectedDocCategory}
@@ -264,159 +313,51 @@ export default function DocumentManagement({
             setSelectedFileType={setSelectedFileType}
             categories={categories}
             fileTypes={fileTypes}
+            docCategoryCounts={docCategoryCounts}
           />
         )}
 
-        <div className="flex-grow order-1 lg:order-2 min-w-0">
-          <DocumentActionBar
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            onUploadClick={handleUploadClick}
-          />
+        <div className="flex-1 order-1 lg:order-2">
+          <div className="bg-white rounded-md shadow-sm p-4">
+            <DocumentTable
+              documents={filteredDocuments}
+              onRowClick={handleDocumentClick}
+              onDownload={handleDownload}
+              onDelete={handleDelete}
+            />
 
-          {(selectedStatus ||
-            selectedCategory ||
-            selectedFileType ||
-            selectedDocCategory) && (
-            <div className="flex flex-wrap gap-2 mb-3 md:mb-4">
-              {selectedStatus && (
-                <div className="flex items-center bg-red-50 text-[#F30] px-2 py-1 rounded-full text-xs md:text-sm">
-                  <span className="truncate max-w-[150px]">
-                    Status: {selectedStatus}
-                  </span>
+            {/* Pagination Controls */}
+            {(filteredDocuments.length > 0 || pageNumber > 1) && (
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-4 text-sm gap-3">
+                <div className="text-gray-500">
+                  Showing {filteredDocuments.length} documents {pageNumber > 1 && `(Page ${pageNumber})`}
+                </div>
+                <div className="flex space-x-2">
                   <button
-                    className="ml-1 md:ml-2 text-[#F30] hover:text-[#E20]"
-                    onClick={() => setSelectedStatus(null)}
-                    aria-label="Remove status filter"
+                    className="px-3 py-1 border rounded-md bg-gray-100 hover:bg-gray-200 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => setPageNumber(pageNumber - 1)}
+                    disabled={pageNumber <= 1}
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-3 w-3 md:h-4 md:w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
+                    Previous
+                  </button>
+                  <button
+                    className="px-3 py-1 border rounded-md bg-[#F30] text-white hover:bg-[#E20] focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => setPageNumber(pageNumber + 1)}
+                    disabled={filteredDocuments.length < pageSize}
+                  >
+                    Next
                   </button>
                 </div>
-              )}
-              {selectedCategory && (
-                <div className="flex items-center bg-red-50 text-[#F30] px-2 py-1 rounded-full text-xs md:text-sm">
-                  <span className="truncate max-w-[150px]">
-                    Category: {selectedCategory}
-                  </span>
-                  <button
-                    className="ml-1 md:ml-2 text-[#F30] hover:text-[#E20]"
-                    onClick={() => setSelectedCategory(null)}
-                    aria-label="Remove category filter"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-3 w-3 md:h-4 md:w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              )}
-              {selectedFileType && (
-                <div className="flex items-center bg-red-50 text-[#F30] px-2 py-1 rounded-full text-xs md:text-sm">
-                  <span className="truncate max-w-[150px]">
-                    File Type: {selectedFileType}
-                  </span>
-                  <button
-                    className="ml-1 md:ml-2 text-[#F30] hover:text-[#E20]"
-                    onClick={() => setSelectedFileType(null)}
-                    aria-label="Remove file type filter"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-3 w-3 md:h-4 md:w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              )}
-              {selectedDocCategory && (
-                <div className="flex items-center bg-red-50 text-[#F30] px-2 py-1 rounded-full text-xs md:text-sm">
-                  <span className="truncate max-w-[150px]">
-                    Doc Category: {selectedDocCategory}
-                  </span>
-                  <button
-                    className="ml-1 md:ml-2 text-[#F30] hover:text-[#E20]"
-                    onClick={() => setSelectedDocCategory(null)}
-                    aria-label="Remove doc category filter"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-3 w-3 md:h-4 md:w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              )}
-              <button
-                className="text-[#F30] hover:text-[#E20] text-xs md:text-sm font-medium"
-                onClick={() => {
-                  setSelectedStatus(null);
-                  setSelectedCategory(null);
-                  setSelectedFileType(null);
-                  setSelectedDocCategory(null);
-                }}
-              >
-                Clear All
-              </button>
-            </div>
-          )}
+              </div>
+            )}
 
-          <DocumentTable
-            documents={filteredDocuments}
-            onRowClick={handleDocumentClick}
-            onDownload={(document) => {
-              // Find the original document to get the path
-              const originalDoc = documents.find((d) => d.id === document.id);
-              if (originalDoc?.path) {
-                // Generate download URL using the utility function
-                const downloadUrl = getFileUrl(tenant.slug, originalDoc.path);
-                window.open(downloadUrl, "_blank");
-              } else {
-                alert("File path not available");
-              }
-            }}
-            onDelete={handleDelete}
-          />
+            {/* No results message */}
+            {filteredDocuments.length === 0 && pageNumber === 1 && (
+              <div className="text-center py-8 text-gray-500">
+                No documents found matching your filters.
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>

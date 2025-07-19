@@ -20,14 +20,11 @@ export async function uploadDocumentForDataMgmtAction(
     const description = formData.get("description") as string;
     const category = formData.get("category") as string;
     const docCategory = formData.get("docCategory") as string;
-
-    // These fields are collected but not yet stored in the current schema
-    // They can be used in future schema updates
-    // const reference = formData.get("reference") as string;
-    // const subCategory = formData.get("subCategory") as string;
-    // const validFrom = formData.get("validFrom") as string;
-    // const expiry = formData.get("expiry") as string;
-    // const isStatutory = formData.get("isStatutory") === "on";
+    const reference = formData.get("reference") as string;
+    const subCategory = formData.get("subCategory") as string;
+    const validFrom = formData.get("validFrom") as string;
+    const expiry = formData.get("expiry") as string;
+    const isStatutory = formData.get("isStatutory") === "on";
 
     // Validate required fields
     if (
@@ -37,10 +34,11 @@ export async function uploadDocumentForDataMgmtAction(
       !code ||
       !description ||
       !category ||
-      !docCategory
+      !docCategory ||
+      !buildingId
     ) {
       return {
-        error: "Please fill in all required fields",
+        error: "Please fill in all required fields including building selection",
         success: false,
       };
     }
@@ -152,6 +150,22 @@ export async function uploadDocumentForDataMgmtAction(
         "application/octet-stream",
       path: uploadedPath,
       size: file.size,
+      // Document metadata
+      docType,
+      code,
+      reference: reference || undefined,
+      description,
+      // Categories
+      category,
+      subCategory: subCategory || undefined,
+      docCategory,
+      // Validity dates - convert to timestamps
+      validFrom: validFrom ? new Date(validFrom).getTime() : undefined,
+      expiryDate: expiry ? new Date(expiry).getTime() : undefined,
+      // Status flags
+      isStatutory,
+      isActive: true, // New documents are active by default
+      // Timestamps
       uploadedAt: Date.now(),
       createdAt: Date.now(),
       updatedAt: Date.now(),

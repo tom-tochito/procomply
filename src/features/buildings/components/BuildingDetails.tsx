@@ -248,10 +248,8 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
       
       case "documents":
         return <DocumentsTab 
-          buildingId={building.id} 
-          tenantId={building.tenant?.id || ""} 
-          tenant={tenantSlug}
-          documents={building.documents || []}
+          building={buildingWithImageUrl}
+          tenant={tenant}
         />;
       
       case "contacts":

@@ -101,6 +101,22 @@ const _schema = i.schema({
       type: i.string().indexed(),
       path: i.string(), // Storage path
       size: i.number(),
+      // Document metadata
+      docType: i.string().optional(), // Policy, Certificate, Manual, etc.
+      code: i.string().indexed().optional(),
+      reference: i.string().indexed().optional(),
+      description: i.string().optional(),
+      // Categories
+      category: i.string().indexed().optional(), // Health & Safety, Environment, etc.
+      subCategory: i.string().optional(),
+      docCategory: i.string().indexed().optional(), // Asbestos, Electrical, Fire, etc.
+      // Validity dates
+      validFrom: i.number().optional(),
+      expiryDate: i.number().indexed().optional(),
+      // Status flags
+      isStatutory: i.boolean().indexed().optional(),
+      isActive: i.boolean().indexed().optional(),
+      // Timestamps
       uploadedAt: i.number().indexed(),
       createdAt: i.number().indexed(),
       updatedAt: i.number().indexed(),
