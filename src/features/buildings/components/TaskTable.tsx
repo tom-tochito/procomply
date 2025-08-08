@@ -1,14 +1,14 @@
 "use client";
 
 import React from "react";
-import { Task } from "@/data/tasks";
 import { db } from "~/lib/db";
 import { isDateOverdue } from "@/common/utils/date";
+import { TaskUI } from "@/features/tasks/models";
 
 interface TaskTableProps {
-  tasks: Task[];
-  onTaskClick: (task: Task) => void;
-  onTaskEdit?: (task: Task) => void;
+  tasks: TaskUI[];
+  onTaskClick: (task: TaskUI) => void;
+  onTaskEdit?: (task: TaskUI) => void;
   onTaskUpdate?: () => void;
 }
 

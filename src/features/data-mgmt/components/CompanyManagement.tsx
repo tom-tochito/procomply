@@ -6,17 +6,7 @@ import CompanyTable from "@/features/company/components/CompanyTable";
 import AddCompanyModal from "@/features/companies/components/AddCompanyModal";
 import { Plus } from "lucide-react";
 import { Tenant } from "@/features/tenant/models";
-
-interface Company {
-  id: string;
-  name: string;
-  referral: string;
-  category: string;
-  email: string | null;
-  phone: string | null;
-  postcode: string | null;
-  number_of_employees: number | null;
-}
+import { Company } from "@/features/companies/models";
 
 interface CompanyManagementProps {
   initialCompanies: Company[];

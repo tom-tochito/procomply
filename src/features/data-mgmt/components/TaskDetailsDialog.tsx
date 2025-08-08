@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { Task } from "@/data/tasks"; // Import Task type from data
 import Image from "next/image"; // Import next/image
 import { db } from "~/lib/db";
 import { isDateOverdue } from "@/common/utils/date";
+import { TaskUI } from "@/features/tasks/models";
 import { 
   Info, 
   Image as ImageIcon, 
@@ -24,7 +24,7 @@ import {
 interface TaskDetailsDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  task: Task; // The task data to display
+  task: TaskUI; // The task data to display
   // Optional: Pass building data if not included directly in task
   building?: { name: string; image?: string };
   onTaskUpdate?: () => void; // Callback when task is updated

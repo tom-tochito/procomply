@@ -1,5 +1,21 @@
 import { i } from "@instantdb/react";
 
+// Template field type definition
+interface TemplateField {
+  key: string;
+  label: string;
+  type: "text" | "textarea" | "number" | "date" | "select" | "multiselect" | "checkbox" | "image" | "file" | "url";
+  required: boolean;
+  placeholder?: string;
+  helpText?: string;
+  // Type-specific options
+  options?: string[]; // For select/multiselect
+  min?: number; // For number type
+  max?: number; // For number type
+  rows?: number; // For textarea
+  accept?: string; // For file/image types
+}
+
 const _schema = i.schema({
   entities: {
     $users: i.entity({
@@ -22,56 +38,17 @@ const _schema = i.schema({
       updatedAt: i.number().indexed(),
     }),
     buildings: i.entity({
-      // Basic Information
       name: i.string(),
-      description: i.string().optional(),
-      address: i.string(),
-      city: i.string().indexed(),
-      state: i.string().indexed(),
-      zipCode: i.string(),
-      floors: i.number(),
       image: i.string().optional(), // Path to building image in storage
-
-      // General Data
-      division: i.string().optional(),
-      billingAccount: i.string().optional(),
-      availability: i.string().optional(), // e.g., "Open - Rented", "Closed", etc.
-      openingHours: i.string().optional(),
-      archived: i.boolean().indexed(),
-      siteAccess: i.string().optional(),
-
-      // Position Data
-      complex: i.string().optional(),
-
-      // Maintenance Data
-      condition: i.string().optional(),
-      criticality: i.string().optional(),
-      fireRiskRating: i.string().optional(),
-      lastCheckDate: i.number().optional(),
-
-      // Dimensional Data
-      totalGrossArea: i.number().optional(),
-      totalNetArea: i.number().optional(),
-      coveredArea: i.number().optional(),
-      glazedArea: i.number().optional(),
-      cleanableArea: i.number().optional(),
-      totalVolume: i.number().optional(),
-      heatedVolume: i.number().optional(),
-      numberOfRooms: i.number().optional(),
-      numberOfUnits: i.number().optional(),
-
-      // Contact Information
-      outOfHourContact: i.string().optional(),
-      telephone: i.string().optional(),
-
-      // Timestamps
+      division: i.string().optional(), // For organizational grouping
+      data: i.json<Record<string, any>>().optional(), // Stores all template field values
       createdAt: i.number().indexed(),
       updatedAt: i.number().indexed(),
     }),
     templates: i.entity({
       name: i.string(),
       type: i.string().indexed(),
-      content: i.json(),
+      fields: i.json<TemplateField[]>(),
       isActive: i.boolean().indexed(),
       createdAt: i.number().indexed(),
       updatedAt: i.number().indexed(),
@@ -93,6 +70,7 @@ const _schema = i.schema({
       priority: i.string().indexed(),
       dueDate: i.number().indexed(),
       completedDate: i.number().optional(),
+      data: i.json<Record<string, any>>().optional(), // Stores all template field values
       createdAt: i.number().indexed(),
       updatedAt: i.number().indexed(),
     }),
@@ -116,6 +94,7 @@ const _schema = i.schema({
       // Status flags
       isStatutory: i.boolean().indexed().optional(),
       isActive: i.boolean().indexed().optional(),
+      data: i.json<Record<string, any>>().optional(), // Stores all template field values
       // Timestamps
       uploadedAt: i.number().indexed(),
       createdAt: i.number().indexed(),
@@ -184,6 +163,50 @@ const _schema = i.schema({
       status: i.string().indexed(), // scheduled, completed, cancelled
       reminder: i.boolean(),
       reminderDays: i.number().optional(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
+    }),
+    // Template Management Entities
+    countries: i.entity({
+      code: i.string().unique().indexed(),
+      description: i.string(),
+      isActive: i.boolean().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
+    }),
+    legislation: i.entity({
+      code: i.string().unique().indexed(),
+      title: i.string(),
+      url: i.string().optional(),
+      isActive: i.boolean().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
+    }),
+    riskAreas: i.entity({
+      code: i.string().unique().indexed(),
+      description: i.string(),
+      isActive: i.boolean().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
+    }),
+    subsections: i.entity({
+      code: i.string().unique().indexed(),
+      description: i.string(),
+      isActive: i.boolean().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
+    }),
+    surveyTypes: i.entity({
+      code: i.string().unique().indexed(),
+      description: i.string(),
+      isActive: i.boolean().indexed(),
+      createdAt: i.number().indexed(),
+      updatedAt: i.number().indexed(),
+    }),
+    taskCategories: i.entity({
+      code: i.string().unique().indexed(),
+      description: i.string(),
+      isActive: i.boolean().indexed(),
       createdAt: i.number().indexed(),
       updatedAt: i.number().indexed(),
     }),
@@ -261,6 +284,18 @@ const _schema = i.schema({
       forward: { on: "buildings", has: "one", label: "divisionEntity" },
       reverse: { on: "divisions", has: "many", label: "buildings" },
     },
+    buildingTemplate: {
+      forward: { on: "buildings", has: "one", label: "template" },
+      reverse: { on: "templates", has: "many", label: "buildings" },
+    },
+    taskTemplate: {
+      forward: { on: "tasks", has: "one", label: "template" },
+      reverse: { on: "templates", has: "many", label: "tasks" },
+    },
+    documentTemplate: {
+      forward: { on: "documents", has: "one", label: "template" },
+      reverse: { on: "templates", has: "many", label: "documents" },
+    },
     teamTenant: {
       forward: { on: "teams", has: "one", label: "tenant" },
       reverse: { on: "tenants", has: "many", label: "teams" },
@@ -320,6 +355,31 @@ const _schema = i.schema({
     yearPlannerEventCreator: {
       forward: { on: "yearPlannerEvents", has: "one", label: "creator" },
       reverse: { on: "$users", has: "many", label: "createdYearPlannerEvents" },
+    },
+    // Template Management Links
+    countryTenant: {
+      forward: { on: "countries", has: "one", label: "tenant" },
+      reverse: { on: "tenants", has: "many", label: "countries" },
+    },
+    legislationTenant: {
+      forward: { on: "legislation", has: "one", label: "tenant" },
+      reverse: { on: "tenants", has: "many", label: "legislation" },
+    },
+    riskAreaTenant: {
+      forward: { on: "riskAreas", has: "one", label: "tenant" },
+      reverse: { on: "tenants", has: "many", label: "riskAreas" },
+    },
+    subsectionTenant: {
+      forward: { on: "subsections", has: "one", label: "tenant" },
+      reverse: { on: "tenants", has: "many", label: "subsections" },
+    },
+    surveyTypeTenant: {
+      forward: { on: "surveyTypes", has: "one", label: "tenant" },
+      reverse: { on: "tenants", has: "many", label: "surveyTypes" },
+    },
+    taskCategoryTenant: {
+      forward: { on: "taskCategories", has: "one", label: "tenant" },
+      reverse: { on: "tenants", has: "many", label: "taskCategories" },
     },
   },
 });

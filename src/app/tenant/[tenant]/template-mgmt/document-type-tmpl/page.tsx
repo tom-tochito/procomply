@@ -1,18 +1,20 @@
-import DocumentTypeTemplateManagement from "@/features/template-mgmt/components/DocumentTypeTemplateManagement";
-import { initialDocumentTypeTemplates } from "@/data/template-mgmt/documentTypeTemplates";
+import { requireAuth } from "@/features/auth";
+import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
+import DocumentTemplateManagement from "@/features/templates/components/DocumentTemplateManagement";
 
 interface DocumentTypeTemplatePageProps {
   params: Promise<{ tenant: string }>;
 }
 
 export default async function DocumentTypeTemplatePage({ params }: DocumentTypeTemplatePageProps) {
-  await params;
+  const { tenant: tenantSlug } = await params;
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <DocumentTypeTemplateManagement initialTemplates={initialDocumentTypeTemplates} />
-      </div>
-    </div>
-  );
+  const tenant = await findTenantBySlug(tenantSlug);
+  if (!tenant) {
+    throw new Error("Tenant not found");
+  }
+
+  await requireAuth(tenant);
+
+  return <DocumentTemplateManagement tenant={tenant} />;
 }

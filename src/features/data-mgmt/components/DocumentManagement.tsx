@@ -32,7 +32,7 @@ export default function DocumentManagement({
   const [selectedStatutory, setSelectedStatutory] = useState<boolean | null>(null);
   const [selectedBuilding, setSelectedBuilding] = useState<string | null>(null);
   const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
-  const [selectedComplex, setSelectedComplex] = useState<string | null>(null);
+  // Complex filter removed - field no longer exists in schema
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -159,12 +159,8 @@ export default function DocumentManagement({
     );
   }
 
-  // Complex filter
-  if (selectedComplex) {
-    filteredDocuments = filteredDocuments.filter(
-      (doc) => doc.building?.complex === selectedComplex
-    );
-  }
+  // Complex filter - removed as field no longer exists in schema
+  // TODO: Implement filter based on template data once available
 
   // File type filter
   if (selectedFileType) {
@@ -240,9 +236,6 @@ export default function DocumentManagement({
   // Get unique divisions and complexes from buildings
   const divisions = Array.from(
     new Set(allBuildings.map((b) => b.divisionEntity?.name).filter((d): d is string => Boolean(d)))
-  );
-  const complexes = Array.from(
-    new Set(allBuildings.map((b) => b.complex).filter((c): c is string => Boolean(c)))
   );
 
   // For now, we'll show the count of current page
@@ -343,13 +336,10 @@ export default function DocumentManagement({
             setSelectedBuilding={setSelectedBuilding}
             selectedDivision={selectedDivision}
             setSelectedDivision={setSelectedDivision}
-            selectedComplex={selectedComplex}
-            setSelectedComplex={setSelectedComplex}
             categories={categories}
             fileTypes={fileTypes}
             buildings={allBuildings.map(b => ({ id: b.id, name: b.name }))}
             divisions={divisions}
-            complexes={complexes}
           />
         )}
 

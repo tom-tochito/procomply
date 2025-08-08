@@ -5,6 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import Table from "@/common/components/Table/Table";
 
 interface CountryData {
+  id: string;
   code: string;
   description: string;
 }
@@ -12,9 +13,10 @@ interface CountryData {
 interface CountryTableProps {
   countries: CountryData[];
   onEdit: (country: CountryData) => void;
+  onDelete?: (country: CountryData) => void;
 }
 
-export default function CountryTable({ countries, onEdit }: CountryTableProps) {
+export default function CountryTable({ countries, onEdit, onDelete }: CountryTableProps) {
   const columns: ColumnDef<CountryData>[] = [
     {
       accessorKey: "code",
@@ -34,12 +36,22 @@ export default function CountryTable({ countries, onEdit }: CountryTableProps) {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <button
-          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-          onClick={() => onEdit(row.original)}
-        >
-          Edit
-        </button>
+        <div className="flex gap-2">
+          <button
+            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            onClick={() => onEdit(row.original)}
+          >
+            Edit
+          </button>
+          {onDelete && (
+            <button
+              className="text-red-600 hover:text-red-800 text-sm font-medium"
+              onClick={() => onDelete(row.original)}
+            >
+              Delete
+            </button>
+          )}
+        </div>
       ),
     },
   ];

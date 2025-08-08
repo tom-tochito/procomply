@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import { Table, ColumnDef } from "@/common/components/Table";
-import { Company } from "@/data/companies";
+import { Company } from "@/features/companies/models";
 
 interface CompanyTableProps {
   companies: Company[];
@@ -13,11 +13,11 @@ export default function CompanyTable({ companies, searchTerm = "" }: CompanyTabl
   const columns = useMemo<ColumnDef<Company>[]>(
     () => [
       {
-        accessorKey: "number_of_employees",
+        accessorKey: "numberOfEmployees",
         header: "Number of Employees",
         cell: ({ row }) => (
           <span className="text-gray-500">
-            {row.original.number_of_employees || "-"}
+            {row.original.numberOfEmployees || "-"}
           </span>
         ),
       },

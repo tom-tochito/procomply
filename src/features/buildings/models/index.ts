@@ -30,6 +30,11 @@ export type BuildingWithDivision = InstaQLEntity<
   "buildings",
   { divisionEntity: object }
 >;
+export type BuildingWithTemplate = InstaQLEntity<
+  AppSchema,
+  "buildings",
+  { template: object }
+>;
 
 // Division with related buildings
 export type DivisionWithBuildings = InstaQLEntity<
@@ -45,6 +50,7 @@ export type BuildingWithRelations = InstaQLEntity<
   {
     tenant: object;
     divisionEntity: object;
+    template: object;
     documents: { uploader: object };
     inspections: object;
     tasks: object;

@@ -4,7 +4,7 @@ import { dbAdmin } from "~/lib/db-admin";
 import { uploadFile } from "@/common/services/storage/storage.service";
 import { requireAuth } from "@/features/auth";
 import { findTenantById } from "@/features/tenant/repository/tenant.repository";
-import { getBuildingById } from "@/features/buildings/repository/buildings.repository";
+import { findBuildingById } from "@/features/buildings/repository/buildings.repository";
 import { FormState } from "@/common/types/form";
 
 export async function uploadDocumentForDataMgmtAction(
@@ -121,7 +121,7 @@ export async function uploadDocumentForDataMgmtAction(
     // Get building if specified
     let building = null;
     if (buildingId) {
-      building = await getBuildingById(buildingId);
+      building = await findBuildingById(buildingId);
       if (!building) {
         return {
           error: "Building not found",

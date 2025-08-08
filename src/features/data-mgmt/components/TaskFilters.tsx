@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Task } from "@/data/tasks";
 import { db } from "~/lib/db";
 import { Tenant } from "@/features/tenant/models";
+import { TaskUI } from "@/features/tasks/models";
 
 interface TaskFiltersProps {
   searchTerm: string;
@@ -19,7 +19,7 @@ interface TaskFiltersProps {
   onAddTaskClick: () => void;
   onColumnsMenuToggle: () => void;
   divisions?: string[]; // Dynamic divisions from database
-  tasks?: Task[]; // Tasks for CSV export
+  tasks?: TaskUI[]; // Tasks for CSV export
   tenant: Tenant; // Pass full tenant object
 }
 

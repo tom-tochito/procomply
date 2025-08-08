@@ -5,11 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import { getFileUrl } from "@/common/utils/file";
-import { Task } from "@/data/tasks";
 import TaskDetailsDialog from "@/features/data-mgmt/components/TaskDetailsDialog";
 import { TaskModal } from "@/features/tasks/components/TaskModal";
 import { db } from "~/lib/db";
 import { Tenant } from "@/features/tenant/models";
+import { TaskUI } from "@/features/tasks/models";
 import TabNavigation from "./TabNavigation";
 import BuildingInfo from "./BuildingInfo";
 import TaskFilters from "./TaskFilters";
@@ -34,11 +34,11 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
   
   // State for Task Details Dialog
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = useState<TaskUI | null>(null);
 
   // State for Task Modal
   const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
-  const [editTask, setEditTask] = useState<Task | undefined>(undefined);
+  const [editTask, setEditTask] = useState<TaskUI | undefined>(undefined);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
 
   // Fetch building data client-side
@@ -50,6 +50,7 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
       },
       tenant: {},
       divisionEntity: {},
+      template: {},
       tasks: {
         assignee: {},
         creator: {},
@@ -162,8 +163,8 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
   // Use check-based compliance if available, otherwise use task-based
   const compliance = building.complianceChecks?.length > 0 ? checkCompliance : taskCompliance;
 
-  // Transform InstantDB tasks to match Task interface
-  const tasks: Task[] = (building.tasks || []).map((task) => ({
+  // Transform InstantDB tasks to match TaskUI interface
+  const tasks: TaskUI[] = (building.tasks || []).map((task) => ({
     id: task.id,
     description: task.title,
     risk_area: "Fire", // Default as no risk area in schema
@@ -187,7 +188,7 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
     setIsAddTaskModalOpen(true);
   };
 
-  const handleEditTask = (task: Task) => {
+  const handleEditTask = (task: TaskUI) => {
     setEditTask(task);
     setModalMode("edit");
     setIsAddTaskModalOpen(true);
@@ -210,7 +211,7 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
   const uniqueTeams = Array.from(new Set(tasks.map(task => task.team))).filter(Boolean);
   const uniqueAssignees = Array.from(new Set(tasks.map(task => task.assignee))).filter(Boolean);
 
-  const openTaskDetails = (task: Task) => {
+  const openTaskDetails = (task: TaskUI) => {
     setSelectedTask(task);
     setIsDialogOpen(true);
   };
@@ -305,12 +306,13 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
                     <span>Buildings</span>
                   </Link>
                   <span className="mx-2">/</span>
-                  <span>{buildingWithImageUrl.city}</span>
+                  <span>{buildingWithImageUrl.name}</span>
                 </div>
-                <div className="text-sm text-gray-600 mt-2">
-                  {buildingWithImageUrl.address}, {buildingWithImageUrl.city},{" "}
-                  {buildingWithImageUrl.state} {buildingWithImageUrl.zipCode}
-                </div>
+                {buildingWithImageUrl.division && (
+                  <div className="text-sm text-gray-600 mt-2">
+                    Division: {buildingWithImageUrl.division}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -364,12 +366,9 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
               building: { 
                 id: building.id,
                 name: building.name,
-                address: building.address,
-                city: building.city,
-                state: building.state,
-                zipCode: building.zipCode,
-                floors: building.floors,
-                archived: building.archived,
+                division: building.division,
+                image: building.image,
+                data: building.data,
                 createdAt: building.createdAt,
                 updatedAt: building.updatedAt
               },

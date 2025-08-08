@@ -24,19 +24,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
   await requireAuth(tenantData);
 
   // Fetch companies from InstantDB
-  const companiesFromDB = await getCompaniesByTenant(tenantData);
-  
-  // Transform to match component expectations
-  const companies = companiesFromDB.map((company) => ({
-    id: company.id,
-    name: company.name,
-    referral: company.referral,
-    category: company.category || '',
-    email: company.email || null,
-    phone: company.phone || null,
-    postcode: company.postcode || null,
-    number_of_employees: company.numberOfEmployees || null,
-  }));
+  const companies = await getCompaniesByTenant(tenantData);
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Task } from "@/data/tasks";
 import { isDateOverdue } from "@/common/utils/date";
+import { TaskUI } from "@/features/tasks/models";
 
 interface TaskTableProps {
-  tasks: Task[];
-  onTaskClick: (task: Task) => void;
-  onTaskEdit?: (task: Task) => void;
+  tasks: TaskUI[];
+  onTaskClick: (task: TaskUI) => void;
+  onTaskEdit?: (task: TaskUI) => void;
   columnsMenuOpen: boolean;
   setColumnsMenuOpen: (open: boolean) => void;
   buildingNames?: Map<string, string>; // Map of building ID to name
@@ -677,12 +677,12 @@ export default function TaskTable({
                       )}
                       {visibleColumns.latestNote && (
                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {task.notes.at(-1) || "—"}
+                          —
                         </td>
                       )}
                       {visibleColumns.groups && (
                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {task.groups ? task.groups.join(", ") : "—"}
+                          —
                         </td>
                       )}
                       {visibleColumns.actions && (

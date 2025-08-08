@@ -1,5 +1,5 @@
 import React from "react";
-import { Document } from "@/data/documents"; // Import Document type from data
+import { Document } from "@/features/documents/models";
 import { 
   X, 
   Info, 
@@ -64,7 +64,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
 
   // Get file icon based on type
   const getFileIcon = () => {
-    const type = document.file_type.toLowerCase();
+    const type = document.type.toLowerCase();
     if (type === "pdf") {
       return (
         <div className="bg-red-100 text-red-700 w-10 h-10 rounded flex items-center justify-center">
@@ -165,12 +165,12 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
           <div className="flex items-center">
             <span className="text-gray-300 mr-1.5">Category:</span>
             <span className="font-semibold text-white">
-              {document.category}
+              {document.docCategory || document.category || "Uncategorized"}
             </span>
           </div>
           <div className="flex items-center">
             <span className="text-gray-300 mr-1.5">Status:</span>
-            {renderStatusBadge(document.status)}
+            {renderStatusBadge(document.isActive ? "Active" : "Inactive")}
           </div>
           <div className="flex items-center">
             <span className="text-gray-300 mr-1.5">Size:</span>
@@ -180,7 +180,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
           <div className="hidden sm:flex flex-grow justify-end space-x-4">
             <span className="flex items-center text-gray-300">
               <span className="mr-1">Version:</span>
-              <span className="font-semibold">{document.version || "1.0"}</span>
+              <span className="font-semibold">1.0</span>
             </span>
           </div>
         </div>
@@ -273,18 +273,18 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                     <div>
                       <p className="text-gray-500 text-xs mb-0.5">File Type:</p>
                       <p className="text-gray-800 font-medium">
-                        {document.file_type}
+                        {document.type}
                       </p>
                     </div>
                     <div>
                       <p className="text-gray-500 text-xs mb-0.5">Category:</p>
                       <p className="text-gray-800 font-medium">
-                        {document.category}
+                        {document.docCategory || document.category || "Uncategorized"}
                       </p>
                     </div>
                     <div>
                       <p className="text-gray-500 text-xs mb-0.5">Status:</p>
-                      <div>{renderStatusBadge(document.status)}</div>
+                      <div>{renderStatusBadge(document.isActive ? "Active" : "Inactive")}</div>
                     </div>
                     <div>
                       <p className="text-gray-500 text-xs mb-0.5">
@@ -303,7 +303,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                         Upload Date:
                       </p>
                       <p className="text-gray-800 font-medium">
-                        {document.upload_date}
+                        {new Date(document.uploadedAt).toLocaleDateString()}
                       </p>
                     </div>
                     <div>
@@ -311,7 +311,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                         Uploaded By:
                       </p>
                       <p className="text-gray-800 font-medium">
-                        {document.uploaded_by}
+                        Unknown
                       </p>
                     </div>
                     <div>
@@ -325,13 +325,13 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                         Last Accessed:
                       </p>
                       <p className="text-gray-800 font-medium">
-                        {document.last_accessed || "Unknown"}
+                        Unknown
                       </p>
                     </div>
                     <div>
                       <p className="text-gray-500 text-xs mb-0.5">Version:</p>
                       <p className="text-gray-800 font-medium">
-                        {document.version || "1.0"}
+                        1.0
                       </p>
                     </div>
                   </div>
@@ -368,7 +368,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                     <p className="text-gray-500 mb-1">
                       Current Version:{" "}
                       <span className="font-medium text-gray-700">
-                        {document.version || "1.0"}
+                        1.0
                       </span>
                     </p>
                   </div>
@@ -377,25 +377,25 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                     <div className="border-l-2 border-blue-400 pl-4 pb-4 relative">
                       <div className="absolute w-3 h-3 bg-blue-400 rounded-full -left-[7px] top-0"></div>
                       <p className="font-medium text-gray-800">
-                        {document.upload_date} - Version{" "}
-                        {document.version || "1.0"}
+                        {new Date(document.uploadedAt).toLocaleDateString()} - Version{" "}
+                        1.0
                       </p>
                       <p className="text-gray-600 mt-1">
-                        Uploaded by {document.uploaded_by}
+                        Uploaded by Unknown
                       </p>
                       <p className="text-gray-500 text-xs mt-2">
                         Current version
                       </p>
                     </div>
 
-                    {document.version && document.version !== "1.0" && (
+                    {false && (
                       <div className="border-l-2 border-gray-300 pl-4 pb-4 relative">
                         <div className="absolute w-3 h-3 bg-gray-300 rounded-full -left-[7px] top-0"></div>
                         <p className="font-medium text-gray-700">
                           10/02/2024 - Version 0.9
                         </p>
                         <p className="text-gray-600 mt-1">
-                          Updated by {document.uploaded_by}
+                          Updated by Unknown
                         </p>
                         <p className="text-gray-500 text-xs mt-2">
                           Draft version
@@ -409,7 +409,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                         05/01/2024 - Version 1.0
                       </p>
                       <p className="text-gray-600 mt-1">
-                        Created by {document.uploaded_by}
+                        Created by Unknown
                       </p>
                       <p className="text-gray-500 text-xs mt-2">
                         Initial upload
@@ -425,8 +425,8 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                   <div>
                     <p className="text-gray-500 text-xs mb-2">Tags:</p>
                     <div className="flex flex-wrap gap-2">
-                      {document.tags && document.tags.length > 0 ? (
-                        document.tags.map((tag, index) => (
+                      {false ? (
+                        [].map((tag: string, index: number) => (
                           <span
                             key={index}
                             className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium"
@@ -450,11 +450,11 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                     <div>
                       <p className="text-gray-500 text-xs mb-0.5">MIME Type:</p>
                       <p className="text-gray-800 font-medium">
-                        {document.file_type === "PDF"
+                        {document.type.toUpperCase() === "PDF"
                           ? "application/pdf"
-                          : document.file_type === "DOCX"
+                          : document.type.toUpperCase() === "DOCX"
                           ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                          : document.file_type === "XLSX"
+                          : document.type.toUpperCase() === "XLSX"
                           ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                           : "application/octet-stream"}
                       </p>
@@ -462,7 +462,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                     <div>
                       <p className="text-gray-500 text-xs mb-0.5">Created:</p>
                       <p className="text-gray-800 font-medium">
-                        {document.upload_date}
+                        {new Date(document.uploadedAt).toLocaleDateString()}
                       </p>
                     </div>
                     <div>
@@ -470,7 +470,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                         Last Modified:
                       </p>
                       <p className="text-gray-800 font-medium">
-                        {document.upload_date}
+                        {new Date(document.uploadedAt).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
@@ -480,7 +480,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
               {/* --- Related Section --- */}
               {activeSidebarItem === "related" && (
                 <div className="space-y-4 text-sm">
-                  {document.building_id && (
+                  {false && (
                     <div>
                       <p className="text-gray-500 text-xs mb-2">
                         Related Building:
@@ -489,7 +489,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                         <BuildingIcon className="h-5 w-5 text-gray-500 mr-2" />
                         <div>
                           <p className="font-medium text-gray-800">
-                            Building {document.building_id}
+                            Building
                           </p>
                           <p className="text-xs text-gray-500">Fordwych Road</p>
                         </div>
@@ -497,7 +497,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                     </div>
                   )}
 
-                  {document.task_id && (
+                  {false && (
                     <div>
                       <p className="text-gray-500 text-xs mb-2 mt-4">
                         Related Task:
@@ -529,7 +529,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                       Related Documents:
                     </p>
                     <div className="space-y-2">
-                      {document.category === "Certification" ? (
+                      {(document.docCategory || document.category) === "Certification" ? (
                         <>
                           <div className="flex items-center p-3 border rounded-md hover:bg-gray-50 cursor-pointer transition">
                             <div className="bg-red-100 text-red-700 w-8 h-8 rounded flex items-center justify-center mr-3">

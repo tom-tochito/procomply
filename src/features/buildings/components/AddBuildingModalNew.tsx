@@ -87,6 +87,7 @@ export default function AddBuildingModal({
         <div className="p-4 md:p-5">
           <BuildingForm 
             divisions={divisions}
+            tenant={tenant}
             onSubmit={handleSubmit} 
             onCancel={onClose}
           />

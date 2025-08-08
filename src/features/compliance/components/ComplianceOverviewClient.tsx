@@ -88,7 +88,7 @@ export default function ComplianceOverviewClient({
       return {
         id: building.id,
         name: building.name,
-        location: building.city || "",
+        location: building.division || "",
         compliance: `${compliance}%`,
         pm: "", // Property Manager - not in schema yet
         annualFlatDoor: formatComplianceCheck(checksByType[COMPLIANCE_CHECK_TYPES.ANNUAL_FLAT_DOOR]),

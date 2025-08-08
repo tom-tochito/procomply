@@ -133,10 +133,8 @@ export default function BuildingsList({ tenant }: BuildingsListProps) {
       return true;
     }
 
-    // Availability filter
-    if (availability !== "Availability" && building.availability !== availability) {
-      return false;
-    }
+    // Availability filter - removed as field no longer exists in schema
+    // TODO: Implement filter based on template data once available
 
     return true;
   });

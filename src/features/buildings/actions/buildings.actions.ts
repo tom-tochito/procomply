@@ -1,11 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { id } from "@instantdb/admin";
 import {
   createBuilding,
   updateBuilding,
   deleteBuilding,
+  findBuildingById,
 } from "../repository/buildings.repository";
 import { Tenant } from "@/features/tenant/models";
 
@@ -13,45 +13,12 @@ function parseFormData(formData: FormData) {
   return {
     // Basic Information
     name: formData.get("name") as string,
-    description: formData.get("description") as string | undefined,
-    address: formData.get("address") as string,
-    city: formData.get("city") as string,
-    state: formData.get("state") as string,
-    zipCode: formData.get("zipCode") as string,
-    floors: parseInt(formData.get("floors") as string),
-    
-    // General Data
     division: formData.get("division") as string | undefined,
     divisionId: formData.get("divisionId") as string | undefined,
-    billingAccount: formData.get("billingAccount") as string | undefined,
-    availability: formData.get("availability") as string | undefined,
-    openingHours: formData.get("openingHours") as string | undefined,
-    archived: formData.get("archived") === "on",
-    siteAccess: formData.get("siteAccess") as string | undefined,
     
-    // Position Data
-    complex: formData.get("complex") as string | undefined,
-    
-    // Maintenance Data
-    condition: formData.get("condition") as string | undefined,
-    criticality: formData.get("criticality") as string | undefined,
-    fireRiskRating: formData.get("fireRiskRating") as string | undefined,
-    lastCheckDate: formData.get("lastCheckDate") as string | undefined,
-    
-    // Dimensional Data
-    totalGrossArea: formData.get("totalGrossArea") ? parseInt(formData.get("totalGrossArea") as string) : undefined,
-    totalNetArea: formData.get("totalNetArea") ? parseInt(formData.get("totalNetArea") as string) : undefined,
-    coveredArea: formData.get("coveredArea") ? parseInt(formData.get("coveredArea") as string) : undefined,
-    glazedArea: formData.get("glazedArea") ? parseInt(formData.get("glazedArea") as string) : undefined,
-    cleanableArea: formData.get("cleanableArea") ? parseInt(formData.get("cleanableArea") as string) : undefined,
-    totalVolume: formData.get("totalVolume") ? parseInt(formData.get("totalVolume") as string) : undefined,
-    heatedVolume: formData.get("heatedVolume") ? parseInt(formData.get("heatedVolume") as string) : undefined,
-    numberOfRooms: formData.get("numberOfRooms") ? parseInt(formData.get("numberOfRooms") as string) : undefined,
-    numberOfUnits: formData.get("numberOfUnits") ? parseInt(formData.get("numberOfUnits") as string) : undefined,
-    
-    // Contact Information
-    outOfHourContact: formData.get("outOfHourContact") as string | undefined,
-    telephone: formData.get("telephone") as string | undefined,
+    // Template Data
+    templateId: formData.get("templateId") as string | undefined,
+    templateData: formData.get("templateData") as string | undefined,
     
     // Image
     imageFile: formData.get("image") as File | null,
@@ -64,19 +31,20 @@ export async function createBuildingAction(
 ) {
   try {
     const data = parseFormData(formData);
-    const { imageFile, ...buildingData } = data;
+    const { imageFile, templateData, ...buildingData } = data;
 
-    // Generate building ID first
-    const buildingId = id();
+    // Parse template data if provided
+    const parsedTemplateData = templateData ? JSON.parse(templateData) : undefined;
 
-    // Create building with all data including image file
+    // Create building with minimal data
     await createBuilding(tenant, {
       ...buildingData,
+      ...(parsedTemplateData ? { data: parsedTemplateData } : {}),
       ...(imageFile && imageFile.size > 0 ? { imageFile } : {}),
-    }, buildingId);
+    });
 
     revalidatePath(`/tenant/[tenant]/buildings`, "page");
-    return { success: true, buildingId };
+    return { success: true };
   } catch (error) {
     return {
       success: false,
@@ -87,12 +55,22 @@ export async function createBuildingAction(
 }
 
 export async function updateBuildingAction(
+  tenant: Tenant,
   buildingId: string,
   formData: FormData
 ) {
   try {
     const data = parseFormData(formData);
-    const { imageFile, ...buildingData } = data;
+    const { imageFile, templateData, ...buildingData } = data;
+
+    // Get existing building to preserve template link
+    const existingBuilding = await findBuildingById(buildingId);
+    if (!existingBuilding) {
+      throw new Error("Building not found");
+    }
+
+    // Parse template data if provided
+    const parsedTemplateData = templateData ? JSON.parse(templateData) : undefined;
 
     // Filter out undefined values to create partial update
     const filteredData = Object.entries(buildingData).reduce((acc, [key, value]) => {
@@ -102,10 +80,11 @@ export async function updateBuildingAction(
       return acc;
     }, {} as Partial<typeof buildingData>);
 
-    await updateBuilding(buildingId, {
+    await updateBuilding(tenant, buildingId, {
       ...filteredData,
+      ...(parsedTemplateData ? { data: parsedTemplateData } : {}),
       ...(imageFile && imageFile.size > 0 ? { imageFile } : {}),
-    });
+    }, existingBuilding);
 
     revalidatePath(`/tenant/[tenant]/buildings`, "page");
     revalidatePath(`/tenant/[tenant]/buildings/[id]`, "page");
@@ -119,9 +98,12 @@ export async function updateBuildingAction(
   }
 }
 
-export async function deleteBuildingAction(buildingId: string) {
+export async function deleteBuildingAction(
+  tenant: Tenant,
+  buildingId: string
+) {
   try {
-    await deleteBuilding(buildingId);
+    await deleteBuilding(tenant, buildingId);
     revalidatePath(`/tenant/[tenant]/buildings`, "page");
     return { success: true };
   } catch (error) {

@@ -11,7 +11,7 @@ import BuildingForm from "./BuildingForm";
 interface EditBuildingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  building: Building;
+  building: Building & { tenant?: { id: string; name: string; slug: string; description: string; createdAt: number; updatedAt: number } };
   divisions?: Division[];
 }
 
@@ -26,7 +26,7 @@ export default function EditBuildingModal({
 
   const handleSubmit = async (prevState: FormState, formData: FormData) => {
     try {
-      const result = await updateBuildingAction(building.id, formData);
+      const result = await updateBuildingAction(building.tenant || { id: "", name: "", slug: "", description: "", createdAt: Date.now(), updatedAt: Date.now() }, building.id, formData);
       
       if (result.success) {
         setSuccessState(true);
@@ -88,6 +88,7 @@ export default function EditBuildingModal({
           <BuildingForm 
             building={building}
             divisions={divisions}
+            tenant={building.tenant || { id: "", name: "", slug: "", description: "", createdAt: Date.now(), updatedAt: Date.now() }}
             onSubmit={handleSubmit} 
             onCancel={onClose}
           />

@@ -13,13 +13,10 @@ interface DocumentSidebarProps {
   setSelectedBuilding: (building: string | null) => void;
   selectedDivision: string | null;
   setSelectedDivision: (division: string | null) => void;
-  selectedComplex: string | null;
-  setSelectedComplex: (complex: string | null) => void;
   categories: string[];
   fileTypes: string[];
   buildings: { id: string; name: string }[];
   divisions: string[];
-  complexes: string[];
 }
 
 // TODO: Fetch categories from database instead of hardcoding
@@ -36,13 +33,10 @@ export default function DocumentSidebar({
   setSelectedBuilding,
   selectedDivision,
   setSelectedDivision,
-  selectedComplex,
-  setSelectedComplex,
   categories,
   fileTypes,
   buildings,
   divisions,
-  complexes,
 }: DocumentSidebarProps) {
   return (
     <div className="w-full lg:w-64 xl:w-72 bg-white rounded-md shadow-sm p-3 md:p-4 order-2 lg:order-1 max-h-[calc(100vh-12rem)] overflow-y-auto sticky top-4">
@@ -162,39 +156,7 @@ export default function DocumentSidebar({
         </div>
       )}
 
-      {complexes.length > 0 && (
-        <div className="mb-5">
-          <h3 className="text-xs uppercase text-gray-500 font-semibold mb-2">
-            COMPLEX:
-          </h3>
-          <div className="space-y-1 max-h-[150px] overflow-y-auto pr-1">
-            <button
-              className={`w-full text-left px-2 py-1.5 rounded-md text-sm ${
-                selectedComplex === null
-                  ? "bg-red-50 text-[#F30] font-medium"
-                  : "hover:bg-gray-100"
-              } cursor-pointer transition-colors`}
-              onClick={() => setSelectedComplex(null)}
-            >
-              All Complexes
-            </button>
-            {complexes.map((complex) => (
-              <button
-                key={complex}
-                className={`w-full text-left px-2 py-1.5 rounded-md text-sm ${
-                  selectedComplex === complex
-                    ? "bg-red-50 text-[#F30] font-medium"
-                    : "hover:bg-gray-100"
-                } cursor-pointer flex items-center transition-colors`}
-                onClick={() => setSelectedComplex(complex)}
-              >
-                <span className="text-gray-700 mr-2">›</span>
-                <span className="truncate">{complex}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Complex filter removed - field no longer exists in schema */}
 
       <div className="mb-5">
         <h3 className="text-xs uppercase text-gray-500 font-semibold mb-2">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import { PieChart } from "lucide-react";
 import { DataManagementMenu } from "./DataManagementMenu";
+import { TemplateManagementMenu } from "./TemplateManagementMenu";
 
 interface NavigationLinksProps {
   tenantSlug: string;
@@ -14,6 +15,8 @@ export function NavigationLinks({ tenantSlug }: NavigationLinksProps) {
   return (
     <div className="hidden md:flex items-center gap-x-4 lg:gap-x-8">
       <DataManagementMenu tenantSlug={tenantSlug} />
+      
+      <TemplateManagementMenu tenantSlug={tenantSlug} />
 
       <Link
         href={generateTenantRedirectUrl(tenantSlug, "/compliance-overview")}

@@ -166,3 +166,61 @@ Only use server-side repositories for:
 - File storage operations (storage)
 
 All other data operations should use client-side InstantDB queries with `db.useQuery`. Do NOT create server-side repositories for entities like buildings, divisions, tasks, etc.
+
+## 15. Template System Rules
+
+### Template Field Definitions
+Templates use a `fields` array in JSON format with typed TemplateField[]. Each field must have:
+- `key`: Unique identifier (alphanumeric, no spaces, camelCase)
+- `label`: Display name for the field
+- `type`: Field type (text, textarea, number, date, select, multiselect, checkbox, image, file, url)
+- `required`: Boolean indicating if field is mandatory
+- Additional properties based on type (options, min/max, rows, accept)
+
+### Template Data Storage
+- Building data is stored in the `data` field as JSON (Record<string, any>)
+- Keys in `data` must match field `key` values from the template
+- Always validate data against template field definitions before saving
+- Use type guards when retrieving data to ensure type safety
+
+### Template Operations
+1. **Creating/Updating Buildings:**
+   ```typescript
+   // Fetch template with building
+   const { data: building } = db.useQuery({
+     buildings: { $: { where: { id: buildingId }, include: { template: true } } }
+   });
+   
+   // Validate and save data
+   const templateData: Record<string, any> = {};
+   template.fields.forEach(field => {
+     if (field.required && !formData[field.key]) {
+       throw new Error(`${field.label} is required`);
+     }
+     templateData[field.key] = formData[field.key];
+   });
+   
+   db.transact([
+     db.tx.buildings[buildingId].update({ data: templateData })
+   ]);
+   ```
+
+2. **Displaying Buildings:**
+   - Fetch building with template relation
+   - Loop through template.fields to determine display order and formatting
+   - Retrieve values from building.data using field keys
+   - Apply field type formatting (dates as timestamps, etc.)
+
+3. **Template Changes:**
+   - Templates should be treated as immutable once buildings use them
+   - Create new template versions rather than modifying existing ones
+   - New fields can be added (existing buildings show empty values)
+   - Field removal should be handled gracefully (preserve data)
+   - Never modify field keys after template is in use
+
+### Template Builder Component
+- Use a simple form-based interface (no drag-and-drop)
+- Provide field type selection via dropdown
+- Show/hide type-specific options based on selection
+- Validate field keys are unique within template
+- Preview the generated form before saving

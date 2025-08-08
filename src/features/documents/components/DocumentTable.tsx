@@ -148,7 +148,7 @@ export default function DocumentTable({
           Document <SortIcon field="name" />
         </button>
       ),
-      cell: ({ row }) => (
+      cell: ({ row }: { row: { original: DocumentWithRelations } }) => (
         <div className="flex items-center">
           {getFileIcon(row.original.name, row.original.type)}
           <div className="ml-3 max-w-[250px]">
@@ -174,7 +174,7 @@ export default function DocumentTable({
           Category <SortIcon field="docCategory" />
         </button>
       ),
-      cell: ({ getValue }) => (
+      cell: ({ getValue }: { getValue: () => unknown }) => (
         <div className="text-sm text-gray-900 truncate max-w-[150px]">
           {(getValue() as string) || "Miscellaneous"}
         </div>
@@ -190,7 +190,7 @@ export default function DocumentTable({
           Reference <SortIcon field="reference" />
         </button>
       ),
-      cell: ({ getValue }) => (
+      cell: ({ getValue }: { getValue: () => unknown }) => (
         <div className="text-sm text-gray-900">
           {(getValue() as string) || "-"}
         </div>
@@ -206,7 +206,7 @@ export default function DocumentTable({
           Valid Until <SortIcon field="expiryDate" />
         </button>
       ),
-      cell: ({ getValue }) => {
+      cell: ({ getValue }: { getValue: () => unknown }) => {
         const timestamp = getValue() as number | undefined;
         return (
           <div className="text-sm text-gray-500">
@@ -218,7 +218,7 @@ export default function DocumentTable({
     ...(visibleColumns.building ? [{
       accessorKey: "building.name",
       header: "Building",
-      cell: ({ row }) => (
+      cell: ({ row }: { row: { original: DocumentWithRelations } }) => (
         <div className="text-sm text-gray-900 truncate max-w-[150px]">
           {row.original.building?.name || "-"}
         </div>
@@ -227,16 +227,16 @@ export default function DocumentTable({
     ...(visibleColumns.uploader ? [{
       accessorKey: "uploader.email",
       header: "Uploaded By",
-      cell: ({ row }) => (
+      cell: ({ row }: { row: { original: DocumentWithRelations } }) => (
         <div className="text-sm text-gray-500 truncate max-w-[150px]">
-          {row.original.uploader?.profile?.name || row.original.uploader?.email || "-"}
+          {row.original.uploader?.email || "-"}
         </div>
       ),
     }] : []),
     {
       accessorKey: "status",
       header: "Status",
-      cell: ({ row }) => renderStatusBadge(row.original),
+      cell: ({ row }: { row: { original: DocumentWithRelations } }) => renderStatusBadge(row.original),
     },
     {
       accessorKey: "uploadedAt",
@@ -248,7 +248,7 @@ export default function DocumentTable({
           Upload Date <SortIcon field="uploadedAt" />
         </button>
       ),
-      cell: ({ getValue }) => (
+      cell: ({ getValue }: { getValue: () => unknown }) => (
         <div className="text-sm text-gray-500">
           {formatTimestamp(getValue() as number)}
         </div>
@@ -257,7 +257,7 @@ export default function DocumentTable({
     {
       id: "actions",
       header: "Actions",
-      cell: ({ row }) => (
+      cell: ({ row }: { row: { original: DocumentWithRelations } }) => (
         <div className="flex items-center justify-end gap-3">
           <button
             className="text-blue-600 hover:text-blue-900 text-sm font-medium"

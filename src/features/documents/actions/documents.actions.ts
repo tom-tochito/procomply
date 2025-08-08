@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { uploadDocument, deleteDocument } from "../repository/documents.repository";
-import { getBuildingById } from "@/features/buildings/repository/buildings.repository";
+import { findBuildingById } from "@/features/buildings/repository/buildings.repository";
 import { findTenantById } from "@/features/tenant/repository/tenant.repository";
 
 export async function uploadDocumentAction(
@@ -18,7 +18,7 @@ export async function uploadDocumentAction(
     }
     
     // Get full models
-    const building = await getBuildingById(buildingId);
+    const building = await findBuildingById(buildingId);
     if (!building) {
       return { success: false, error: "Building not found" };
     }

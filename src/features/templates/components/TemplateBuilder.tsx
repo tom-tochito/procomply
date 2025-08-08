@@ -1,0 +1,561 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { db } from "~/lib/db";
+import { id } from "@instantdb/react";
+import { Tenant } from "@/features/tenant/models";
+import { TemplateField, BUILDING_COMMON_FIELDS, getBuiltinFieldsByType, TemplateType } from "../models";
+import { getCurrentTimestamp } from "@/common/utils/date";
+import { startTransition } from "react";
+
+interface TemplateBuilderProps {
+  tenant: Tenant;
+  templateId: string | null;
+  onBack: () => void;
+  templateType: TemplateType;
+}
+
+export default function TemplateBuilder({ tenant, templateId, onBack, templateType }: TemplateBuilderProps) {
+  const [templateName, setTemplateName] = useState("");
+  const [fields, setFields] = useState<TemplateField[]>([]);
+  const [showFieldForm, setShowFieldForm] = useState(false);
+  const [editingFieldIndex, setEditingFieldIndex] = useState<number | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Field form state
+  const [fieldKey, setFieldKey] = useState("");
+  const [fieldLabel, setFieldLabel] = useState("");
+  const [fieldType, setFieldType] = useState<TemplateField["type"]>("text");
+  const [fieldRequired, setFieldRequired] = useState(false);
+  const [fieldPlaceholder, setFieldPlaceholder] = useState("");
+  const [fieldHelpText, setFieldHelpText] = useState("");
+  const [fieldOptions, setFieldOptions] = useState<string[]>([]);
+  const [fieldMin, setFieldMin] = useState<number | undefined>();
+  const [fieldMax, setFieldMax] = useState<number | undefined>();
+  const [fieldRows, setFieldRows] = useState<number | undefined>();
+  const [fieldAccept, setFieldAccept] = useState<string | undefined>();
+
+  // Fetch existing template if editing
+  const { data: templateData } = db.useQuery(
+    templateId
+      ? {
+          templates: {
+            $: {
+              where: { id: templateId },
+              limit: 1,
+            },
+          },
+        }
+      : null
+  );
+
+  useEffect(() => {
+    if (templateData?.templates?.[0]) {
+      const template = templateData.templates[0];
+      setTemplateName(template.name);
+      setFields(template.fields || []);
+    }
+  }, [templateData]);
+
+  const handleAddField = () => {
+    if (!fieldKey || !fieldLabel) {
+      alert("Field key and label are required");
+      return;
+    }
+
+    // Check for duplicate keys
+    if (fields.some((f, i) => f.key === fieldKey && i !== editingFieldIndex)) {
+      alert("Field key must be unique");
+      return;
+    }
+
+    const newField: TemplateField = {
+      key: fieldKey,
+      label: fieldLabel,
+      type: fieldType,
+      required: fieldRequired,
+      ...(fieldPlaceholder && { placeholder: fieldPlaceholder }),
+      ...(fieldHelpText && { helpText: fieldHelpText }),
+      ...((fieldType === "select" || fieldType === "multiselect") && { options: fieldOptions }),
+      ...(fieldType === "number" && fieldMin !== undefined && { min: fieldMin }),
+      ...(fieldType === "number" && fieldMax !== undefined && { max: fieldMax }),
+      ...(fieldType === "textarea" && fieldRows && { rows: fieldRows }),
+      ...((fieldType === "image" || fieldType === "file") && fieldAccept && { accept: fieldAccept }),
+    };
+
+    if (editingFieldIndex !== null) {
+      const updatedFields = [...fields];
+      updatedFields[editingFieldIndex] = newField;
+      setFields(updatedFields);
+      setEditingFieldIndex(null);
+    } else {
+      setFields([...fields, newField]);
+    }
+
+    resetFieldForm();
+  };
+
+  const resetFieldForm = () => {
+    setFieldKey("");
+    setFieldLabel("");
+    setFieldType("text");
+    setFieldRequired(false);
+    setFieldPlaceholder("");
+    setFieldHelpText("");
+    setFieldOptions([]);
+    setFieldMin(undefined);
+    setFieldMax(undefined);
+    setFieldRows(undefined);
+    setFieldAccept(undefined);
+    setShowFieldForm(false);
+    setEditingFieldIndex(null);
+  };
+
+  const handleEditField = (index: number) => {
+    const field = fields[index];
+    setFieldKey(field.key);
+    setFieldLabel(field.label);
+    setFieldType(field.type);
+    setFieldRequired(field.required);
+    setFieldPlaceholder(field.placeholder || "");
+    setFieldHelpText(field.helpText || "");
+    setFieldOptions(field.options || []);
+    setFieldMin(field.min);
+    setFieldMax(field.max);
+    setFieldRows(field.rows);
+    setFieldAccept(field.accept);
+    setEditingFieldIndex(index);
+    setShowFieldForm(true);
+  };
+
+  const handleDeleteField = (index: number) => {
+    setFields(fields.filter((_, i) => i !== index));
+  };
+
+  const handleMoveField = (index: number, direction: "up" | "down") => {
+    const newFields = [...fields];
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex >= 0 && targetIndex < fields.length) {
+      [newFields[index], newFields[targetIndex]] = [newFields[targetIndex], newFields[index]];
+      setFields(newFields);
+    }
+  };
+
+  const handleAddCommonField = (field: TemplateField) => {
+    if (fields.some((f) => f.key === field.key)) {
+      alert(`Field with key "${field.key}" already exists`);
+      return;
+    }
+    setFields([...fields, field]);
+  };
+
+  const handleSave = async () => {
+    if (!templateName) {
+      alert("Template name is required");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      if (templateId) {
+        // Update existing template
+        startTransition(() => {
+          db.transact([
+            db.tx.templates[templateId].update({
+              name: templateName,
+              fields: fields,
+              updatedAt: getCurrentTimestamp(),
+            }),
+          ]);
+        });
+      } else {
+        // Create new template
+        const newTemplateId = id();
+        startTransition(() => {
+          db.transact([
+            db.tx.templates[newTemplateId]
+              .update({
+                name: templateName,
+                type: templateType,
+                fields: fields,
+                isActive: true,
+                createdAt: getCurrentTimestamp(),
+                updatedAt: getCurrentTimestamp(),
+              })
+              .link({ tenant: tenant.id }),
+          ]);
+        });
+      }
+      onBack();
+    } catch (error) {
+      console.error("Error saving template:", error);
+      alert("Failed to save template");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={onBack}
+          className="flex items-center text-gray-600 hover:text-gray-900"
+        >
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Templates
+        </button>
+      </div>
+
+      {/* Template Name */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">
+          {templateId ? "Edit Template" : "Create New Template"}
+        </h2>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Template Name
+          </label>
+          <input
+            type="text"
+            value={templateName}
+            onChange={(e) => setTemplateName(e.target.value)}
+            placeholder="Enter template name"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
+          />
+        </div>
+      </div>
+
+      {/* Built-in Fields */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Built-in Fields</h3>
+        <p className="text-sm text-gray-500 mb-4">
+          These fields are always included in every {templateType} and cannot be modified.
+        </p>
+        <div className="space-y-2">
+          {getBuiltinFieldsByType(templateType).map((field) => (
+            <div
+              key={field.key}
+              className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
+            >
+              <div className="flex-1">
+                <div className="font-medium text-gray-900">{field.label}</div>
+                <div className="text-sm text-gray-500">
+                  Key: {field.key} | Type: {field.type} | Required: Yes
+                </div>
+              </div>
+              <div className="text-sm text-gray-400">Built-in</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Custom Fields */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-medium text-gray-900">Custom Fields</h3>
+          <button
+            onClick={() => setShowFieldForm(true)}
+            className="px-4 py-2 bg-[#F30] text-white rounded-md hover:bg-[#E20] transition-colors"
+          >
+            Add Field
+          </button>
+        </div>
+
+        {fields.length === 0 ? (
+          <p className="text-gray-500 text-center py-8">
+            No custom fields added yet. Click &quot;Add Field&quot; to create one.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {fields.map((field, index) => (
+              <div
+                key={field.key}
+                className="flex items-center justify-between p-3 border rounded-md"
+              >
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900">{field.label}</div>
+                  <div className="text-sm text-gray-500">
+                    Key: {field.key} | Type: {field.type} | Required: {field.required ? "Yes" : "No"}
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handleMoveField(index, "up")}
+                    disabled={index === 0}
+                    className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => handleMoveField(index, "down")}
+                    disabled={index === fields.length - 1}
+                    className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => handleEditField(index)}
+                    className="p-1 text-[#F30] hover:text-[#E20]"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => handleDeleteField(index)}
+                    className="p-1 text-red-600 hover:text-red-800"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Common Fields - Only show for building templates */}
+      {templateType === "building" && (
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Common Fields</h3>
+          <p className="text-sm text-gray-500 mb-4">
+            Quickly add commonly used fields to your template.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {BUILDING_COMMON_FIELDS.map((field) => (
+            <button
+              key={field.key}
+              onClick={() => handleAddCommonField(field)}
+              disabled={fields.some((f) => f.key === field.key)}
+              className="p-2 text-sm text-left border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="font-medium">{field.label}</div>
+              <div className="text-xs text-gray-500">{field.type}</div>
+            </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Save Button */}
+      <div className="flex justify-end">
+        <button
+          onClick={handleSave}
+          disabled={isSaving || !templateName}
+          className="px-6 py-2 bg-[#F30] text-white rounded-md hover:bg-[#E20] disabled:opacity-50 transition-colors"
+        >
+          {isSaving ? "Saving..." : templateId ? "Update Template" : "Create Template"}
+        </button>
+      </div>
+
+      {/* Field Form Modal */}
+      {showFieldForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              {editingFieldIndex !== null ? "Edit Field" : "Add New Field"}
+            </h3>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Field Key
+                  </label>
+                  <input
+                    type="text"
+                    value={fieldKey}
+                    onChange={(e) => setFieldKey(e.target.value.replace(/[^a-zA-Z0-9]/g, ""))}
+                    placeholder="fieldKey"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Alphanumeric only, no spaces</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Field Label
+                  </label>
+                  <input
+                    type="text"
+                    value={fieldLabel}
+                    onChange={(e) => setFieldLabel(e.target.value)}
+                    placeholder="Field Label"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Field Type
+                  </label>
+                  <select
+                    value={fieldType}
+                    onChange={(e) => setFieldType(e.target.value as TemplateField["type"])}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
+                  >
+                    <option value="text">Text</option>
+                    <option value="textarea">Textarea</option>
+                    <option value="number">Number</option>
+                    <option value="date">Date</option>
+                    <option value="select">Select</option>
+                    <option value="multiselect">Multi-select</option>
+                    <option value="checkbox">Checkbox</option>
+                    <option value="url">URL</option>
+                    <option value="image">Image</option>
+                    <option value="file">File</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Required
+                  </label>
+                  <label className="flex items-center mt-2">
+                    <input
+                      type="checkbox"
+                      checked={fieldRequired}
+                      onChange={(e) => setFieldRequired(e.target.checked)}
+                      className="h-4 w-4 text-[#F30] focus:ring-[#F30] border-gray-300 rounded"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">This field is required</span>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Placeholder
+                </label>
+                <input
+                  type="text"
+                  value={fieldPlaceholder}
+                  onChange={(e) => setFieldPlaceholder(e.target.value)}
+                  placeholder="Enter placeholder text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Help Text
+                </label>
+                <input
+                  type="text"
+                  value={fieldHelpText}
+                  onChange={(e) => setFieldHelpText(e.target.value)}
+                  placeholder="Enter help text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
+                />
+              </div>
+
+              {/* Type-specific options */}
+              {(fieldType === "select" || fieldType === "multiselect") && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Options (one per line)
+                  </label>
+                  <textarea
+                    value={fieldOptions.join("\n")}
+                    onChange={(e) => setFieldOptions(e.target.value.split("\n").filter(Boolean))}
+                    rows={4}
+                    placeholder="Option 1&#10;Option 2&#10;Option 3"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
+                  />
+                </div>
+              )}
+
+              {fieldType === "number" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Minimum Value
+                    </label>
+                    <input
+                      type="number"
+                      value={fieldMin || ""}
+                      onChange={(e) => setFieldMin(e.target.value ? Number(e.target.value) : undefined)}
+                      placeholder="Min"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Maximum Value
+                    </label>
+                    <input
+                      type="number"
+                      value={fieldMax || ""}
+                      onChange={(e) => setFieldMax(e.target.value ? Number(e.target.value) : undefined)}
+                      placeholder="Max"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {fieldType === "textarea" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Number of Rows
+                  </label>
+                  <input
+                    type="number"
+                    value={fieldRows || ""}
+                    onChange={(e) => setFieldRows(e.target.value ? Number(e.target.value) : undefined)}
+                    placeholder="4"
+                    min="1"
+                    max="20"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
+                  />
+                </div>
+              )}
+
+              {(fieldType === "image" || fieldType === "file") && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Accepted File Types
+                  </label>
+                  <input
+                    type="text"
+                    value={fieldAccept || ""}
+                    onChange={(e) => setFieldAccept(e.target.value)}
+                    placeholder={fieldType === "image" ? "image/*" : ".pdf,.doc,.docx"}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={resetFieldForm}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddField}
+                className="px-4 py-2 bg-[#F30] text-white rounded-md hover:bg-[#E20]"
+              >
+                {editingFieldIndex !== null ? "Update Field" : "Add Field"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

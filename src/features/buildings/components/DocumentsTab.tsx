@@ -54,7 +54,7 @@ export default function DocumentsTab({
     formData.append("tenantSlug", tenant.slug);
 
     startTransition(() => {
-      deleteDocumentAction(formData);
+      deleteDocumentAction({ error: null, success: false }, formData);
     });
   };
 

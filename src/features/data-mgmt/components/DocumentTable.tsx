@@ -3,7 +3,7 @@
 import React from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import Table from "@/common/components/Table/Table";
-import { Document } from "@/data/documents";
+import { Document } from "@/features/documents/models";
 import { Download, Trash2 } from "lucide-react";
 
 interface DocumentTableProps {
@@ -89,7 +89,7 @@ export default function DocumentTable({
       header: "Document",
       cell: ({ row }) => (
         <div className="flex items-center">
-          {getFileIcon(row.original.file_type)}
+          {getFileIcon(row.original.type)}
           <div className="ml-3 max-w-[250px]">
             <div className="text-sm font-medium text-gray-900 truncate">
               {row.original.name}
@@ -113,7 +113,7 @@ export default function DocumentTable({
       ),
     },
     {
-      accessorKey: "document_category",
+      accessorKey: "docCategory",
       header: "Doc Category",
       cell: ({ getValue }) => (
         <div className="text-sm text-gray-900 truncate max-w-[150px]">
@@ -122,15 +122,15 @@ export default function DocumentTable({
       ),
     },
     {
-      accessorKey: "status",
+      accessorKey: "isActive",
       header: "Status",
-      cell: ({ getValue }) => renderStatusBadge(getValue() as string),
+      cell: ({ getValue }) => renderStatusBadge(getValue() ? "Active" : "Inactive"),
     },
     {
-      accessorKey: "upload_date",
+      accessorKey: "uploadedAt",
       header: "Upload Date",
       cell: ({ getValue }) => (
-        <div className="text-sm text-gray-500">{getValue() as string}</div>
+        <div className="text-sm text-gray-500">{new Date(getValue() as number).toLocaleDateString()}</div>
       ),
     },
     {

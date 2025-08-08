@@ -14,7 +14,7 @@ import {
   uploadFile,
   deleteFile,
 } from "@/common/services/storage/storage.service";
-import { dateInputToTimestamp } from "@/common/utils/date";
+import { getCurrentTimestamp } from "@/common/utils/date";
 
 async function validateUserAccess(
   tenant: Tenant,
@@ -32,169 +32,54 @@ export async function createBuilding(
   tenant: Tenant,
   data: {
     name: string;
-    description?: string;
-    address: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    floors: number;
-    imageFile?: File;
-    // General Data
     division?: string;
     divisionId?: string;
-    billingAccount?: string;
-    availability?: string;
-    openingHours?: string;
-    archived?: boolean;
-    siteAccess?: string;
-    // Position Data
-    complex?: string;
-    // Maintenance Data
-    condition?: string;
-    criticality?: string;
-    fireRiskRating?: string;
-    lastCheckDate?: string;
-    // Dimensional Data
-    totalGrossArea?: number;
-    totalNetArea?: number;
-    coveredArea?: number;
-    glazedArea?: number;
-    cleanableArea?: number;
-    totalVolume?: number;
-    heatedVolume?: number;
-    numberOfRooms?: number;
-    numberOfUnits?: number;
-    // Contact Information
-    outOfHourContact?: string;
-    telephone?: string;
-  },
-  buildingId?: string
-): Promise<string> {
-  const auth = await getAuthCookies();
-  if (!auth) throw new Error("Unauthorized");
+    imageFile?: File;
+    templateId?: string;
+    templateData?: Record<string, unknown>;
+  }
+): Promise<BuildingWithTenant> {
+  const authData = await getAuthCookies();
+  if (!authData || !authData.user) {
+    throw new Error("User not authenticated");
+  }
+  const { user } = authData;
 
-  await validateUserAccess(tenant, auth.user);
+  await validateUserAccess(tenant, user);
 
-  const finalBuildingId = buildingId || id();
-  const now = Date.now();
+  const buildingId = id();
 
   // Handle image upload if provided
   let imagePath: string | undefined;
   if (data.imageFile) {
-    // Preserve original filename
-    const originalFileName = data.imageFile.name;
     imagePath = await uploadFile(
       tenant.slug,
-      `/buildings/${finalBuildingId}/${originalFileName}`,
+      `buildings/${buildingId}`,
       data.imageFile
     );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { imageFile, lastCheckDate, ...buildingData } = data;
+  const { imageFile, templateData, ...buildingData } = data;
 
-  const transaction = dbAdmin.tx.buildings[finalBuildingId]
+  const transaction = dbAdmin.tx.buildings[buildingId]
     .update({
-      // Required fields
       name: data.name,
-      address: data.address,
-      city: data.city,
-      state: data.state,
-      zipCode: data.zipCode,
-      floors: data.floors,
-      archived: data.archived || false,
-
-      // Optional fields - only include if provided
-      ...(data.description && { description: data.description }),
       ...(data.division && { division: data.division }),
-      ...(data.billingAccount && { billingAccount: data.billingAccount }),
-      ...(data.availability && { availability: data.availability }),
-      ...(data.openingHours && { openingHours: data.openingHours }),
-      ...(data.siteAccess && { siteAccess: data.siteAccess }),
-      ...(data.complex && { complex: data.complex }),
-      ...(data.condition && { condition: data.condition }),
-      ...(data.criticality && { criticality: data.criticality }),
-      ...(data.fireRiskRating && { fireRiskRating: data.fireRiskRating }),
-      ...(lastCheckDate && {
-        lastCheckDate: dateInputToTimestamp(lastCheckDate),
-      }),
-      ...(data.outOfHourContact && {
-        outOfHourContact: data.outOfHourContact,
-      }),
-      ...(data.telephone && { telephone: data.telephone }),
       ...(imagePath && { image: imagePath }),
-
-      // Optional dimensional data fields
-      ...(data.totalGrossArea && { totalGrossArea: data.totalGrossArea }),
-      ...(data.totalNetArea && { totalNetArea: data.totalNetArea }),
-      ...(data.coveredArea && { coveredArea: data.coveredArea }),
-      ...(data.glazedArea && { glazedArea: data.glazedArea }),
-      ...(data.cleanableArea && { cleanableArea: data.cleanableArea }),
-      ...(data.totalVolume && { totalVolume: data.totalVolume }),
-      ...(data.heatedVolume && { heatedVolume: data.heatedVolume }),
-      ...(data.numberOfRooms && { numberOfRooms: data.numberOfRooms }),
-      ...(data.numberOfUnits && { numberOfUnits: data.numberOfUnits }),
-
-      // Timestamps
-      createdAt: now,
-      updatedAt: now,
+      ...(templateData && { data: templateData }),
+      createdAt: getCurrentTimestamp(),
+      updatedAt: getCurrentTimestamp(),
     })
     .link({
       tenant: tenant.id,
       ...(data.divisionId && { divisionEntity: data.divisionId }),
+      ...(data.templateId && { template: data.templateId }),
     });
 
   await dbAdmin.transact([transaction]);
 
-  return finalBuildingId;
-}
-
-export async function updateBuilding(
-  buildingId: string,
-  data: Partial<{
-    name: string;
-    description: string;
-    address: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    floors: number;
-    imageFile: File;
-    // General Data
-    division: string;
-    divisionId: string;
-    billingAccount: string;
-    availability: string;
-    openingHours: string;
-    archived: boolean;
-    siteAccess: string;
-    // Position Data
-    complex: string;
-    // Maintenance Data
-    condition: string;
-    criticality: string;
-    fireRiskRating: string;
-    lastCheckDate: string;
-    // Dimensional Data
-    totalGrossArea: number;
-    totalNetArea: number;
-    coveredArea: number;
-    glazedArea: number;
-    cleanableArea: number;
-    totalVolume: number;
-    heatedVolume: number;
-    numberOfRooms: number;
-    numberOfUnits: number;
-    // Contact Information
-    outOfHourContact: string;
-    telephone: string;
-  }>
-): Promise<void> {
-  const auth = await getAuthCookies();
-  if (!auth) throw new Error("Unauthorized");
-
-  // Get building with tenant to validate access
-  const buildingResult = await dbAdmin.query({
+  const queryResponse = await dbAdmin.query({
     buildings: {
       $: {
         where: { id: buildingId },
@@ -203,82 +88,92 @@ export async function updateBuilding(
     },
   });
 
-  const building = buildingResult.buildings[0];
-  if (!building) throw new Error("Building not found");
-  if (!building.tenant) throw new Error("Building has no tenant");
+  const buildings = queryResponse.buildings;
+  if (!buildings || buildings.length === 0) {
+    throw new Error("Building not found after creation");
+  }
 
-  await validateUserAccess(building.tenant, auth.user);
+  return buildings[0] as BuildingWithTenant;
+}
+
+export async function updateBuilding(
+  tenant: Tenant,
+  buildingId: string,
+  data: {
+    name?: string;
+    division?: string;
+    divisionId?: string;
+    imageFile?: File;
+    templateId?: string;
+    templateData?: Record<string, unknown>;
+  },
+  existingBuilding?: BuildingWithRelations
+): Promise<BuildingWithTenant> {
+  const authData = await getAuthCookies();
+  if (!authData || !authData.user) {
+    throw new Error("User not authenticated");
+  }
+  const { user } = authData;
+
+  await validateUserAccess(tenant, user);
 
   // Handle image upload if provided
   let imagePath: string | undefined;
   if (data.imageFile) {
-    // Delete old image if exists
-    if (building.image) {
-      try {
-        await deleteFile(building.tenant.slug, building.image);
-      } catch (error) {
-        console.error("Failed to delete old image:", error);
-      }
+    // Delete old image if it exists
+    if (existingBuilding?.image) {
+      await deleteFile(tenant.slug, existingBuilding.image);
     }
 
-    // Upload new image with original filename
-    const originalFileName = data.imageFile.name;
     imagePath = await uploadFile(
-      building.tenant.slug,
-      `/buildings/${buildingId}/${originalFileName}`,
+      tenant.slug,
+      `buildings/${buildingId}`,
       data.imageFile
     );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { imageFile, lastCheckDate, divisionId, ...buildingData } = data;
+  const { imageFile, templateData, divisionId, templateId, ...buildingData } = data;
 
-  const updateTransaction = dbAdmin.tx.buildings[buildingId].update({
+  const updateData: Record<string, unknown> = {
     ...buildingData,
     ...(imagePath && { image: imagePath }),
-    ...(lastCheckDate && {
-      lastCheckDate: dateInputToTimestamp(lastCheckDate),
-    }),
-    updatedAt: Date.now(),
-  });
+    ...(templateData && { data: templateData }),
+    updatedAt: getCurrentTimestamp(),
+  };
 
-  // Handle division linking separately
-  const transactions = [updateTransaction];
+  const transaction = dbAdmin.tx.buildings[buildingId].update(updateData);
 
+  // Handle links separately
+  const transactions = [transaction];
+  
   if (divisionId !== undefined) {
     if (divisionId) {
-      // Link to new division
       transactions.push(
         dbAdmin.tx.buildings[buildingId].link({ divisionEntity: divisionId })
       );
-    } else {
-      // Unlink from current division if divisionId is empty
-      const currentBuilding = await dbAdmin.query({
-        buildings: {
-          $: { where: { id: buildingId } },
-          divisionEntity: {},
-        },
-      });
+    } else if (existingBuilding?.divisionEntity) {
+      transactions.push(
+        dbAdmin.tx.buildings[buildingId].unlink({ divisionEntity: existingBuilding.divisionEntity.id })
+      );
+    }
+  }
 
-      if (currentBuilding.buildings[0]?.divisionEntity) {
-        transactions.push(
-          dbAdmin.tx.buildings[buildingId].unlink({
-            divisionEntity: currentBuilding.buildings[0].divisionEntity.id,
-          })
-        );
-      }
+  if (templateId !== undefined) {
+    if (templateId) {
+      transactions.push(
+        dbAdmin.tx.buildings[buildingId].link({ template: templateId })
+      );
+    } else if (existingBuilding?.template) {
+      transactions.push(
+        dbAdmin.tx.buildings[buildingId].unlink({ template: existingBuilding.template.id })
+      );
     }
   }
 
   await dbAdmin.transact(transactions);
-}
 
-export async function deleteBuilding(buildingId: string): Promise<void> {
-  const auth = await getAuthCookies();
-  if (!auth) throw new Error("Unauthorized");
-
-  // Get building with tenant to validate access
-  const buildingResult = await dbAdmin.query({
+  const queryResponse = await dbAdmin.query({
     buildings: {
       $: {
         where: { id: buildingId },
@@ -287,153 +182,85 @@ export async function deleteBuilding(buildingId: string): Promise<void> {
     },
   });
 
-  const building = buildingResult.buildings[0];
-  if (!building) throw new Error("Building not found");
-  if (!building.tenant) throw new Error("Building has no tenant");
+  const buildings = queryResponse.buildings;
+  if (!buildings || buildings.length === 0) {
+    throw new Error("Building not found after update");
+  }
 
-  await validateUserAccess(building.tenant, auth.user);
-
-  await dbAdmin.transact([dbAdmin.tx.buildings[buildingId].delete()]);
+  return buildings[0] as BuildingWithTenant;
 }
 
-export async function getBuildingsByTenant(
-  tenant: Tenant
-): Promise<BuildingWithTenant[]> {
-  const auth = await getAuthCookies();
-  if (!auth) throw new Error("Unauthorized");
+export async function deleteBuilding(
+  tenant: Tenant,
+  buildingId: string
+): Promise<void> {
+  const authData = await getAuthCookies();
+  if (!authData || !authData.user) {
+    throw new Error("User not authenticated");
+  }
+  const { user } = authData;
 
-  await validateUserAccess(tenant, auth.user);
+  await validateUserAccess(tenant, user);
 
-  const result = await dbAdmin.query({
+  // Get building to check for image
+  const queryResponse = await dbAdmin.query({
     buildings: {
       $: {
-        where: { "tenant.id": tenant.id },
-        order: { createdAt: "desc" },
+        where: { id: buildingId },
       },
-      tenant: {},
     },
   });
 
-  return result.buildings;
+  const building = queryResponse.buildings?.[0];
+  if (!building) {
+    throw new Error("Building not found");
+  }
+
+  // Delete image if exists
+  if (building.image) {
+    await deleteFile(tenant.slug, building.image);
+  }
+
+  // Delete the building
+  await dbAdmin.transact([dbAdmin.tx.buildings[buildingId].delete()]);
 }
 
-export async function getBuildingById(
+export async function findBuildingById(
   buildingId: string
 ): Promise<BuildingWithRelations | null> {
-  const auth = await getAuthCookies();
-  if (!auth) throw new Error("Unauthorized");
-
-  const result = await dbAdmin.query({
+  const queryResponse = await dbAdmin.query({
     buildings: {
       $: {
         where: { id: buildingId },
       },
       tenant: {},
       divisionEntity: {},
-      tasks: {
-        $: {
-          order: { createdAt: "desc" },
-        },
-      },
-      inspections: {
-        $: {
-          order: { scheduledDate: "desc" },
-        },
-      },
-      documents: {
-        $: {
-          order: { uploadedAt: "desc" },
-        },
-        uploader: {},
-      },
+      template: {},
+      documents: { uploader: {} },
+      inspections: {},
+      tasks: {},
     },
   });
 
-  const building = result.buildings[0];
-  if (!building) return null;
-  if (!building.tenant) throw new Error("Building has no tenant");
+  const buildings = queryResponse.buildings;
+  if (!buildings || buildings.length === 0) {
+    return null;
+  }
 
-  await validateUserAccess(building.tenant, auth.user);
-
-  return building;
+  return buildings[0] as BuildingWithRelations;
 }
 
-export async function searchBuildings(
-  tenant: Tenant,
-  query: string
-): Promise<BuildingWithTenant[]> {
-  const auth = await getAuthCookies();
-  if (!auth) throw new Error("Unauthorized");
-
-  await validateUserAccess(tenant, auth.user);
-
-  // Search by name, city, or state
-  const searchPattern = `%${query}%`;
-
-  const result = await dbAdmin.query({
+export async function findBuildingsByTenant(
+  tenantId: string
+): Promise<BuildingWithDivision[]> {
+  const queryResponse = await dbAdmin.query({
     buildings: {
       $: {
-        where: {
-          and: [
-            { "tenant.id": tenant.id },
-            {
-              or: [
-                { name: { $ilike: searchPattern } },
-                { city: { $ilike: searchPattern } },
-                { state: { $ilike: searchPattern } },
-                { address: { $ilike: searchPattern } },
-              ],
-            },
-          ],
-        },
-        order: { createdAt: "desc" },
+        where: { "tenant.id": tenantId },
       },
-      tenant: {},
+      divisionEntity: {},
     },
   });
 
-  return (result.buildings || []) as BuildingWithTenant[];
-}
-
-export async function getBuildingsWithComplianceStats(tenant: Tenant): Promise<
-  (BuildingWithTenant &
-    BuildingWithDivision & {
-      taskStats: { total: number; completed: number };
-    })[]
-> {
-  const auth = await getAuthCookies();
-  if (!auth) throw new Error("Unauthorized");
-
-  await validateUserAccess(tenant, auth.user);
-
-  try {
-    const result = await dbAdmin.query({
-      buildings: {
-        $: {
-          where: { "tenant.id": tenant.id },
-          order: { createdAt: "desc" },
-        },
-        tenant: {},
-        divisionEntity: {},
-      },
-    });
-
-    // Calculate compliance stats
-    const buildings = result.buildings || [];
-    return buildings.map((building) => {
-      // TODO: Add tasks back when we understand the validation error
-      const taskStats = {
-        total: 0,
-        completed: 0,
-      };
-
-      return {
-        ...building,
-        taskStats,
-      };
-    });
-  } catch (error) {
-    console.error("Error fetching buildings with compliance stats:", error);
-    throw error;
-  }
+  return (queryResponse.buildings || []) as BuildingWithDivision[];
 }

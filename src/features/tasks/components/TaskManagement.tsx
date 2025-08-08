@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Task } from "@/data/tasks";
 import { TaskModal } from "./TaskModal";
-import { TaskWithRelations } from "@/features/tasks/models";
+import { TaskWithRelations, TaskUI } from "@/features/tasks/models";
 import TaskDetailsDialog from "@/features/data-mgmt/components/TaskDetailsDialog";
 import TaskSidebar from "@/features/data-mgmt/components/TaskSidebar";
 import TaskFilters from "@/features/data-mgmt/components/TaskFilters";
@@ -65,8 +64,8 @@ export default function TaskManagement({
     }
   });
 
-  // Transform InstantDB tasks to match Task interface
-  const tasks: Task[] = (instantData?.tasks || []).map((task) => {
+  // Transform InstantDB tasks to match TaskUI interface
+  const tasks: TaskUI[] = (instantData?.tasks || []).map((task) => {
     const dueDateStr = task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-GB') : '';
     
     // Determine the progress status
@@ -97,7 +96,7 @@ export default function TaskManagement({
       building_id: task.building?.id || '',
     };
   });
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = useState<TaskUI | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [editTask, setEditTask] = useState<TaskWithRelations | undefined>(undefined);
@@ -190,7 +189,7 @@ export default function TaskManagement({
     return true;
   });
 
-  const handleTaskClick = (task: Task) => {
+  const handleTaskClick = (task: TaskUI) => {
     setSelectedTask(task);
     setDialogOpen(true);
   };
@@ -205,7 +204,7 @@ export default function TaskManagement({
     setTaskModalOpen(true);
   };
 
-  const handleEditTask = (task: Task) => {
+  const handleEditTask = (task: TaskUI) => {
     // Convert Task to TaskWithRelations format for the modal
     const taskWithRelations: TaskWithRelations = {
       id: task.id,
@@ -220,12 +219,6 @@ export default function TaskManagement({
       building: task.building_id ? { 
         id: task.building_id,
         name: "",
-        address: "",
-        city: "",
-        state: "",
-        zipCode: "",
-        floors: 0,
-        archived: false,
         createdAt: Date.now(),
         updatedAt: Date.now()
       } : undefined,
