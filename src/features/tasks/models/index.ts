@@ -1,14 +1,13 @@
-/* eslint-disable @typescript-eslint/no-empty-object-type */
-import { InstaQLEntity } from "@instantdb/react";
-import { AppSchema } from "~/instant.schema";
+import { Doc, Id } from "../../../../convex/_generated/dataModel";
 
-export type Task = InstaQLEntity<AppSchema, "tasks">;
-export type TaskWithRelations = InstaQLEntity<AppSchema, "tasks", {
-  assignee: {};
-  creator: {};
-  tenant: {};
-  building: {};
-}>;
+export type Task = Doc<"tasks">;
+export type TaskId = Id<"tasks">;
+export type TaskWithRelations = Task & {
+  assignee?: Doc<"users">;
+  creator?: Doc<"users">;
+  tenant?: Doc<"tenants">;
+  building?: Doc<"buildings">;
+};
 
 // UI-specific task interface for legacy components
 export interface TaskUI {

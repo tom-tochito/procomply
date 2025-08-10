@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-empty-object-type */
-import { InstaQLEntity } from "@instantdb/react";
-import { AppSchema } from "~/instant.schema";
+import { Doc, Id } from "../../../../convex/_generated/dataModel";
 
-export type Company = InstaQLEntity<AppSchema, "companies">;
-export type CompanyWithTenant = InstaQLEntity<AppSchema, "companies", { tenant: {} }>;
-export type CompanyWithRelations = InstaQLEntity<AppSchema, "companies", { 
-  tenant: {},
-  teams: {},
-  employees: {}
-}>;
+export type Company = Doc<"companies">;
+export type CompanyId = Id<"companies">;
+export type CompanyWithTenant = Company & { tenant?: Doc<"tenants"> };
+export type CompanyWithRelations = Company & {
+  tenant?: Doc<"tenants">;
+  teams?: Doc<"teams">[];
+  employees?: Doc<"users">[];
+};

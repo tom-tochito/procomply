@@ -1,27 +1,23 @@
-import { InstaQLEntity } from "@instantdb/react";
-import { AppSchema } from "~/instant.schema";
+import { Doc, Id } from "../../../../convex/_generated/dataModel";
 
-// Base tenant type from InstantDB
-export type Tenant = InstaQLEntity<AppSchema, "tenants">;
+// Base tenant type from Convex
+export type Tenant = Doc<"tenants">;
+export type TenantId = Id<"tenants">;
 
 // Tenant with related data
-export type TenantWithUsers = InstaQLEntity<AppSchema, "tenants", { users: object }>;
-export type TenantWithBuildings = InstaQLEntity<AppSchema, "tenants", { buildings: object }>;
-export type TenantWithTemplates = InstaQLEntity<AppSchema, "tenants", { templates: object }>;
-export type TenantWithTasks = InstaQLEntity<AppSchema, "tenants", { tasks: object }>;
-export type TenantWithDocuments = InstaQLEntity<AppSchema, "tenants", { documents: object }>;
-export type TenantWithInspections = InstaQLEntity<AppSchema, "tenants", { inspections: object }>;
+export type TenantWithUsers = Tenant & { users?: Doc<"users">[] };
+export type TenantWithBuildings = Tenant & { buildings?: Doc<"buildings">[] };
+export type TenantWithTemplates = Tenant & { templates?: Doc<"templates">[] };
+export type TenantWithTasks = Tenant & { tasks?: Doc<"tasks">[] };
+export type TenantWithDocuments = Tenant & { documents?: Doc<"documents">[] };
+export type TenantWithInspections = Tenant & { inspections?: Doc<"inspections">[] };
 
 // Tenant with all relations
-export type TenantWithRelations = InstaQLEntity<
-  AppSchema,
-  "tenants",
-  {
-    users: object;
-    buildings: object;
-    templates: object;
-    tasks: object;
-    documents: object;
-    inspections: object;
-  }
->;
+export type TenantWithRelations = Tenant & {
+  users?: Doc<"users">[];
+  buildings?: Doc<"buildings">[];
+  templates?: Doc<"templates">[];
+  tasks?: Doc<"tasks">[];
+  documents?: Doc<"documents">[];
+  inspections?: Doc<"inspections">[];
+};

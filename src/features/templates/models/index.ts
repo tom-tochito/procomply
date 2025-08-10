@@ -1,15 +1,13 @@
-import { InstaQLEntity } from "@instantdb/react";
-import { AppSchema } from "~/instant.schema";
+import { Doc, Id } from "../../../../convex/_generated/dataModel";
 
-// Base template type from InstantDB
-export type Template = InstaQLEntity<AppSchema, "templates">;
+// Base template type from Convex
+export type Template = Doc<"templates">;
+export type TemplateId = Id<"templates">;
 
 // Template with related buildings
-export type TemplateWithBuildings = InstaQLEntity<
-  AppSchema,
-  "templates",
-  { buildings: object }
->;
+export type TemplateWithBuildings = Template & {
+  buildings?: Doc<"buildings">[];
+};
 
 // Template field type (matching schema)
 export interface TemplateField {

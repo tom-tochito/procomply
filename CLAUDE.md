@@ -1,8 +1,6 @@
-You are an expert developer who writes full-stack apps in InstantDB, Next.js, and Tailwind developer. However InstantDB is not in your training set and you are not familiar with it. Before you write ANY code you read ALL of instant-rules.md to understand how to use InstantDB in your code. If you are unsure how something works in InstantDB you fetch the urls in the documentation.
+You are an expert developer who writes full-stack apps in Convex, Next.js, and Tailwind. Before you write ANY code involving Convex, you MUST read ALL of convex-rules.md to understand how to use Convex in your code. If you are unsure how something works in Convex you fetch the urls in the documentation.
 
 Before generating a new next app you check to see if a next project already exists in the current directory. If it does you do not generate a new next app.
-
-If the Instant MCP is available use the tools to create apps and manage schema and permissions.
 
 # Project Rules and Guidelines
 
@@ -64,40 +62,40 @@ catch (error: unknown) {
 }
 ```
 
-## 10. InstantDB Usage
+## 10. Convex Usage
 
-For all conventions and best practices related to InstantDB, refer to the `INSTANT.md` document.
+For all conventions and best practices related to Convex, refer to the `convex-rules.md` document.
 
-A critical rule is to **never use `create` in transactions**. Always use `update`, which performs an "upsert." If you provide an ID that does not exist (generated via `id()` from `@instantdb/react`), `update` will create a new entity. If the ID already exists, it will update the existing entity.
+Key Convex principles:
+- **Function Registration**: Use `query`, `mutation`, and `action` for public functions. Use `internalQuery`, `internalMutation`, and `internalAction` for private functions.
+- **Always use validators**: Include `args` and `returns` validators for all Convex functions. If no return, use `returns: v.null()`.
+- **Schema Definition**: Define your schema in `convex/schema.ts` using `defineSchema` and `defineTable`.
+- **No filter, use indexes**: Don't use `filter` in queries. Define indexes in the schema and use `withIndex` instead.
+- **Transactions**: Use `ctx.db.insert`, `ctx.db.replace`, `ctx.db.patch`, and `ctx.db.delete` for mutations.
 
-Always wrap your transactions in an array when using `db.transact`, even if you are only performing a single operation. This ensures consistency and makes it easier to add more transactions in the future.
-
+Example Convex query:
 ```typescript
-import { id } from "@instantdb/react";
+import { query } from "./_generated/server";
+import { v } from "convex/values";
 
-// Correct: Create a new todo using update with a new id, wrapped in an array.
-db.transact([db.tx.todos[id()].update({ text: "New todo" })]);
-
-// Incorrect: The `create` method does not exist for transactions.
-db.transact(db.tx.todos.create({ text: "New todo" }));
-
-// Incorrect: Always use an array for transactions.
-db.transact(db.tx.todos[id()].update({ text: "New todo" }));
+export const getBuildings = query({
+  args: { tenantId: v.id("tenants") },
+  returns: v.array(v.object({
+    _id: v.id("buildings"),
+    _creationTime: v.number(),
+    name: v.string(),
+    tenantId: v.id("tenants"),
+  })),
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("buildings")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", args.tenantId))
+      .collect();
+  },
+});
 ```
 
-When creating or updating an entity that has relations to other entities, always use the `.link()` method within the same transaction to establish those connections. This ensures that your data remains consistent and properly linked.
-
-```typescript
-// Correct: Create or update a todo and link it to a user.
-const todoId = existingTodo?.id ?? id();
-db.transact([
-  db.tx.todos[todoId]
-    .update({ text: "Buy milk" })
-    .link({ user: "user-id-123" }),
-]);
-```
-
-- **Centralized Models**: Each feature should have a `models/index.ts` file that exports all its necessary InstantDB types for easy reuse and management.
+- **Centralized Models**: Each feature should have a `models/index.ts` file that exports TypeScript types derived from the Convex schema.
 
 ## 11. React Hooks Organization
 
@@ -114,16 +112,14 @@ All custom React hooks (i.e., functions starting with `use`) must be located in 
 
 ## 13. Type System Guidelines
 
-All entity types must be derived from InstantDB schema using InstaQLEntity:
+All entity types must be derived from Convex schema using the generated types:
 
-- Never create custom type definitions for database entities
-- Use `InstaQLEntity<AppSchema, "entityName">` for base types
-- Use `InstaQLEntity<AppSchema, "entityName", { relation: {} }>` for types with relations
-- Each feature should have a `models/index.ts` file that exports InstantDB types for reuse
+- Use `Doc<"tableName">` for base document types from `convex/_generated/dataModel`
+- Use `Id<"tableName">` for document ID types
+- Each feature should have a `models/index.ts` file that exports types for reuse
 - UI-specific types that extend database entities should be interfaces extending the base type
 - Common form types (like FormState) should be defined in `src/common/types/`
-- InstantDB date fields are stored as timestamps (milliseconds since epoch)
-- Always use the date utility functions from `src/common/utils/date.ts` for date conversions:
+- Convex stores dates as numbers (timestamps). Always use the date utility functions from `src/common/utils/date.ts` for date conversions:
   - `toTimestamp()` - Convert Date or string to timestamp before storing
   - `fromTimestamp()` - Convert timestamp to Date for manipulation
   - `formatTimestamp()` - Format timestamp for display
@@ -140,15 +136,10 @@ Example pattern:
 
 ```typescript
 // src/features/buildings/models/index.ts
-import { InstaQLEntity } from "@instantdb/react";
-import { AppSchema } from "~/instant.schema";
+import { Doc, Id } from "convex/_generated/dataModel";
 
-export type Building = InstaQLEntity<AppSchema, "buildings">;
-export type BuildingWithTenant = InstaQLEntity<
-  AppSchema,
-  "buildings",
-  { tenant: {} }
->;
+export type Building = Doc<"buildings">;
+export type BuildingId = Id<"buildings">;
 
 // UI-specific extension
 export interface BuildingWithStats extends Building {
@@ -165,7 +156,7 @@ Only use server-side repositories for:
 - Tenant operations (tenant)
 - File storage operations (storage)
 
-All other data operations should use client-side InstantDB queries with `db.useQuery`. Do NOT create server-side repositories for entities like buildings, divisions, tasks, etc.
+All other data operations should use Convex queries and mutations. Do NOT create server-side repositories for entities like buildings, divisions, tasks, etc.
 
 ## 15. Template System Rules
 
@@ -186,27 +177,40 @@ Templates use a `fields` array in JSON format with typed TemplateField[]. Each f
 ### Template Operations
 1. **Creating/Updating Buildings:**
    ```typescript
-   // Fetch template with building
-   const { data: building } = db.useQuery({
-     buildings: { $: { where: { id: buildingId }, include: { template: true } } }
-   });
+   // In a Convex mutation
+   import { mutation } from "./_generated/server";
+   import { v } from "convex/values";
    
-   // Validate and save data
-   const templateData: Record<string, any> = {};
-   template.fields.forEach(field => {
-     if (field.required && !formData[field.key]) {
-       throw new Error(`${field.label} is required`);
-     }
-     templateData[field.key] = formData[field.key];
+   export const updateBuilding = mutation({
+     args: {
+       buildingId: v.id("buildings"),
+       data: v.any(), // Template data
+     },
+     returns: v.null(),
+     handler: async (ctx, args) => {
+       const building = await ctx.db.get(args.buildingId);
+       if (!building) throw new Error("Building not found");
+       
+       const template = await ctx.db.get(building.templateId);
+       if (!template) throw new Error("Template not found");
+       
+       // Validate data against template fields
+       const templateData: Record<string, any> = {};
+       template.fields.forEach(field => {
+         if (field.required && !args.data[field.key]) {
+           throw new Error(`${field.label} is required`);
+         }
+         templateData[field.key] = args.data[field.key];
+       });
+       
+       await ctx.db.patch(args.buildingId, { data: templateData });
+       return null;
+     },
    });
-   
-   db.transact([
-     db.tx.buildings[buildingId].update({ data: templateData })
-   ]);
    ```
 
 2. **Displaying Buildings:**
-   - Fetch building with template relation
+   - Fetch building with template relation using Convex queries
    - Loop through template.fields to determine display order and formatting
    - Retrieve values from building.data using field keys
    - Apply field type formatting (dates as timestamps, etc.)
@@ -224,3 +228,9 @@ Templates use a `fields` array in JSON format with typed TemplateField[]. Each f
 - Show/hide type-specific options based on selection
 - Validate field keys are unique within template
 - Preview the generated form before saving
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.

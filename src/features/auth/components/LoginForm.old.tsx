@@ -2,11 +2,16 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthActions } from "@convex-dev/auth/react";
-import { Doc } from "../../../../convex/_generated/dataModel";
+import { db } from "~/lib/db";
+import {
+  checkUserExistsAction,
+  setAuthCookiesAction,
+} from "../actions/magic-code";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
+import type { InstaQLEntity } from "@instantdb/react";
+import type { AppSchema } from "~/instant.schema";
 
-type Tenant = Doc<"tenants">;
+type Tenant = InstaQLEntity<AppSchema, "tenants">;
 
 interface LoginFormProps {
   tenant: Tenant;
@@ -16,7 +21,6 @@ type Step = "email" | "code";
 
 export function LoginForm({ tenant }: LoginFormProps) {
   const router = useRouter();
-  const { signIn } = useAuthActions();
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
@@ -29,17 +33,29 @@ export function LoginForm({ tenant }: LoginFormProps) {
     setIsLoading(true);
 
     try {
-      // Send verification code
-      await signIn("password", {
-        email,
-        flow: "email-verification",
-      });
+      // Check if user exists in our database
+      const checkResult = await checkUserExistsAction(email, tenant);
+
+      if (!checkResult.success) {
+        setError(checkResult.error || "Failed to verify email");
+        return;
+      }
+
+      if (!checkResult.exists) {
+        setError(
+          "No account found with this email address. Please contact your administrator."
+        );
+        return;
+      }
+
+      // Send magic code using InstantDB client
+      await db.auth.sendMagicCode({ email });
 
       // Move to code step
       setStep("code");
     } catch (err) {
-      console.error("Email submission error:", err);
-      setError("Failed to send verification code. Please try again.");
+      const error = err as { body?: { message?: string } };
+      setError(error.body?.message || "Failed to send verification code");
     } finally {
       setIsLoading(false);
     }
@@ -53,21 +69,23 @@ export function LoginForm({ tenant }: LoginFormProps) {
     const code = codeInputRef.current?.value || "";
 
     try {
-      // Verify code and complete sign in
-      await signIn("password", {
-        email,
-        code,
-        flow: "email-verification",
-      });
+      // Verify magic code with InstantDB
+      await db.auth.signInWithMagicCode({ email, code });
+
+      // Set server-side auth cookies
+      const cookieResult = await setAuthCookiesAction(email, tenant);
+
+      if (!cookieResult.success) {
+        setError(cookieResult.error || "Failed to complete login");
+        return;
+      }
 
       // Redirect to dashboard
       router.push(generateTenantRedirectUrl(tenant.slug, "/dashboard"));
     } catch (err) {
-      console.error("Code verification error:", err);
-      setError("Invalid verification code. Please try again.");
-      if (codeInputRef.current) {
-        codeInputRef.current.value = "";
-      }
+      const error = err as { body?: { message?: string } };
+      setError(error.body?.message || "Invalid verification code");
+      codeInputRef.current!.value = "";
     } finally {
       setIsLoading(false);
     }

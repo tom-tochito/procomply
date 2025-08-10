@@ -1,10 +1,10 @@
-import { InstaQLEntity } from "@instantdb/react";
-import { AppSchema } from "~/instant.schema";
+import { Doc, Id } from "../../../../convex/_generated/dataModel";
 
-export type YearPlannerEvent = InstaQLEntity<AppSchema, "yearPlannerEvents">;
+export type YearPlannerEvent = Doc<"yearPlannerEvents">;
+export type YearPlannerEventId = Id<"yearPlannerEvents">;
 
-export type YearPlannerEventWithRelations = InstaQLEntity<
-  AppSchema,
-  "yearPlannerEvents",
-  { building: object; tenant: object; creator: object }
->;
+export type YearPlannerEventWithRelations = YearPlannerEvent & {
+  building?: Doc<"buildings">;
+  tenant?: Doc<"tenants">;
+  creator?: Doc<"users">;
+};

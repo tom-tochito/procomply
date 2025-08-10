@@ -1,17 +1,21 @@
-import { InstaQLEntity } from "@instantdb/react";
-import { AppSchema } from "~/instant.schema";
+import { Doc, Id } from "../../../../convex/_generated/dataModel";
 
-// Base user types from InstantDB
-export type User = InstaQLEntity<AppSchema, "$users">;
-export type UserProfile = InstaQLEntity<AppSchema, "userProfiles">;
+// Base user types from Convex
+export type User = Doc<"users">;
+export type UserId = Id<"users">;
+export type UserProfile = Doc<"userProfiles">;
+export type UserProfileId = Id<"userProfiles">;
 
 // User with related data
-export type UserWithProfile = InstaQLEntity<AppSchema, "$users", { profile: object }>;
-export type UserWithTenant = InstaQLEntity<AppSchema, "$users", { tenant: object }>;
-export type UserWithProfileAndTenant = InstaQLEntity<AppSchema, "$users", { profile: object; tenant: object }>;
+export type UserWithProfile = User & { profile?: UserProfile };
+export type UserWithTenant = User & { tenant?: Doc<"tenants"> };
+export type UserWithProfileAndTenant = User & { 
+  profile?: UserProfile;
+  tenant?: Doc<"tenants">;
+};
 
 // Full user type for auth
 export type FullUser = User & { 
   profile?: UserProfile;
-  tenant?: InstaQLEntity<AppSchema, "tenants">;
+  tenant?: Doc<"tenants">;
 };

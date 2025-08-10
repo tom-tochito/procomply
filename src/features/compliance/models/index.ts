@@ -1,13 +1,20 @@
-import { InstaQLEntity } from "@instantdb/react";
-import { AppSchema } from "~/instant.schema";
+import { Doc, Id } from "../../../../convex/_generated/dataModel";
 
-export type ComplianceCheck = InstaQLEntity<AppSchema, "complianceChecks">;
-export type ComplianceCheckWithBuilding = InstaQLEntity<AppSchema, "complianceChecks", { building: object }>;
-export type ComplianceCheckWithRelations = InstaQLEntity<AppSchema, "complianceChecks", { building: object; tenant: object }>;
+export type ComplianceCheck = Doc<"complianceChecks">;
+export type ComplianceCheckId = Id<"complianceChecks">;
+export type ComplianceCheckWithBuilding = ComplianceCheck & { building?: Doc<"buildings"> };
+export type ComplianceCheckWithRelations = ComplianceCheck & { 
+  building?: Doc<"buildings">;
+  tenant?: Doc<"tenants">;
+};
 
-export type Building = InstaQLEntity<AppSchema, "buildings">;
-export type BuildingWithComplianceChecks = InstaQLEntity<AppSchema, "buildings", { complianceChecks: object }>;
-export type BuildingWithFullRelations = InstaQLEntity<AppSchema, "buildings", { complianceChecks: object; tenant: object }>;
+export type Building = Doc<"buildings">;
+export type BuildingId = Id<"buildings">;
+export type BuildingWithComplianceChecks = Building & { complianceChecks?: ComplianceCheck[] };
+export type BuildingWithFullRelations = Building & { 
+  complianceChecks?: ComplianceCheck[];
+  tenant?: Doc<"tenants">;
+};
 
 export const COMPLIANCE_CHECK_TYPES = {
   ANNUAL_FLAT_DOOR: "annualFlatDoor",

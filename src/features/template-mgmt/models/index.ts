@@ -1,29 +1,31 @@
-import { InstaQLEntity } from "@instantdb/react";
-import { AppSchema } from "~/instant.schema";
+import { Doc, Id } from "../../../../convex/_generated/dataModel";
 
-// Type alias for tenant relation to avoid ESLint empty object warning
-type TenantRelation = { tenant: object };
+// Country type from Convex
+export type Country = Doc<"countries">;
+export type CountryId = Id<"countries">;
+export type CountryWithTenant = Country & { tenant?: Doc<"tenants"> };
 
-// Country type from InstantDB
-export type Country = InstaQLEntity<AppSchema, "countries">;
-export type CountryWithTenant = InstaQLEntity<AppSchema, "countries", TenantRelation>;
+// Legislation type from Convex
+export type Legislation = Doc<"legislation">;
+export type LegislationId = Id<"legislation">;
+export type LegislationWithTenant = Legislation & { tenant?: Doc<"tenants"> };
 
-// Legislation type from InstantDB
-export type Legislation = InstaQLEntity<AppSchema, "legislation">;
-export type LegislationWithTenant = InstaQLEntity<AppSchema, "legislation", TenantRelation>;
+// Risk Area type from Convex
+export type RiskArea = Doc<"riskAreas">;
+export type RiskAreaId = Id<"riskAreas">;
+export type RiskAreaWithTenant = RiskArea & { tenant?: Doc<"tenants"> };
 
-// Risk Area type from InstantDB
-export type RiskArea = InstaQLEntity<AppSchema, "riskAreas">;
-export type RiskAreaWithTenant = InstaQLEntity<AppSchema, "riskAreas", TenantRelation>;
+// Subsection type from Convex
+export type Subsection = Doc<"subsections">;
+export type SubsectionId = Id<"subsections">;
+export type SubsectionWithTenant = Subsection & { tenant?: Doc<"tenants"> };
 
-// Subsection type from InstantDB
-export type Subsection = InstaQLEntity<AppSchema, "subsections">;
-export type SubsectionWithTenant = InstaQLEntity<AppSchema, "subsections", TenantRelation>;
+// Survey Type type from Convex
+export type SurveyType = Doc<"surveyTypes">;
+export type SurveyTypeId = Id<"surveyTypes">;
+export type SurveyTypeWithTenant = SurveyType & { tenant?: Doc<"tenants"> };
 
-// Survey Type type from InstantDB
-export type SurveyType = InstaQLEntity<AppSchema, "surveyTypes">;
-export type SurveyTypeWithTenant = InstaQLEntity<AppSchema, "surveyTypes", TenantRelation>;
-
-// Task Category type from InstantDB
-export type TaskCategory = InstaQLEntity<AppSchema, "taskCategories">;
-export type TaskCategoryWithTenant = InstaQLEntity<AppSchema, "taskCategories", TenantRelation>;
+// Task Category type from Convex
+export type TaskCategory = Doc<"taskCategories">;
+export type TaskCategoryId = Id<"taskCategories">;
+export type TaskCategoryWithTenant = TaskCategory & { tenant?: Doc<"tenants"> };

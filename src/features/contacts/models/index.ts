@@ -1,10 +1,10 @@
-import { InstaQLEntity } from "@instantdb/react";
-import { AppSchema } from "~/instant.schema";
+import { Doc, Id } from "../../../../convex/_generated/dataModel";
 
-export type Contact = InstaQLEntity<AppSchema, "contacts">;
+export type Contact = Doc<"contacts">;
+export type ContactId = Id<"contacts">;
 
-export type ContactWithRelations = InstaQLEntity<
-  AppSchema,
-  "contacts",
-  { building: object; tenant: object; creator: object }
->;
+export type ContactWithRelations = Contact & {
+  building?: Doc<"buildings">;
+  tenant?: Doc<"tenants">;
+  creator?: Doc<"users">;
+};

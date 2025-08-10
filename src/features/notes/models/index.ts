@@ -1,10 +1,10 @@
-import { InstaQLEntity } from "@instantdb/react";
-import { AppSchema } from "~/instant.schema";
+import { Doc, Id } from "../../../../convex/_generated/dataModel";
 
-export type Note = InstaQLEntity<AppSchema, "notes">;
+export type Note = Doc<"notes">;
+export type NoteId = Id<"notes">;
 
-export type NoteWithRelations = InstaQLEntity<
-  AppSchema,
-  "notes",
-  { building: object; tenant: object; creator: object }
->;
+export type NoteWithRelations = Note & {
+  building?: Doc<"buildings">;
+  tenant?: Doc<"tenants">;
+  creator?: Doc<"users">;
+};
