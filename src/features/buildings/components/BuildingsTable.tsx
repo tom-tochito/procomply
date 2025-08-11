@@ -167,7 +167,7 @@ export default function BuildingsTable({
   );
 
   const handleRowClick = (building: BuildingWithStats) => {
-    router.push(generateTenantRedirectUrl(tenant, `/buildings/${building.id}`));
+    router.push(generateTenantRedirectUrl(tenant, `/buildings/${building._id}`));
   };
 
   return (

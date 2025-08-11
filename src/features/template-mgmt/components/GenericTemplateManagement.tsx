@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { db } from "~/lib/db";
-import { id } from "@instantdb/react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
 import { Tenant } from "@/features/tenant/models";
-import { getCurrentTimestamp } from "@/common/utils/date";
 import { startTransition } from "react";
 import SearchBar from "./SearchBar";
 import PageHeader from "./PageHeader";
@@ -12,7 +12,8 @@ import Table from "@/common/components/Table/Table";
 import { ColumnDef } from "@tanstack/react-table";
 
 interface GenericEntity {
-  id: string;
+  _id: string;
+  _creationTime: number;
   code: string;
   description: string;
   isActive?: boolean;
@@ -39,21 +40,15 @@ export default function GenericTemplateManagement({
   const [code, setCode] = useState("");
   const [description, setDescription] = useState("");
 
-  // Fetch entities from InstantDB
-  const { data } = db.useQuery({
-    [entityType]: {
-      $: {
-        where: {
-          "tenant.id": tenant.id,
-        },
-        order: {
-          code: "asc",
-        },
-      },
-    },
-  });
+  const createEntity = useMutation(api.templateEntities.createTemplateEntity);
+  const updateEntity = useMutation(api.templateEntities.updateTemplateEntity);
+  const deleteEntity = useMutation(api.templateEntities.deleteTemplateEntity);
 
-  const entities = (data?.[entityType] || []) as GenericEntity[];
+  // Fetch entities from Convex
+  const entities = (useQuery(api.templateEntities.getTemplateEntities, {
+    entityType,
+    tenantId: tenant._id as Id<"tenants">,
+  }) || []) as GenericEntity[];
 
   const filteredEntities = entities.filter(
     (entity) =>
@@ -68,7 +63,7 @@ export default function GenericTemplateManagement({
     setFormOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!code.trim() || !description.trim()) {
@@ -76,40 +71,40 @@ export default function GenericTemplateManagement({
       return;
     }
 
-    startTransition(() => {
+    try {
       if (editingEntity) {
         // Update existing entity
-        db.transact([
-          db.tx[entityType][editingEntity.id].update({
-            code: code.trim(),
-            description: description.trim(),
-            updatedAt: getCurrentTimestamp(),
-          }),
-        ]);
+        await updateEntity({
+          entityType,
+          entityId: editingEntity._id,
+          code: code.trim(),
+          description: description.trim(),
+        });
       } else {
         // Create new entity
-        const newEntityId = id();
-        db.transact([
-          db.tx[entityType][newEntityId]
-            .update({
-              code: code.trim(),
-              description: description.trim(),
-              isActive: true,
-              createdAt: getCurrentTimestamp(),
-              updatedAt: getCurrentTimestamp(),
-            })
-            .link({ tenant: tenant.id }),
-        ]);
+        await createEntity({
+          entityType,
+          code: code.trim(),
+          description: description.trim(),
+          tenantId: tenant._id as Id<"tenants">,
+        });
       }
-    });
-    handleClose();
+      handleClose();
+    } catch (error) {
+      console.error("Error saving entity:", error);
+    }
   };
 
-  const handleDelete = (entity: GenericEntity) => {
+  const handleDelete = async (entity: GenericEntity) => {
     if (window.confirm(`Are you sure you want to delete "${entity.description}"?`)) {
-      startTransition(() => {
-        db.transact([db.tx[entityType][entity.id].delete()]);
-      });
+      try {
+        await deleteEntity({
+          entityType,
+          entityId: entity._id,
+        });
+      } catch (error) {
+        console.error("Error deleting entity:", error);
+      }
     }
   };
 

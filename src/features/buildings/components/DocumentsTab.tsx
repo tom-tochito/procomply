@@ -2,16 +2,16 @@
 
 import React, { useState } from "react";
 import { Search, Upload } from "lucide-react";
-import { useDocuments } from "@/features/documents/hooks/useDocuments";
+import { useMutation } from "convex/react";
+import { api } from "~/convex/_generated/api";
 import DocumentTable from "@/features/documents/components/DocumentTable";
 import DocumentViewer from "@/features/documents/components/DocumentViewer";
 import UploadDocumentDialog from "@/features/data-mgmt/components/UploadDocumentDialog";
 import { Building } from "@/features/buildings/models";
 import { Tenant } from "@/features/tenant/models";
-import { getFileUrl } from "@/common/utils/file";
-import { deleteDocumentAction } from "@/features/data-mgmt/actions/document-delete.action";
+import { getStorageFileUrl } from "@/common/utils/storage";
 import { DocumentWithRelations } from "@/features/documents/models";
-import { startTransition } from "react";
+import { toast } from "sonner";
 
 interface DocumentsTabProps {
   building: Building;
@@ -27,12 +27,10 @@ export default function DocumentsTab({
   const [viewerOpen, setViewerOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<DocumentWithRelations | null>(null);
 
-  // Use shared document hook with building filter
-  const { documents, isLoading, error } = useDocuments({
-    tenant,
-    building,
-    searchTerm,
-  });
+  // TODO: Migrate useDocuments to Convex
+  const documents: DocumentWithRelations[] = [];
+  const isLoading = false;
+  const error = null;
 
   const handleDocumentClick = (document: DocumentWithRelations) => {
     setSelectedDocument(document);
@@ -41,21 +39,23 @@ export default function DocumentsTab({
 
   const handleDownload = (document: DocumentWithRelations) => {
     if (document.path) {
-      const downloadUrl = getFileUrl(tenant.slug, document.path);
+      const downloadUrl = getStorageFileUrl(tenant.slug, document.path);
       window.open(downloadUrl, "_blank");
     } else {
       alert("File path not available");
     }
   };
 
-  const handleDelete = async (document: DocumentWithRelations) => {
-    const formData = new FormData();
-    formData.append("documentId", document.id);
-    formData.append("tenantSlug", tenant.slug);
+  const deleteDocument = useMutation(api.documents.deleteDocument);
 
-    startTransition(() => {
-      deleteDocumentAction({ error: null, success: false }, formData);
-    });
+  const handleDelete = async (document: DocumentWithRelations) => {
+    try {
+      await deleteDocument({ documentId: document._id as any });
+      toast.success("Document deleted successfully");
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      toast.error("Failed to delete document");
+    }
   };
 
   if (isLoading) {
@@ -66,13 +66,7 @@ export default function DocumentsTab({
     );
   }
 
-  if (error) {
-    return (
-      <div className="text-center py-8 text-red-600">
-        Error loading documents: {error.message}
-      </div>
-    );
-  }
+  // Error handling removed temporarily - useDocuments needs migration to Convex
 
   return (
     <div>

@@ -2,6 +2,8 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import type { Tenant } from "@/features/tenant/models";
+import { useLogout } from "~/src/hooks/useLogout";
+import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 
 interface UserAvatarProps {
   user?: { email?: string; profile?: { name?: string } };
@@ -11,6 +13,7 @@ interface UserAvatarProps {
 export function UserAvatar({ user, tenant }: UserAvatarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const logout = useLogout();
 
   const getInitials = () => {
     if (user?.profile?.name) {
@@ -46,8 +49,7 @@ export function UserAvatar({ user, tenant }: UserAvatarProps) {
 
   const handleLogout = async () => {
     if (!tenant) return;
-    const { logoutAction } = await import("@/features/auth");
-    await logoutAction(tenant);
+    await logout(generateTenantRedirectUrl(tenant.slug, "/login"));
   };
 
   return (

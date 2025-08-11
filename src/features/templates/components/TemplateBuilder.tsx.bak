@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { db } from "~/lib/db";
-import { id } from "@instantdb/react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
 import { Tenant } from "@/features/tenant/models";
 import { TemplateField, BUILDING_COMMON_FIELDS, getBuiltinFieldsByType, TemplateType } from "../models";
 import { getCurrentTimestamp } from "@/common/utils/date";
@@ -22,6 +23,9 @@ export default function TemplateBuilder({ tenant, templateId, onBack, templateTy
   const [editingFieldIndex, setEditingFieldIndex] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  const createTemplate = useMutation(api.templates.createTemplate);
+  const updateTemplate = useMutation(api.templates.updateTemplate);
+
   // Field form state
   const [fieldKey, setFieldKey] = useState("");
   const [fieldLabel, setFieldLabel] = useState("");
@@ -36,26 +40,17 @@ export default function TemplateBuilder({ tenant, templateId, onBack, templateTy
   const [fieldAccept, setFieldAccept] = useState<string | undefined>();
 
   // Fetch existing template if editing
-  const { data: templateData } = db.useQuery(
-    templateId
-      ? {
-          templates: {
-            $: {
-              where: { id: templateId },
-              limit: 1,
-            },
-          },
-        }
-      : null
+  const template = useQuery(
+    api.templates.getTemplate,
+    templateId ? { templateId: templateId as Id<"templates"> } : "skip"
   );
 
   useEffect(() => {
-    if (templateData?.templates?.[0]) {
-      const template = templateData.templates[0];
+    if (template) {
       setTemplateName(template.name);
       setFields(template.fields || []);
     }
-  }, [templateData]);
+  }, [template]);
 
   const handleAddField = () => {
     if (!fieldKey || !fieldLabel) {
@@ -159,31 +154,18 @@ export default function TemplateBuilder({ tenant, templateId, onBack, templateTy
     try {
       if (templateId) {
         // Update existing template
-        startTransition(() => {
-          db.transact([
-            db.tx.templates[templateId].update({
-              name: templateName,
-              fields: fields,
-              updatedAt: getCurrentTimestamp(),
-            }),
-          ]);
+        await updateTemplate({
+          templateId: templateId as Id<"templates">,
+          name: templateName,
+          fields: fields,
         });
       } else {
         // Create new template
-        const newTemplateId = id();
-        startTransition(() => {
-          db.transact([
-            db.tx.templates[newTemplateId]
-              .update({
-                name: templateName,
-                type: templateType,
-                fields: fields,
-                isActive: true,
-                createdAt: getCurrentTimestamp(),
-                updatedAt: getCurrentTimestamp(),
-              })
-              .link({ tenant: tenant.id }),
-          ]);
+        await createTemplate({
+          name: templateName,
+          type: templateType,
+          fields: fields,
+          tenantId: tenant._id as Id<"tenants">,
         });
       }
       onBack();

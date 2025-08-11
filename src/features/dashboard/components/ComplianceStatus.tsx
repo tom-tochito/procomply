@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { InstaQLEntity } from "@instantdb/react";
-import { AppSchema } from "~/instant.schema";
+import { Doc } from "../../../../convex/_generated/dataModel";
 
-type ComplianceCheck = InstaQLEntity<AppSchema, "complianceChecks", { building: object }>;
+type ComplianceCheck = Doc<"complianceChecks"> & { building?: Doc<"buildings"> };
 
 interface ComplianceStatusProps {
   complianceChecks: ComplianceCheck[];

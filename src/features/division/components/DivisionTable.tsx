@@ -20,7 +20,7 @@ export default function DivisionTable({ divisions, searchTerm = "" }: DivisionTa
   // Transform divisions array into table data format
   const divisionData: DivisionData[] = useMemo(
     () => divisions.map(division => ({
-      id: division.id,
+      id: division._id,
       name: division.name,
       type: division.type,
       buildingsCount: division.buildings?.length || 0

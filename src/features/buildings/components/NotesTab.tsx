@@ -2,7 +2,8 @@
 
 import React, { useState, useActionState } from "react";
 import { MessageSquare, Plus, Search, Calendar, User, Edit, Trash2, X, AlertCircle } from "lucide-react";
-import { db } from "~/lib/db";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "~/convex/_generated/api";
 import { BuildingWithRelations } from "@/features/buildings/models";
 import { Note } from "@/features/notes/models";
 import {
@@ -23,86 +24,40 @@ export default function NotesTab({ building }: NotesTabProps) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   
-  // Real-time subscription to notes
-  const { data, isLoading } = db.useQuery({
-    notes: {
-      $: {
-        where: { "building.id": building.id },
-        order: { createdAt: "desc" },
-      },
-      building: {},
-      tenant: {},
-      creator: {},
-    },
-  });
-
-  const notes = data?.notes || [];
+  // TODO: Migrate to Convex - notes functions not yet created
+  const notes: Note[] = [];
+  const isLoading = false;
   const categories = ["all", "general", "maintenance", "compliance", "other"];
   const priorities = ["all", "low", "medium", "high"];
 
-  // Form actions
+  // Form actions - TODO: Migrate to Convex
   const [addFormState, addFormAction, isAddPending] = useActionState(
-    async (prevState: FormState, formData: FormData) => {
-      try {
-        if (!building.tenant) {
-          return { error: "Building has no tenant", success: false };
-        }
-        await createNote(building, building.tenant, {
-          title: formData.get("title") as string,
-          content: formData.get("content") as string,
-          category: formData.get("category") as string || "general",
-          priority: formData.get("priority") as string || "medium",
-        });
-        setShowAddModal(false);
-        return { error: null, success: true };
-      } catch (err) {
-        return { error: err instanceof Error ? err.message : "Failed to add note", success: false };
-      }
+    async (prevState: FormState, formData: FormData): Promise<FormState> => {
+      // TODO: Implement with Convex mutations
+      return { error: "Not implemented" as string | null, success: false };
     },
     { error: null, success: false }
   );
 
   const [editFormState, editFormAction, isEditPending] = useActionState(
-    async (prevState: FormState, formData: FormData) => {
-      if (!editingNote) return { error: "No note selected", success: false };
-      try {
-        await updateNote(editingNote.id, {
-          title: formData.get("title") as string,
-          content: formData.get("content") as string,
-          category: formData.get("category") as string,
-          priority: formData.get("priority") as string,
-        });
-        setEditingNote(null);
-        return { error: null, success: true };
-      } catch (err) {
-        return { error: err instanceof Error ? err.message : "Failed to update note", success: false };
-      }
+    async (prevState: FormState, formData: FormData): Promise<FormState> => {
+      if (!editingNote) return { error: "No note selected" as string | null, success: false };
+      // TODO: Implement with Convex mutations
+      return { error: "Not implemented" as string | null, success: false };
     },
     { error: null, success: false }
   );
 
   const handleDeleteNote = async (noteId: string) => {
     if (!confirm("Are you sure you want to delete this note?")) return;
-    try {
-      await deleteNote(noteId);
-    } catch {
-      console.error("Failed to delete note");
-    }
+    // TODO: Implement with Convex mutations
+    console.error("Delete note not implemented");
   };
-
-  const filteredNotes = notes.filter(note => {
-    const matchesSearch = 
-      note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || note.category === categoryFilter;
-    const matchesPriority = priorityFilter === "all" || note.priority === priorityFilter;
-    return matchesSearch && matchesCategory && matchesPriority;
-  });
 
   const getCategoryBadgeClass = (category: string) => {
     switch (category) {
-      case "general": return "bg-gray-100 text-gray-800";
-      case "maintenance": return "bg-blue-100 text-blue-800";
+      case "general": return "bg-blue-100 text-blue-800";
+      case "maintenance": return "bg-yellow-100 text-yellow-800";
       case "compliance": return "bg-green-100 text-green-800";
       default: return "bg-gray-100 text-gray-800";
     }
@@ -117,19 +72,16 @@ export default function NotesTab({ building }: NotesTabProps) {
     }
   };
 
-  const formatDate = (dateString: string | number) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
-    
-    if (diffInHours < 24) {
-      return `${Math.floor(diffInHours)} hours ago`;
-    } else if (diffInHours < 168) {
-      return `${Math.floor(diffInHours / 24)} days ago`;
-    } else {
-      return date.toLocaleDateString();
-    }
-  };
+  const filteredNotes = notes.filter(note => {
+    const matchesSearch = 
+      note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      note.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = categoryFilter === "all" || note.category === categoryFilter;
+    const matchesPriority = priorityFilter === "all" || note.priority === priorityFilter;
+    return matchesSearch && matchesCategory && matchesPriority;
+  });
+
+
 
   return (
     <div>
@@ -196,7 +148,7 @@ export default function NotesTab({ building }: NotesTabProps) {
       {!isLoading && (
         <div className="space-y-4">
           {filteredNotes.map((note) => (
-            <div key={note.id} className="bg-white shadow rounded-lg p-6 hover:shadow-lg transition-shadow">
+            <div key={note._id} className="bg-white shadow rounded-lg p-6 hover:shadow-lg transition-shadow">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
                   <h3 className="text-lg font-medium text-gray-900 mb-2">{note.title}</h3>
@@ -206,11 +158,11 @@ export default function NotesTab({ building }: NotesTabProps) {
                   <div className="flex items-center gap-4 text-sm text-gray-500">
                     <div className="flex items-center">
                       <User className="h-4 w-4 mr-1" />
-                      {note.creator?.email || "Unknown"}
+                      Unknown
                     </div>
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 mr-1" />
-                      {formatDate(note.createdAt)}
+                      {new Date(note.createdAt).toLocaleDateString()}
                     </div>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryBadgeClass(note.category)}`}>
                       {note.category.charAt(0).toUpperCase() + note.category.slice(1)}
@@ -230,7 +182,7 @@ export default function NotesTab({ building }: NotesTabProps) {
                     <Edit className="h-4 w-4" />
                   </button>
                   <button 
-                    onClick={() => handleDeleteNote(note.id)}
+                    onClick={() => handleDeleteNote(note._id)}
                     className="text-gray-400 hover:text-red-600"
                   >
                     <Trash2 className="h-4 w-4" />

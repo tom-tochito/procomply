@@ -19,6 +19,7 @@ export interface TaskUI {
   due_date: string;
   team: string;
   assignee: string;
+  assigneeId?: string;
   progress: string;
   notes: unknown[];
   completed: boolean;

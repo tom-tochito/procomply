@@ -5,9 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import { getFileUrl } from "@/common/utils/file";
-import TaskDetailsDialog from "@/features/data-mgmt/components/TaskDetailsDialog";
 import { TaskModal } from "@/features/tasks/components/TaskModal";
-import { db } from "~/lib/db";
+import { useQuery } from "convex/react";
+import { api } from "~/convex/_generated/api";
 import { Tenant } from "@/features/tenant/models";
 import { TaskUI } from "@/features/tasks/models";
 import TabNavigation from "./TabNavigation";
@@ -28,7 +28,6 @@ interface BuildingDetailsProps {
 
 export default function BuildingDetails({ buildingId, tenant, tenantSlug }: BuildingDetailsProps) {
   const [activeTab, setActiveTab] = useState("details");
-  const [filterByTeam, setFilterByTeam] = useState("");
   const [filterByAssignee, setFilterByAssignee] = useState("");
   const [taskSearchTerm, setTaskSearchTerm] = useState("");
   
@@ -38,358 +37,241 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
 
   // State for Task Modal
   const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
-  const [editTask, setEditTask] = useState<TaskUI | undefined>(undefined);
+  const [editTaskId, setEditTaskId] = useState<string | undefined>(undefined);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
 
-  // Fetch building data client-side
-  const { data: buildingData, isLoading: buildingLoading, error: buildingError } = db.useQuery({
-    buildings: {
-      $: {
-        where: { id: buildingId },
-        limit: 1,
-      },
-      tenant: {},
-      divisionEntity: {},
-      template: {},
-      tasks: {
-        assignee: {},
-        creator: {},
-      },
-      documents: { uploader: {} },
-      inspections: {},
-      complianceChecks: {},
-      contacts: {},
-      notes: {},
-      yearPlannerEvents: {},
-    },
-  });
+  // Fetch building data using Convex
+  const building = useQuery(api.buildings.getBuilding, { buildingId: buildingId as any });
+  const divisions = useQuery(api.divisions.getDivisions, {}) || [];
+  const tasks = useQuery(api.tasks.getTasks, { buildingId: buildingId as any }) || [];
+  const teams = useQuery(api.teams.getTeams, {}) || [];
+  const users = useQuery(api.users.getUsers, {}) || [];
 
-  // Fetch divisions for the tenant
-  const { data: divisionsData } = db.useQuery({
-    divisions: {
-      $: {
-        where: { "tenant.id": tenant.id },
-      },
-      buildings: {},
-    },
-  });
-
-  if (buildingLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-500">Loading building details...</div>
-      </div>
-    );
-  }
-
-  if (buildingError) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Error loading building
-            </h1>
-            <p className="text-red-600 mt-2">{buildingError.message}</p>
-            <Link
-              href={generateTenantRedirectUrl(tenantSlug, "/buildings")}
-              className="mt-4 inline-block text-blue-600 hover:text-blue-800"
-            >
-              Back to Buildings
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const building = buildingData?.buildings?.[0];
+  // Calculate compliance
+  const complianceChecks = useQuery(api.complianceChecks.getComplianceChecks, { 
+    buildingId: buildingId as any 
+  }) || [];
+  
+  const totalChecks = Object.keys(COMPLIANCE_CHECK_TYPES).length;
+  const completedChecks = complianceChecks.filter(check => check.status === 'compliant' || check.status === 'success').length;
+  const compliancePercentage = totalChecks > 0 ? Math.round((completedChecks / totalChecks) * 100) : 0;
 
   if (!building) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Building not found
-            </h1>
-            <Link
-              href={generateTenantRedirectUrl(tenantSlug, "/buildings")}
-              className="mt-4 inline-block text-blue-600 hover:text-blue-800"
-            >
-              Back to Buildings
-            </Link>
-          </div>
-        </div>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7600FF]"></div>
       </div>
     );
   }
 
-  // Transform building image URL to use file service
-  const buildingWithImageUrl = {
-    ...building,
-    image: building.image ? getFileUrl(tenantSlug, building.image) : undefined,
-  };
-
-  // Calculate compliance
-  // Task-based compliance
-  const taskStats = {
-    total: building.tasks?.length || 0,
-    completed: building.tasks?.filter((task) => task.status === "completed").length || 0,
-  };
-  const taskCompliance = taskStats.total > 0
-    ? Math.round((taskStats.completed / taskStats.total) * 100)
-    : 100;
-
-  // Compliance check-based compliance
-  const checksByType: Record<string, { status?: string; completedDate?: number; dueDate?: number }> = {};
-  (building.complianceChecks || []).forEach(check => {
-    if (!checksByType[check.checkType] || 
-        (check.completedDate || check.dueDate || 0) > 
-        (checksByType[check.checkType].completedDate || 
-         checksByType[check.checkType].dueDate || 0)) {
-      checksByType[check.checkType] = check;
-    }
-  });
-
-  const totalCheckTypes = Object.keys(COMPLIANCE_CHECK_TYPES).length;
-  const completedChecks = Object.values(checksByType).filter(
-    check => check.status === "success"
-  ).length;
-  const checkCompliance = totalCheckTypes > 0 
-    ? Math.round((completedChecks / totalCheckTypes) * 100) 
-    : 0;
-
-  // Use check-based compliance if available, otherwise use task-based
-  const compliance = building.complianceChecks?.length > 0 ? checkCompliance : taskCompliance;
-
-  // Transform InstantDB tasks to match TaskUI interface
-  const tasks: TaskUI[] = (building.tasks || []).map((task) => ({
-    id: task.id,
-    description: task.title,
-    risk_area: "Fire", // Default as no risk area in schema
-    priority: (task.priority === "high" ? "H" : task.priority === "low" ? "L" : "M") as "H" | "M" | "L",
-    risk_level: "M" as "H" | "M" | "L", // Default as no risk level in schema
-    due_date: task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-GB') : '',
-    team: '', // No team association in current schema
+  // Transform tasks to TaskUI format
+  const tasksUI: TaskUI[] = tasks.map(task => ({
+    id: task._id,
+    description: task.description || task.title,
+    risk_area: '',
+    priority: task.priority === 'high' ? 'H' : task.priority === 'medium' ? 'M' : 'L',
+    risk_level: 'L',
+    due_date: new Date(task.dueDate).toISOString(),
+    team: '',
     assignee: task.assignee?.email || '',
+    assigneeId: task.assigneeId,  // Add assigneeId for filtering
     progress: task.status,
     notes: [],
     completed: task.status === 'completed',
     groups: [],
-    building_id: building.id,
+    building_id: buildingId,
   }));
 
-  const divisions = divisionsData?.divisions || [];
+  // Filter tasks
+  const filteredTasks = tasksUI.filter(task => {
+    const matchesAssignee = !filterByAssignee || task.assigneeId === filterByAssignee;
+    const matchesSearch = !taskSearchTerm || 
+      task.description.toLowerCase().includes(taskSearchTerm.toLowerCase());
+    
+    return matchesAssignee && matchesSearch;
+  });
 
-  const addNewTask = () => {
-    setEditTask(undefined);
+  const openTaskDialog = (task: TaskUI) => {
+    setSelectedTask(task);
+    setIsDialogOpen(true);
+  };
+
+  const handleAddTask = () => {
+    setEditTaskId(undefined);
     setModalMode("create");
     setIsAddTaskModalOpen(true);
   };
 
   const handleEditTask = (task: TaskUI) => {
-    setEditTask(task);
+    setEditTaskId(task.id);
     setModalMode("edit");
     setIsAddTaskModalOpen(true);
   };
+  
+  // Find the actual task for editing
+  const editTask = editTaskId ? tasks.find(t => t._id === editTaskId) : undefined;
 
-  const handleTaskSuccess = () => {
-    // No need to refresh - InstantDB will automatically update the data
-  };
+  const getBreadcrumbs = () => (
+    <nav className="text-sm mb-4">
+      <ol className="list-none p-0 inline-flex">
+        <li className="flex items-center">
+          <Link
+            href={generateTenantRedirectUrl(tenantSlug, "/")}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            Home
+          </Link>
+          <span className="mx-2 text-gray-400">/</span>
+        </li>
+        <li className="flex items-center">
+          <Link
+            href={generateTenantRedirectUrl(tenantSlug, "/buildings")}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            Buildings
+          </Link>
+          <span className="mx-2 text-gray-400">/</span>
+        </li>
+        <li className="text-gray-700">{building.name}</li>
+      </ol>
+    </nav>
+  );
 
-  // Filter by team, assignee, and search term
-  const filteredTasks = tasks.filter(task => {
-    const matchesTeam = !filterByTeam || task.team === filterByTeam;
-    const matchesAssignee = !filterByAssignee || task.assignee === filterByAssignee;
-    const matchesSearch = !taskSearchTerm || 
-      task.description.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
-      task.risk_area.toLowerCase().includes(taskSearchTerm.toLowerCase());
-    return matchesTeam && matchesAssignee && matchesSearch;
-  });
-
-  const uniqueTeams = Array.from(new Set(tasks.map(task => task.team))).filter(Boolean);
-  const uniqueAssignees = Array.from(new Set(tasks.map(task => task.assignee))).filter(Boolean);
-
-  const openTaskDetails = (task: TaskUI) => {
-    setSelectedTask(task);
-    setIsDialogOpen(true);
-  };
-
-  // No longer needed - removed progress filters
-
-  // Render content based on active tab
   const renderTabContent = () => {
     switch (activeTab) {
-      case "details":
-        return <BuildingInfo building={buildingWithImageUrl} divisions={divisions} />;
-      
       case "tasks":
         return (
-          <div>
+          <div className="mt-6">
             <TaskFilters
               taskSearchTerm={taskSearchTerm}
               setTaskSearchTerm={setTaskSearchTerm}
-              filterByTeam={filterByTeam}
-              setFilterByTeam={setFilterByTeam}
+              filterByTeam=""
+              setFilterByTeam={() => {}}
               filterByAssignee={filterByAssignee}
               setFilterByAssignee={setFilterByAssignee}
-              uniqueTeams={uniqueTeams}
-              uniqueAssignees={uniqueAssignees}
-              onAddNewTask={addNewTask}
+              uniqueTeams={[]}
+              uniqueAssignees={users.map(u => u?._id || '')}
+              onAddNewTask={handleAddTask}
             />
             <TaskTable
               tasks={filteredTasks}
-              onTaskClick={openTaskDetails}
+              onTaskClick={openTaskDialog}
               onTaskEdit={handleEditTask}
-              onTaskUpdate={handleTaskSuccess}
             />
           </div>
         );
-      
       case "documents":
-        return <DocumentsTab 
-          building={buildingWithImageUrl}
-          tenant={tenant}
-        />;
-      
+        return (
+          <div className="mt-6">
+            <DocumentsTab building={building} tenant={tenant} />
+          </div>
+        );
       case "contacts":
-        return <ContactsTab building={buildingWithImageUrl} />;
-      
+        return (
+          <div className="mt-6">
+            <ContactsTab building={building as any} />
+          </div>
+        );
       case "notes":
-        return <NotesTab building={buildingWithImageUrl} />;
-      
-      case "yearplanner":
-        return <YearPlannerTab building={buildingWithImageUrl} />;
-      
+        return (
+          <div className="mt-6">
+            <NotesTab building={building as any} />
+          </div>
+        );
+      case "year-planner":
+        return (
+          <div className="mt-6">
+            <YearPlannerTab building={building as any} />
+          </div>
+        );
       default:
-        return null;
+        return (
+          <div className="mt-6">
+            <BuildingInfo
+              building={building as any}
+              divisions={divisions}
+            />
+          </div>
+        );
     }
   };
 
   return (
-    <div className="min-h-svh bg-gray-50">
-      <div className="px-3 md:px-6 py-4 md:py-6 space-y-4 md:space-y-6">
-        {/* Building header with image */}
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-            {/* Building image */}
-            {buildingWithImageUrl.image && (
-              <div className="relative h-48 w-full md:w-64 rounded-lg overflow-hidden md:flex-shrink-0">
-                <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent z-10" />
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {getBreadcrumbs()}
+        
+        {/* Building Header */}
+        <div className="bg-white rounded-lg shadow mb-6">
+          <div className="flex items-start p-6">
+            <div className="relative w-32 h-32 mr-6 bg-gray-100 rounded-lg overflow-hidden">
+              {building.image ? (
                 <Image
-                  src={buildingWithImageUrl.image}
-                  alt={buildingWithImageUrl.name}
-                  layout="fill"
-                  objectFit="cover"
+                  src={getFileUrl(tenant.slug, building.image)}
+                  alt={building.name}
+                  fill
+                  className="object-cover"
                 />
-              </div>
-            )}
-
-            <div className="flex flex-col justify-between py-2 space-y-4 md:space-y-0">
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold text-gray-800">
-                  {buildingWithImageUrl.name}
-                </h1>
-                <div className="flex flex-wrap items-center text-sm text-gray-600 mt-1">
-                  <Link
-                    href={generateTenantRedirectUrl(tenantSlug, "/dashboard")}
-                    className="hover:text-blue-600"
-                  >
-                    <span>Home</span>
-                  </Link>
-                  <span className="mx-2">/</span>
-                  <Link
-                    href={generateTenantRedirectUrl(tenantSlug, "/buildings")}
-                    className="hover:text-blue-600"
-                  >
-                    <span>Buildings</span>
-                  </Link>
-                  <span className="mx-2">/</span>
-                  <span>{buildingWithImageUrl.name}</span>
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-400">
+                  <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
                 </div>
-                {buildingWithImageUrl.division && (
-                  <div className="text-sm text-gray-600 mt-2">
-                    Division: {buildingWithImageUrl.division}
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <div className="text-sm text-gray-600">Rem. compliance:</div>
-                <div className="text-xl font-bold text-[#F30]">{compliance}%</div>
+              )}
+            </div>
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-gray-900">{building.name}</h1>
+              {building.divisionEntity && (
+                <p className="text-gray-600 mt-1">Division: {building.divisionEntity.name}</p>
+              )}
+              <div className="flex items-center mt-4 space-x-6">
+                <div className="flex items-center">
+                  <span className="text-sm text-gray-500 mr-2">Compliance:</span>
+                  <span className={`text-lg font-semibold ${
+                    compliancePercentage >= 75 ? 'text-green-600' : 
+                    compliancePercentage >= 50 ? 'text-yellow-600' : 'text-red-600'
+                  }`}>
+                    {compliancePercentage}%
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-sm text-gray-500 mr-2">Active Tasks:</span>
+                  <span className="text-lg font-semibold text-gray-900">
+                    {tasks.filter(t => t.status !== 'completed').length}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Building details component */}
-        <div className="max-w-7xl mx-auto">
-          {/* Tab navigation */}
-          <TabNavigation
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            taskCount={tasks.length}
-          />
+        {/* Tab Navigation */}
+        <TabNavigation 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          taskCount={tasks.filter(t => t.status !== 'completed').length} 
+        />
 
-          {/* Content based on active tab */}
+        {/* Tab Content */}
+        <div className="bg-white rounded-lg shadow">
           {renderTabContent()}
-
-          {/* Task Details Dialog */}
-          {selectedTask && (
-            <TaskDetailsDialog
-              isOpen={isDialogOpen}
-              onClose={() => setIsDialogOpen(false)}
-              task={selectedTask}
-              building={buildingWithImageUrl}
-              onTaskUpdate={handleTaskSuccess}
-            />
-          )}
-
-          {/* Task Modal */}
-          <TaskModal
-            isOpen={isAddTaskModalOpen}
-            onClose={() => setIsAddTaskModalOpen(false)}
-            onSuccess={handleTaskSuccess}
-            tenant={building.tenant || { id: "", name: "", slug: "", description: "", createdAt: Date.now(), updatedAt: Date.now() }}
-            building={buildingWithImageUrl}
-            task={editTask ? {
-              id: editTask.id,
-              title: editTask.description,
-              description: editTask.notes?.join("\n") || "",
-              status: editTask.progress,
-              priority: editTask.priority === "H" ? "high" : editTask.priority === "L" ? "low" : "medium",
-              dueDate: editTask.due_date ? new Date(editTask.due_date.split('/').reverse().join('-')).getTime() : Date.now(),
-              completedDate: editTask.completed ? Date.now() : undefined,
-              createdAt: Date.now(),
-              updatedAt: Date.now(),
-              building: { 
-                id: building.id,
-                name: building.name,
-                division: building.division,
-                image: building.image,
-                data: building.data,
-                createdAt: building.createdAt,
-                updatedAt: building.updatedAt
-              },
-              assignee: undefined,
-              creator: {
-                id: "",
-                email: ""
-              },
-              tenant: building.tenant ? building.tenant : { 
-                id: "",
-                name: "",
-                slug: "",
-                description: "",
-                createdAt: Date.now(),
-                updatedAt: Date.now()
-              },
-            } : undefined}
-            mode={modalMode}
-          />
         </div>
       </div>
+
+
+      {/* Task Modal */}
+      <TaskModal
+        isOpen={isAddTaskModalOpen}
+        onClose={() => {
+          setIsAddTaskModalOpen(false);
+          setEditTaskId(undefined);
+        }}
+        tenant={tenant}
+        building={building}
+        task={editTask as any}
+        mode={modalMode}
+      />
     </div>
   );
 }

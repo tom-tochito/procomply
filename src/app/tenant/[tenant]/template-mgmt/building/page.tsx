@@ -1,6 +1,7 @@
 import { requireAuth } from "@/features/auth";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
-import BuildingTemplateManagement from "@/features/templates/components/BuildingTemplateManagement";
+// TODO: Migrate BuildingTemplateManagement from InstantDB to Convex
+// import BuildingTemplateManagement from "@/features/templates/components/BuildingTemplateManagement";
 
 export default async function BuildingTemplatesPage({
   params,
@@ -17,5 +18,11 @@ export default async function BuildingTemplatesPage({
 
   await requireAuth(tenant);
 
-  return <BuildingTemplateManagement tenant={tenant} />;
+  // TODO: Migrate BuildingTemplateManagement from InstantDB to Convex
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Building Templates</h1>
+      <p className="text-gray-600">Template management is currently being migrated to the new system.</p>
+    </div>
+  );
 }

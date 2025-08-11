@@ -21,7 +21,7 @@ export default function BuildingCard({ building, tenant }: BuildingCardProps) {
 
   return (
     <Link
-      href={generateTenantRedirectUrl(tenant, `/buildings/${building.id}`)}
+      href={generateTenantRedirectUrl(tenant, `/buildings/${building._id}`)}
       className="block"
     >
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">

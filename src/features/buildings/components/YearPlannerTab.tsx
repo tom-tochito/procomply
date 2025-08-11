@@ -2,7 +2,8 @@
 
 import React, { useState, useActionState } from "react";
 import { Calendar, Plus, X, Clock, CheckCircle, XCircle, FileText } from "lucide-react";
-import { db } from "~/lib/db";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "~/convex/_generated/api";
 import { BuildingWithRelations } from "@/features/buildings/models";
 import { YearPlannerEvent } from "@/features/year-planner/models";
 import {
@@ -23,90 +24,31 @@ export default function YearPlannerTab({ building }: YearPlannerTabProps) {
   const [editingEvent, setEditingEvent] = useState<YearPlannerEvent | null>(null);
   const [viewMode, setViewMode] = useState<"planner" | "list">("planner");
   
-  // Real-time subscription to year planner events
-  const { data, isLoading } = db.useQuery({
-    yearPlannerEvents: {
-      $: {
-        where: { 
-          "building.id": building.id,
-          startDate: { 
-            $gte: new Date(selectedYear, 0, 1).toISOString(),
-            $lt: new Date(selectedYear + 1, 0, 1).toISOString()
-          }
-        },
-        order: { startDate: "asc" },
-      },
-      building: {},
-      tenant: {},
-      creator: {},
-    },
-  });
-
-  const events = data?.yearPlannerEvents || [];
+  // TODO: Migrate to Convex - yearPlannerEvents functions not yet created
+  const events: YearPlannerEvent[] = [];
+  const isLoading = false;
   // Form actions
   const [addFormState, addFormAction, isAddPending] = useActionState(
-    async (prevState: FormState, formData: FormData) => {
-      try {
-        if (!building.tenant) {
-          return { error: "Building has no tenant", success: false };
-        }
-        const startDate = new Date(formData.get("startDate") as string);
-        const endDate = formData.get("endDate") ? new Date(formData.get("endDate") as string) : undefined;
-        
-        await createYearPlannerEvent(building, building.tenant, {
-          title: formData.get("title") as string,
-          description: formData.get("description") as string || undefined,
-          eventType: formData.get("eventType") as string,
-          startDate,
-          endDate,
-          allDay: formData.get("allDay") === "true",
-          status: "scheduled",
-          reminder: formData.get("reminder") === "true",
-          reminderDays: formData.get("reminderDays") ? parseInt(formData.get("reminderDays") as string) : undefined,
-        });
-        setShowAddModal(false);
-        return { error: null, success: true };
-      } catch (err) {
-        return { error: err instanceof Error ? err.message : "Failed to add event", success: false };
-      }
+    async (prevState: FormState, formData: FormData): Promise<FormState> => {
+      // TODO: Implement with Convex mutations
+      return { error: "Not implemented" as string | null, success: false };
     },
     { error: null, success: false }
   );
 
   const [editFormState, editFormAction, isEditPending] = useActionState(
-    async (prevState: FormState, formData: FormData) => {
-      if (!editingEvent) return { error: "No event selected", success: false };
-      try {
-        const startDate = new Date(formData.get("startDate") as string);
-        const endDate = formData.get("endDate") ? new Date(formData.get("endDate") as string) : undefined;
-        
-        await updateYearPlannerEvent(editingEvent.id, {
-          title: formData.get("title") as string,
-          description: formData.get("description") as string || undefined,
-          eventType: formData.get("eventType") as string,
-          startDate,
-          endDate,
-          allDay: formData.get("allDay") === "true",
-          status: formData.get("status") as string,
-          reminder: formData.get("reminder") === "true",
-          reminderDays: formData.get("reminderDays") ? parseInt(formData.get("reminderDays") as string) : undefined,
-        });
-        setEditingEvent(null);
-        return { error: null, success: true };
-      } catch (err) {
-        return { error: err instanceof Error ? err.message : "Failed to update event", success: false };
-      }
+    async (prevState: FormState, formData: FormData): Promise<FormState> => {
+      if (!editingEvent) return { error: "No event selected" as string | null, success: false };
+      // TODO: Implement with Convex mutations
+      return { error: "Not implemented" as string | null, success: false };
     },
     { error: null, success: false }
   );
 
   const handleDeleteEvent = async (eventId: string) => {
     if (!confirm("Are you sure you want to delete this event?")) return;
-    try {
-      await deleteYearPlannerEvent(eventId);
-    } catch {
-      console.error("Failed to delete event");
-    }
+    // TODO: Implement with Convex mutations
+    console.error("Delete event not implemented");
   };
 
   const eventTypes = ["inspection", "maintenance", "compliance", "meeting", "training", "other"];
@@ -214,7 +156,7 @@ export default function YearPlannerTab({ building }: YearPlannerTabProps) {
               </thead>
               <tbody>
                 {filteredEvents.map((event) => (
-                  <tr key={event.id} className="border-b hover:bg-gray-50">
+                  <tr key={event._id} className="border-b hover:bg-gray-50">
                     <td className="px-4 py-3">
                       <div>
                         <div className="font-medium">{event.title}</div>
@@ -251,7 +193,7 @@ export default function YearPlannerTab({ building }: YearPlannerTabProps) {
                           <FileText className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleDeleteEvent(event.id)}
+                          onClick={() => handleDeleteEvent(event._id)}
                           className="text-gray-600 hover:text-red-600"
                         >
                           <XCircle className="h-4 w-4" />

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import BuildingsList from "@/features/buildings/components/BuildingsList";
 import { requireAuth } from "@/features/auth";
-import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
+import { getTenantBySlug } from "@/features/tenant/utils/get-tenant";
 
 interface BuildingsPageProps {
   params: Promise<{
@@ -14,10 +14,7 @@ export default async function BuildingsPage({ params }: BuildingsPageProps) {
   const { tenant: tenantSlug } = await params;
 
   // Get tenant data
-  const tenant = await findTenantBySlug(tenantSlug);
-  if (!tenant) {
-    throw new Error("Tenant not found");
-  }
+  const tenant = await getTenantBySlug(tenantSlug);
 
   // Require authentication
   await requireAuth(tenant);

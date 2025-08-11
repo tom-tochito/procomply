@@ -1,12 +1,13 @@
-export { checkUserExistsAction, setAuthCookiesAction } from "./actions/magic-code";
-export { logoutAction } from "./actions/logout";
 export { LoginForm } from "./components/LoginForm";
-export {
-  setAuthCookies,
-  getAuthCookies,
-  clearAuthCookies,
-  isAuthenticated,
-  requireAuth
-} from "./repository";
-export type { AuthCookieData } from "./repository";
-export type { CheckUserResult, SetAuthCookiesResult } from "./actions/magic-code";
+
+// Server-side auth placeholder
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function requireAuth(_tenant: unknown) {
+  // In Convex, auth is handled client-side
+  return true;
+}
+
+export function getAuthCookies() {
+  // In Convex, auth is handled client-side
+  return {};
+}

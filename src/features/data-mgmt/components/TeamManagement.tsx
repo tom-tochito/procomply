@@ -1,74 +1,82 @@
 "use client";
 
 import React, { useState } from "react";
+import { useQuery } from "convex/react";
+import { api } from "~/convex/_generated/api";
 import CompanySearch from "./CompanySearch";
 import TeamTable from "@/features/team/components/TeamTable";
 import AddTeamModal from "@/features/teams/components/AddTeamModal";
 import { Plus } from "lucide-react";
-import { Tenant } from "@/features/tenant/models";
-import type { Company } from "@/features/companies/models";
-import type { FullUser } from "@/features/user/models";
 
-interface Team {
-  id: number;
-  code: string;
-  description: string;
-  company: string;
-  supervisor: string;
-}
-
-interface TeamManagementProps {
-  initialTeams: Team[];
-  tenant: Tenant;
-  companies: Company[];
-  supervisors: FullUser[];
-}
-
-export default function TeamManagement({
-  initialTeams,
-  tenant,
-  companies,
-  supervisors,
-}: TeamManagementProps) {
+export default function TeamManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  const filteredTeams = initialTeams.filter((team) => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      (team.code && team.code.toLowerCase().includes(searchLower)) ||
-      (team.description &&
-        team.description.toLowerCase().includes(searchLower)) ||
-      (team.company && team.company.toLowerCase().includes(searchLower)) ||
-      (team.supervisor && team.supervisor.toLowerCase().includes(searchLower))
-    );
+  // Fetch data from Convex
+  const teams = useQuery(api.teams.getTeams, {}) || [];
+  const tenant = useQuery(api.tenants.getCurrentTenant, {});
+  const companies = useQuery(api.companies.getCompanies, {}) || [];
+  const users = useQuery(api.users.getUsers, {}) || [];
+
+  // Transform teams data to include company and supervisor names
+  const teamsWithDetails = teams.map(team => {
+    // Find user by matching profile id
+    const supervisor = users.find(u => u && u.profile?._id === team.supervisorId);
+    return {
+      id: team._id,
+      code: team.code || "",
+      description: team.description,
+      company: companies.find(c => c._id === team.companyId)?.name || "",
+      supervisor: supervisor?.profile?.name || supervisor?.email || ""
+    };
   });
 
+  const filteredTeams = teamsWithDetails.filter((team) => {
+    if (
+      searchTerm &&
+      !team.code.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !team.description.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !team.company.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !team.supervisor.toLowerCase().includes(searchTerm.toLowerCase())
+    ) {
+      return false;
+    }
+    return true;
+  });
+
+  if (!tenant) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <>
-      <div className="flex flex-wrap gap-3 mb-6">
-        <CompanySearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      </div>
-
-      <TeamTable teams={filteredTeams} searchTerm={searchTerm} />
-
-      <div className="flex justify-end mt-6">
-        <button 
+    <div className="flex flex-col gap-6">
+      {/* Search and Add Button */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex-1 max-w-md">
+          <CompanySearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        </div>
+        <button
           onClick={() => setIsAddModalOpen(true)}
-          className="bg-[#F30] text-white px-4 py-2 rounded-md hover:bg-[#E20] transition-colors flex items-center focus:outline-none focus:ring-2 focus:ring-[#F30] focus:ring-offset-2"
+          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#7600FF] hover:bg-[#6600e5] rounded-md transition-colors"
         >
-          <Plus className="h-5 w-5 mr-1" />
+          <Plus className="h-4 w-4 mr-2" />
           Add Team
         </button>
       </div>
 
+      {/* Teams Table */}
+      <div className="bg-white rounded-lg shadow">
+        <TeamTable teams={filteredTeams} />
+      </div>
+
+      {/* Add Team Modal */}
       <AddTeamModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         tenant={tenant}
         companies={companies}
-        supervisors={supervisors}
+        supervisors={users.filter(u => u !== null) as any}
       />
-    </>
+    </div>
   );
 }

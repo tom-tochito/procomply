@@ -168,7 +168,7 @@ export function TaskForm({
             >
               <option value="">No building</option>
               {buildings.map((building) => (
-                <option key={building.id} value={building.id}>
+                <option key={building._id} value={building._id}>
                   {building.name}
                 </option>
               ))}

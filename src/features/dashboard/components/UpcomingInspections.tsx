@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { InstaQLEntity } from "@instantdb/react";
-import { AppSchema } from "~/instant.schema";
+import { Doc } from "../../../../convex/_generated/dataModel";
 
-type Inspection = InstaQLEntity<AppSchema, "inspections", { building: object }>;
+type Inspection = Doc<"inspections"> & { building?: Doc<"buildings"> };
 
 interface UpcomingInspectionsProps {
   inspections: Inspection[];
@@ -38,7 +37,7 @@ export default function UpcomingInspections({ inspections, tenant }: UpcomingIns
       ) : (
         <div className="space-y-3">
           {upcomingInspections.map((inspection) => (
-            <div key={inspection.id} className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+            <div key={inspection._id} className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900">{inspection.type}</p>

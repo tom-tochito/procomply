@@ -5,7 +5,6 @@ export const { auth, signIn, signOut, store } = convexAuth({
   providers: [
     Password({
       id: "password",
-      verify: Password.EmailVerificationCode
     }),
   ],
 });

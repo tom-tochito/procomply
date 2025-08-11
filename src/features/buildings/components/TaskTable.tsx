@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { db } from "~/lib/db";
+import { useMutation } from "convex/react";
+import { api } from "~/convex/_generated/api";
 import { isDateOverdue } from "@/common/utils/date";
 import { TaskUI } from "@/features/tasks/models";
 
@@ -13,6 +14,8 @@ interface TaskTableProps {
 }
 
 export default function TaskTable({ tasks, onTaskClick, onTaskEdit, onTaskUpdate }: TaskTableProps) {
+  const updateTask = useMutation(api.tasks.updateTask);
+  
   const getPriorityBadgeClass = (priority: string) => {
     switch (priority) {
       case "H": return "bg-red-100 text-red-800";
@@ -97,14 +100,12 @@ export default function TaskTable({ tasks, onTaskClick, onTaskEdit, onTaskUpdate
                     const newStatus = e.target.value;
                     
                     try {
-                      // Update task directly through InstantDB
-                      await db.transact([
-                        db.tx.tasks[task.id].update({
-                          status: newStatus,
-                          updatedAt: Date.now(),
-                          completedDate: newStatus === "completed" ? Date.now() : undefined,
-                        })
-                      ]);
+                      // Update task through Convex
+                      await updateTask({
+                        taskId: task.id as any,
+                        status: newStatus,
+                        completedDate: newStatus === "completed" ? Date.now() : undefined,
+                      });
                       
                       if (onTaskUpdate) {
                         onTaskUpdate();

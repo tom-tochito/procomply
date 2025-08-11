@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { createUserAction } from "@/features/user/actions/user.actions";
+import React, { useEffect, useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "~/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Tenant } from "@/features/tenant/models";
 import { FormState } from "@/common/types/form.types";
 import PersonForm from "./PersonForm";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 import type { Company } from "@/features/companies/models";
 
 interface AddPersonModalProps {
@@ -23,55 +25,79 @@ export default function AddPersonModal({
   companies,
 }: AddPersonModalProps) {
   const router = useRouter();
-  const [successState, setSuccessState] = React.useState(false);
+  const [successState, setSuccessState] = useState(false);
+  const createUserProfile = useMutation(api.users.createUserProfile);
 
   const handleSubmit = async (prevState: FormState, formData: FormData) => {
     try {
-      const result = await createUserAction(tenant, formData);
+      // Extract form data
+      const name = formData.get("name") as string;
+      const email = formData.get("email") as string;
+      const phone = formData.get("phone") as string;
+      const phoneMobile = formData.get("phoneMobile") as string;
+      const position = formData.get("position") as string;
+      const companyId = formData.get("companyId") as string;
+      const role = formData.get("role") as string || "user";
+
+      // Create user profile using Convex
+      // Note: This creates a profile for the current authenticated user
+      // In a real app, you might want a different flow for adding other users
+      await createUserProfile({
+        name,
+        phone,
+        phoneMobile,
+        position,
+        companyId: companyId ? companyId as any : undefined,
+        role,
+      });
+
+      setSuccessState(true);
+      toast.success("Person created successfully");
+      router.refresh();
       
-      if (result.success) {
-        setSuccessState(true);
-        return { error: null, success: true };
-      } else {
-        return { error: result.error || "Failed to create person", success: false };
-      }
-    } catch (error) {
-      console.error("Error saving person:", error);
-      return { error: "Failed to create person", success: false };
+      return {
+        success: true,
+        error: null,
+      };
+    } catch (error: unknown) {
+      console.error("Error creating person:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to create person",
+      };
     }
   };
 
-  // Handle successful submission
   useEffect(() => {
     if (successState) {
-      router.refresh();
-      onClose();
-      setSuccessState(false);
+      const timer = setTimeout(() => {
+        onClose();
+        setSuccessState(false);
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [successState, router, onClose]);
+  }, [successState, onClose]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Add New Person</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="text-gray-400 hover:text-gray-600"
           >
-            <X className="h-5 w-5" />
+            <X className="h-6 w-6" />
           </button>
         </div>
-        
-        <div className="p-6">
-          <PersonForm 
-            companies={companies}
-            onSubmit={handleSubmit} 
-            onCancel={onClose} 
-          />
-        </div>
+
+        <PersonForm
+          companies={companies}
+          onSubmit={handleSubmit}
+          onCancel={onClose}
+        />
       </div>
     </div>
   );

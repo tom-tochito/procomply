@@ -1,12 +1,8 @@
 "use client";
 
-import React, {
-  useState,
-  useEffect,
-  useActionState,
-  startTransition,
-} from "react";
-import { db } from "~/lib/db";
+import React, { useState, useMemo } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "~/convex/_generated/api";
 import UploadDocumentDialog from "./UploadDocumentDialog";
 import DocumentTable from "@/features/documents/components/DocumentTable";
 import DocumentViewer from "@/features/documents/components/DocumentViewer";
@@ -14,9 +10,15 @@ import DocumentSidebar from "./DocumentSidebar";
 import DocumentActionBar from "./DocumentActionBar";
 import { Tenant } from "@/features/tenant/models";
 import { getFileUrl } from "@/common/utils/file";
-import { deleteDocumentAction } from "@/features/data-mgmt/actions/document-delete.action";
-import { FormState } from "@/common/types/form";
-import { DocumentWithRelations } from "@/features/documents/models";
+import { Document } from "@/features/documents/models";
+import { toast } from "sonner";
+import { Id } from "~/convex/_generated/dataModel";
+
+// Type for documents with simplified relations as returned by the query
+type DocumentWithSimplifiedRelations = Document & {
+  building?: { _id: Id<"buildings">; name: string };
+  uploader?: { _id: Id<"users">; email?: string };
+};
 
 interface DocumentManagementProps {
   tenant: Tenant;
@@ -29,196 +31,77 @@ export default function DocumentManagement({
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedFileType, setSelectedFileType] = useState<string | null>(null);
-  const [selectedStatutory, setSelectedStatutory] = useState<boolean | null>(null);
   const [selectedBuilding, setSelectedBuilding] = useState<string | null>(null);
   const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
-  // Complex filter removed - field no longer exists in schema
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedStatutory, setSelectedStatutory] = useState<boolean | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<DocumentWithRelations | null>(
-    null
-  );
-  const [pageNumber, setPageNumber] = useState(1);
-  const pageSize = 10;
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentWithSimplifiedRelations | null>(null);
 
-  // Delete action state
-  const initialDeleteState: FormState = { error: null, success: false };
-  const [deleteState, deleteAction] = useActionState(
-    deleteDocumentAction,
-    initialDeleteState
-  );
+  // Fetch buildings and divisions
+  const buildings = useQuery(api.buildings.getBuildings, {}) || [];
+  const divisions = useQuery(api.divisions.getDivisions, {}) || [];
+  
+  // Fetch documents from Convex
+  const documents = useQuery(api.documents.getDocuments, {
+    buildingId: selectedBuilding ? selectedBuilding as Id<"buildings"> : undefined,
+  }) || [];
 
-  // Subscribe to documents using InstantDB with pagination
-  const { data, isLoading, error } = db.useQuery({
-    documents: {
-      $: {
-        where: {
-          tenant: tenant.id,
-        },
-        order: { uploadedAt: "desc" },
-        limit: pageSize,
-        offset: (pageNumber - 1) * pageSize,
-      },
-      building: {
-        divisionEntity: {},
-      },
-      uploader: {
-        profile: {},
-      },
-      tenant: {},
-    },
-  });
+  const deleteDocument = useMutation(api.documents.deleteDocument);
 
-  // Get document counts for categories
-  // const docCategoryCounts = useDocumentCounts(tenant);
-
-  // Get buildings data for filters
-  const { data: buildingsData } = db.useQuery({
-    buildings: {
-      $: {
-        where: {
-          tenant: tenant.id,
-        },
-      },
-      divisionEntity: {},
-    },
-  });
-
-  const allBuildings = buildingsData?.buildings || [];
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 1024) {
-        setSidebarOpen(false);
-      } else {
-        setSidebarOpen(true);
-      }
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const documents = data?.documents || [];
-
-  // Apply client-side filters
-  let filteredDocuments = documents;
-
-  // Search filter
-  if (searchTerm) {
-    const searchLower = searchTerm.toLowerCase();
-    filteredDocuments = filteredDocuments.filter(
-      (doc) =>
-        doc.name.toLowerCase().includes(searchLower) ||
-        doc.type.toLowerCase().includes(searchLower) ||
-        doc.description?.toLowerCase().includes(searchLower) ||
-        doc.reference?.toLowerCase().includes(searchLower)
-    );
-  }
-
-  // Status filter
-  if (selectedStatus) {
-    filteredDocuments = filteredDocuments.filter((doc) => {
-      const now = Date.now();
-      const isExpired = doc.expiryDate && doc.expiryDate < now;
-      const isActive = doc.isActive !== false;
-      
-      switch (selectedStatus) {
-        case "Active":
-          return isActive && !isExpired;
-        case "Pending":
-          return doc.expiryDate && doc.expiryDate < now + 30 * 24 * 60 * 60 * 1000; // 30 days
-        case "Archived":
-          return !isActive;
-        default:
-          return true;
-      }
+  // Extract unique categories and file types from documents
+  const categories = useMemo(() => {
+    const uniqueCategories = new Set<string>();
+    documents.forEach(doc => {
+      if (doc.category) uniqueCategories.add(doc.category);
     });
-  }
+    return Array.from(uniqueCategories).sort();
+  }, [documents]);
 
-  // Category filter
-  if (selectedCategory) {
-    filteredDocuments = filteredDocuments.filter(
-      (doc) => doc.category === selectedCategory
-    );
-  }
-
-  // Building filter
-  if (selectedBuilding) {
-    filteredDocuments = filteredDocuments.filter(
-      (doc) => doc.building?.id === selectedBuilding
-    );
-  }
-
-  // Division filter
-  if (selectedDivision) {
-    filteredDocuments = filteredDocuments.filter(
-      (doc) => doc.building?.divisionEntity?.name === selectedDivision
-    );
-  }
-
-  // Complex filter - removed as field no longer exists in schema
-  // TODO: Implement filter based on template data once available
-
-  // File type filter
-  if (selectedFileType) {
-    filteredDocuments = filteredDocuments.filter((doc) => {
-      const extension = doc.name.split(".").pop()?.toLowerCase() || "";
-      switch (selectedFileType) {
-        case "pdf":
-          return extension === "pdf";
-        case "doc":
-          return ["doc", "docx"].includes(extension);
-        case "xls":
-          return ["xls", "xlsx"].includes(extension);
-        case "image":
-          return ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"].includes(extension);
-        default:
-          return true;
-      }
+  const fileTypes = useMemo(() => {
+    const uniqueFileTypes = new Set<string>();
+    documents.forEach(doc => {
+      if (doc.type) uniqueFileTypes.add(doc.type);
     });
-  }
+    return Array.from(uniqueFileTypes).sort();
+  }, [documents]);
 
-  // Statutory filter
-  if (selectedStatutory !== null) {
-    filteredDocuments = filteredDocuments.filter((doc) => {
-      return doc.isStatutory === selectedStatutory;
-    });
-  }
-
-  const handleDocumentClick = (document: DocumentWithRelations) => {
-    setSelectedDocument(document);
-    setDialogOpen(true);
-  };
-
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-  };
-
-  const handleDelete = async (document: DocumentWithRelations) => {
-    const formData = new FormData();
-    formData.append("documentId", document.id);
-    formData.append("tenantSlug", tenant.slug);
-
-    startTransition(() => {
-      deleteAction(formData);
-    });
-  };
-
-  // Show error if delete fails
-  React.useEffect(() => {
-    if (deleteState.error) {
-      alert(`Error deleting document: ${deleteState.error}`);
+  // Filter documents
+  const filteredDocuments = documents.filter(doc => {
+    const matchesSearch = !searchTerm || 
+      doc.name.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Status filter - based on document state and expiry
+    const matchesStatus = !selectedStatus || 
+      (selectedStatus === "Active" && doc.isActive !== false) ||
+      (selectedStatus === "Archived" && doc.isActive === false) ||
+      (selectedStatus === "Pending" && doc.isActive !== false && doc.expiryDate && doc.expiryDate > Date.now());
+    
+    const matchesCategory = !selectedCategory || doc.category === selectedCategory;
+    const matchesFileType = !selectedFileType || doc.type === selectedFileType;
+    const matchesStatutory = selectedStatutory === null || doc.isStatutory === selectedStatutory;
+    
+    // Division filter - check if document's building belongs to selected division
+    let matchesDivision = true;
+    if (selectedDivision && doc.buildingId) {
+      const building = buildings.find(b => b._id === doc.buildingId);
+      const division = divisions.find(d => d.name === selectedDivision);
+      matchesDivision = building?.divisionId === division?._id;
     }
-  }, [deleteState.error]);
+    
+    return matchesSearch && matchesStatus && matchesCategory && matchesFileType && matchesStatutory && matchesDivision;
+  });
 
-  const handleUploadClick = () => {
-    setUploadDialogOpen(true);
+  const getFileUrl = (tenantSlug: string, path: string) => {
+    return `/api/files/${path}`;
   };
 
-  const handleDownload = (document: DocumentWithRelations) => {
+  const handleView = (document: DocumentWithSimplifiedRelations) => {
+    setSelectedDocument(document);
+    setViewerOpen(true);
+  };
+
+  const handleDownload = (document: DocumentWithSimplifiedRelations) => {
     if (document.path) {
       const downloadUrl = getFileUrl(tenant.slug, document.path);
       window.open(downloadUrl, "_blank");
@@ -227,165 +110,79 @@ export default function DocumentManagement({
     }
   };
 
-  // Get unique categories and file types from current documents
-  const categories = Array.from(
-    new Set(documents.map((doc) => doc.category).filter((cat): cat is string => Boolean(cat)))
-  );
-  const fileTypes = ["pdf", "doc", "xls", "image"];
-  
-  // Get unique divisions and complexes from buildings
-  const divisions = Array.from(
-    new Set(allBuildings.map((b) => b.divisionEntity?.name).filter((d): d is string => Boolean(d)))
-  );
-
-  // For now, we'll show the count of current page
-  // TODO: Implement proper total count query when InstantDB supports it
-  const totalDocuments = filteredDocuments.length;
-
-  if (isLoading && pageNumber === 1) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F30]"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-8 text-red-600">
-        Error loading documents: {error.message}
-      </div>
-    );
-  }
+  const handleDelete = async (document: DocumentWithSimplifiedRelations) => {
+    try {
+      await deleteDocument({ documentId: document._id });
+      toast.success("Document deleted successfully");
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      toast.error("Failed to delete document");
+    }
+  };
 
   return (
-    <>
-      <DocumentViewer
-        document={selectedDocument}
-        tenantSlug={tenant.slug}
-        isOpen={dialogOpen}
-        onClose={handleDialogClose}
-        onDownload={handleDownload}
+    <div className="flex h-full">
+      {/* Sidebar */}
+      <DocumentSidebar
+        selectedStatus={selectedStatus}
+        setSelectedStatus={setSelectedStatus}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        selectedFileType={selectedFileType}
+        setSelectedFileType={setSelectedFileType}
+        selectedStatutory={selectedStatutory}
+        setSelectedStatutory={setSelectedStatutory}
+        selectedBuilding={selectedBuilding}
+        setSelectedBuilding={setSelectedBuilding}
+        selectedDivision={selectedDivision}
+        setSelectedDivision={setSelectedDivision}
+        categories={categories}
+        fileTypes={fileTypes}
+        buildings={buildings.map(b => ({ id: b._id, name: b.name }))}
+        divisions={divisions.map(d => d.name)}
       />
 
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col bg-gray-50">
+        {/* Action Bar */}
+        <DocumentActionBar
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onUploadClick={() => setUploadDialogOpen(true)}
+          documentCount={filteredDocuments.length}
+        />
+
+        {/* Documents Table */}
+        <div className="flex-1 overflow-auto">
+          <DocumentTable
+            documents={filteredDocuments as any}
+            onRowClick={handleView}
+            onDownload={handleDownload}
+            onDelete={handleDelete}
+          />
+        </div>
+      </div>
+
+      {/* Upload Dialog */}
       <UploadDocumentDialog
         isOpen={uploadDialogOpen}
         onClose={() => setUploadDialogOpen(false)}
         tenant={tenant}
       />
 
-      <div className="flex items-center justify-between mb-6">
-        <button
-          className="block lg:hidden rounded-md border p-2 text-gray-600 hover:bg-gray-100"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          aria-label={sidebarOpen ? "Close filters" : "Open filters"}
-        >
-          {sidebarOpen ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          )}
-        </button>
-      </div>
-
-      <DocumentActionBar
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        onUploadClick={handleUploadClick}
-        documentCount={totalDocuments}
-      />
-
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
-        {sidebarOpen && (
-          <DocumentSidebar
-            selectedStatus={selectedStatus}
-            setSelectedStatus={setSelectedStatus}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            selectedFileType={selectedFileType}
-            setSelectedFileType={setSelectedFileType}
-            selectedStatutory={selectedStatutory}
-            setSelectedStatutory={setSelectedStatutory}
-            selectedBuilding={selectedBuilding}
-            setSelectedBuilding={setSelectedBuilding}
-            selectedDivision={selectedDivision}
-            setSelectedDivision={setSelectedDivision}
-            categories={categories}
-            fileTypes={fileTypes}
-            buildings={allBuildings.map(b => ({ id: b.id, name: b.name }))}
-            divisions={divisions}
-          />
-        )}
-
-        <div className="flex-1 order-1 lg:order-2">
-          <div className="bg-white rounded-md shadow-sm p-4">
-            <DocumentTable
-              documents={filteredDocuments}
-              onRowClick={handleDocumentClick}
-              onDownload={handleDownload}
-              onDelete={handleDelete}
-            />
-
-            {/* Pagination Controls */}
-            {(filteredDocuments.length > 0 || pageNumber > 1) && (
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-4 text-sm gap-3">
-                <div className="text-gray-500">
-                  Showing {filteredDocuments.length} documents {pageNumber > 1 && `(Page ${pageNumber})`}
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    className="px-3 py-1 border rounded-md bg-gray-100 hover:bg-gray-200 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => setPageNumber(pageNumber - 1)}
-                    disabled={pageNumber <= 1}
-                  >
-                    Previous
-                  </button>
-                  <button
-                    className="px-3 py-1 border rounded-md bg-[#F30] text-white hover:bg-[#E20] focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => setPageNumber(pageNumber + 1)}
-                    disabled={filteredDocuments.length < pageSize}
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* No results message */}
-            {filteredDocuments.length === 0 && pageNumber === 1 && (
-              <div className="text-center py-8 text-gray-500">
-                No documents found matching your filters.
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </>
+      {/* Document Viewer */}
+      {selectedDocument && (
+        <DocumentViewer
+          isOpen={viewerOpen}
+          onClose={() => {
+            setViewerOpen(false);
+            setSelectedDocument(null);
+          }}
+          document={selectedDocument as any}
+          tenantSlug={tenant.slug}
+          onDownload={handleDownload}
+        />
+      )}
+    </div>
   );
 }

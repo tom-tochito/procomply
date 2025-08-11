@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { db } from "~/lib/db";
-import { id } from "@instantdb/react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
 import { Tenant } from "@/features/tenant/models";
 import { Legislation } from "../models";
-import { getCurrentTimestamp } from "@/common/utils/date";
 import { startTransition } from "react";
 import SearchBar from "./SearchBar";
 import PageHeader from "./PageHeader";
@@ -21,21 +21,14 @@ export default function LegislationManagementDB({ tenant }: LegislationManagemen
   const [formOpen, setFormOpen] = useState(false);
   const [editingLegislation, setEditingLegislation] = useState<Legislation | null>(null);
 
-  // Fetch legislation from InstantDB
-  const { data } = db.useQuery({
-    legislation: {
-      $: {
-        where: {
-          "tenant.id": tenant.id,
-        },
-        order: {
-          code: "asc",
-        },
-      },
-    },
-  });
+  const createLegislation = useMutation(api.legislation.createLegislation);
+  const updateLegislation = useMutation(api.legislation.updateLegislation);
+  const deleteLegislation = useMutation(api.legislation.deleteLegislation);
 
-  const legislation = data?.legislation || [];
+  // Fetch legislation from Convex
+  const legislation = useQuery(api.legislation.getLegislation, {
+    tenantId: tenant._id as Id<"tenants">,
+  }) || [];
 
   const filteredLegislation = legislation.filter(
     (item) =>
@@ -48,44 +41,41 @@ export default function LegislationManagementDB({ tenant }: LegislationManagemen
     setFormOpen(true);
   };
 
-  const handleSave = (legislationData: Omit<Legislation, "id">) => {
-    startTransition(() => {
+  const handleSave = async (legislationData: Omit<Legislation, "_id" | "_creationTime">) => {
+    try {
       if (editingLegislation) {
         // Update existing legislation
-        db.transact([
-          db.tx.legislation[editingLegislation.id].update({
-            code: legislationData.code,
-            title: legislationData.title,
-            url: legislationData.url || null,
-            updatedAt: getCurrentTimestamp(),
-          }),
-        ]);
+        await updateLegislation({
+          legislationId: editingLegislation._id as Id<"legislation">,
+          code: legislationData.code,
+          title: legislationData.title,
+          url: legislationData.url,
+        });
       } else {
         // Create new legislation
-        const newLegislationId = id();
-        db.transact([
-          db.tx.legislation[newLegislationId]
-            .update({
-              code: legislationData.code,
-              title: legislationData.title,
-              url: legislationData.url || null,
-              isActive: true,
-              createdAt: getCurrentTimestamp(),
-              updatedAt: getCurrentTimestamp(),
-            })
-            .link({ tenant: tenant.id }),
-        ]);
+        await createLegislation({
+          code: legislationData.code,
+          title: legislationData.title,
+          url: legislationData.url,
+          tenantId: tenant._id as Id<"tenants">,
+        });
       }
-    });
-    setFormOpen(false);
-    setEditingLegislation(null);
+      setFormOpen(false);
+      setEditingLegislation(null);
+    } catch (error) {
+      console.error("Error saving legislation:", error);
+    }
   };
 
-  const handleDelete = (legislation: Legislation) => {
+  const handleDelete = async (legislation: Legislation) => {
     if (window.confirm(`Are you sure you want to delete "${legislation.title}"?`)) {
-      startTransition(() => {
-        db.transact([db.tx.legislation[legislation.id].delete()]);
-      });
+      try {
+        await deleteLegislation({
+          legislationId: legislation._id as Id<"legislation">,
+        });
+      } catch (error) {
+        console.error("Error deleting legislation:", error);
+      }
     }
   };
 

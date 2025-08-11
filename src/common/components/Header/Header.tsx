@@ -6,12 +6,12 @@ import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import logo from "@/common/assets/images/logo/light.png";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
-import { db } from "~/lib/db";
 import { Menu, X } from "lucide-react";
 import type { Tenant } from "@/features/tenant/models";
 import { UserAvatar } from "./UserAvatar";
 import { NavigationLinks } from "./NavigationLinks";
 import { MobileMenu } from "./MobileMenu";
+import { useAuth } from "~/src/hooks/useAuth";
 
 interface HeaderProps {
   tenant: Tenant;
@@ -23,15 +23,7 @@ export default function Header({ tenant }: HeaderProps) {
   const tenantSlug = paramsHook.tenant as string;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const { user } = db.useAuth();
-  const { data } = db.useQuery({
-    $users: {
-      $: { where: { id: user?.id || "" } },
-      profile: {},
-    },
-  });
-
-  const userWithProfile = data?.$users?.[0];
+  const { user } = useAuth();
 
   const isLoginPage = pathname.includes("/login");
   if (isLoginPage) return null;
@@ -70,7 +62,15 @@ export default function Header({ tenant }: HeaderProps) {
           </button>
         </div>
 
-        {tenant && <UserAvatar user={userWithProfile} tenant={tenant} />}
+        {tenant && (
+          <UserAvatar 
+            user={user ? {
+              email: user.email,
+              profile: user.profile ? { name: user.profile.name } : undefined
+            } : undefined} 
+            tenant={tenant} 
+          />
+        )}
       </div>
 
       <MobileMenu
@@ -78,6 +78,10 @@ export default function Header({ tenant }: HeaderProps) {
         onClose={() => setMobileMenuOpen(false)}
         tenantSlug={tenantSlug}
         tenant={tenant}
+        user={user ? {
+          email: user.email,
+          profile: user.profile ? { name: user.profile.name } : undefined
+        } : undefined}
       />
     </header>
   );

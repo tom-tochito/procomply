@@ -8,8 +8,10 @@ import {
   ComplianceCheckType,
   ComplianceStatus
 } from "../models";
-import { createComplianceCheck } from "../repository/compliance.repository";
 import type { Tenant } from "@/features/tenant/models";
+import { useMutation } from "convex/react";
+import { api } from "~/convex/_generated/api";
+import { Id } from "~/convex/_generated/dataModel";
 
 interface AddComplianceCheckDialogProps {
   isOpen: boolean;
@@ -33,6 +35,8 @@ export default function AddComplianceCheckDialog({
   tenant,
   onSuccess,
 }: AddComplianceCheckDialogProps) {
+  const createComplianceCheck = useMutation(api.complianceChecks.createComplianceCheck);
+  
   const [state, formAction, isPending] = useActionState(
     async (prevState: FormState, formData: FormData): Promise<FormState> => {
       try {
@@ -46,15 +50,15 @@ export default function AddComplianceCheckDialog({
           return { error: "Please fill in all required fields", success: false };
         }
 
-        await createComplianceCheck(
-          buildingId,
-          tenant.id,
-          checkType as ComplianceCheckType,
-          status as ComplianceStatus,
-          new Date(dueDate),
-          completedDate ? new Date(completedDate) : undefined,
-          notes || undefined
-        );
+        await createComplianceCheck({
+          buildingId: buildingId as Id<"buildings">,
+          tenantId: tenant._id,
+          checkType: checkType as ComplianceCheckType,
+          status: status as ComplianceStatus,
+          dueDate: new Date(dueDate).getTime(),
+          completedDate: completedDate ? new Date(completedDate).getTime() : undefined,
+          notes: notes || undefined
+        });
 
         onSuccess();
         onClose();

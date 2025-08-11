@@ -1,8 +1,9 @@
-import { findAllTenants } from "@/features/tenant/repository/tenant.repository";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "../../convex/_generated/api";
 import { ROOT_DOMAIN, PROTOCOL } from "~/src/common/constants";
 
 export default async function Page() {
-  const tenants = await findAllTenants();
+  const tenants = await fetchQuery(api.tenants.getAllTenants, {});
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col items-center justify-center p-4">
@@ -16,7 +17,7 @@ export default async function Page() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl w-full px-4">
         {tenants.map((tenant) => (
           <a
-            key={tenant.id}
+            key={tenant._id}
             href={`${PROTOCOL}://${ROOT_DOMAIN}/tenant/${tenant.slug}/login`}
             className="group relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
           >

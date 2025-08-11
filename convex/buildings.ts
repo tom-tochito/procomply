@@ -41,43 +41,6 @@ export const getBuildings = query({
 
 export const getBuilding = query({
   args: { buildingId: v.id("buildings") },
-  returns: v.union(
-    v.object({
-      _id: v.id("buildings"),
-      _creationTime: v.number(),
-      tenantId: v.id("tenants"),
-      templateId: v.optional(v.id("templates")),
-      divisionId: v.optional(v.id("divisions")),
-      name: v.string(),
-      image: v.optional(v.string()),
-      division: v.optional(v.string()),
-      data: v.optional(v.any()),
-      createdAt: v.number(),
-      updatedAt: v.number(),
-      template: v.optional(v.object({
-        _id: v.id("templates"),
-        _creationTime: v.number(),
-        tenantId: v.id("tenants"),
-        name: v.string(),
-        type: v.string(),
-        fields: v.array(v.any()),
-        isActive: v.boolean(),
-        createdAt: v.number(),
-        updatedAt: v.number(),
-      })),
-      divisionEntity: v.optional(v.object({
-        _id: v.id("divisions"),
-        _creationTime: v.number(),
-        tenantId: v.id("tenants"),
-        name: v.string(),
-        type: v.string(),
-        description: v.optional(v.string()),
-        createdAt: v.number(),
-        updatedAt: v.number(),
-      })),
-    }),
-    v.null()
-  ),
   handler: async (ctx, args) => {
     const building = await ctx.db.get(args.buildingId);
     if (!building) return null;

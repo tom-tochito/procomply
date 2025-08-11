@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import { Table, ColumnDef } from "@/common/components/Table";
 
 interface Team {
-  id: number;
+  id: number | string;
   code: string;
   description: string;
   company: string;

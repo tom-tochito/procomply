@@ -108,7 +108,7 @@ export default function PersonForm({ person, companies, onSubmit, onCancel }: Pe
           >
             <option value="">Select a company</option>
             {companies.map((company) => (
-              <option key={company.id} value={company.id}>
+              <option key={company._id} value={company._id}>
                 {company.name}
               </option>
             ))}

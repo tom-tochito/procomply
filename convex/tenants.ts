@@ -1,33 +1,27 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 import { getUserIdentity } from "./auth";
 
 // Helper to get current user's tenant
-export async function getCurrentUserTenant(ctx: any) {
+export async function getCurrentUserTenant(ctx: any): Promise<Id<"tenants">> {
   const identity = await getUserIdentity(ctx);
   if (!identity) {
     throw new Error("Not authenticated");
   }
 
-  const user = await ctx.db
-    .query("users")
-    .withIndex("by_tokenIdentifier", (q: any) => q.eq("tokenIdentifier", identity.tokenIdentifier))
-    .unique();
-
-  if (!user) {
-    throw new Error("User not found");
-  }
+  const userId = identity.subject as Id<"users">;
 
   const userTenant = await ctx.db
     .query("userTenants")
-    .withIndex("by_user", (q: any) => q.eq("userId", user._id))
+    .withIndex("by_user", (q: any) => q.eq("userId", userId))
     .first();
 
   if (!userTenant) {
     throw new Error("User not assigned to any tenant");
   }
 
-  return userTenant.tenantId;
+  return userTenant.tenantId as Id<"tenants">;
 }
 
 export const getTenant = query({
@@ -49,6 +43,29 @@ export const getTenant = query({
   },
 });
 
+export const getTenantBySlug = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    const tenant = await ctx.db
+      .query("tenants")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .unique();
+    
+    if (!tenant) {
+      throw new Error("Tenant not found");
+    }
+    
+    return tenant;
+  },
+});
+
+export const getAllTenants = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("tenants").collect();
+  },
+});
+
 export const getCurrentTenant = query({
   args: {},
   returns: v.union(
@@ -66,7 +83,18 @@ export const getCurrentTenant = query({
   handler: async (ctx) => {
     try {
       const tenantId = await getCurrentUserTenant(ctx);
-      return await ctx.db.get(tenantId);
+      const tenant = await ctx.db.get(tenantId);
+      if (!tenant) return null;
+      
+      return {
+        _id: tenant._id as Id<"tenants">,
+        _creationTime: tenant._creationTime,
+        name: tenant.name,
+        slug: tenant.slug,
+        description: tenant.description,
+        createdAt: tenant.createdAt,
+        updatedAt: tenant.updatedAt,
+      };
     } catch {
       return null;
     }

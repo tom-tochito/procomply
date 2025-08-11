@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { db } from "~/lib/db";
+import { useQuery } from "convex/react";
+import { api } from "~/convex/_generated/api";
 import ComplianceSearch from "./ComplianceSearch";
 import ComplianceDynamicFilters from "./ComplianceDynamicFilters";
 import ComplianceTable from "./ComplianceTable";
@@ -22,43 +23,31 @@ export default function ComplianceOverviewClient({
   const [roomUse, setRoomUse] = useState("Room Use");
   const [buildingManagers, setBuildingManagers] = useState("Building Managers");
 
-  // Fetch buildings with tasks and compliance checks
-  const { data: buildingsData, isLoading: buildingsLoading } = db.useQuery({
-    buildings: {
-      $: {
-        where: { "tenant.id": tenant.id },
-        order: { name: "asc" },
-      },
-      tasks: {},
-      complianceChecks: {},
-      divisionEntity: {},
-    },
-  });
-
-  // Fetch divisions
-  const { data: divisionsData } = db.useQuery({
-    divisions: {
-      $: {
-        where: { "tenant.id": tenant.id },
-      },
-    },
-  });
-
-  const divisions = useMemo(() => divisionsData?.divisions || [], [divisionsData?.divisions]);
-  const buildings = useMemo(() => buildingsData?.buildings || [], [buildingsData?.buildings]);
+  // Fetch buildings, tasks, compliance checks, and divisions separately
+  const buildings = useQuery(api.buildings.getBuildings, {}) || [];
+  const divisions = useQuery(api.divisions.getDivisions, {}) || [];
+  const allTasks = useQuery(api.tasks.getTasks, {}) || [];
+  const allComplianceChecks = useQuery(api.complianceChecks.getComplianceChecks, {}) || [];
+  
+  const buildingsLoading = buildings === undefined || divisions === undefined || 
+                          allTasks === undefined || allComplianceChecks === undefined;
 
   // Initialize selected divisions to all active divisions
   useEffect(() => {
     const activeDivisions = divisions.filter(d => d.type === "Active");
-    setSelectedDivisions(activeDivisions.map(d => d.id));
+    setSelectedDivisions(activeDivisions.map(d => d._id));
   }, [divisions]);
 
   // Transform buildings to match the component's expected format
   const formattedBuildings = useMemo(() => {
     return buildings.map(building => {
+      // Get tasks for this building
+      const buildingTasks = allTasks.filter(task => task.buildingId === building._id);
+      const buildingComplianceChecks = allComplianceChecks.filter(check => check.buildingId === building._id);
+      
       // Calculate task-based compliance
-      const totalTasks = building.tasks?.length || 0;
-      const completedTasks = building.tasks?.filter(task => task.status === "completed").length || 0;
+      const totalTasks = buildingTasks.length;
+      const completedTasks = buildingTasks.filter(task => task.status === "completed").length;
       const taskCompliance = totalTasks > 0 
         ? Math.round((completedTasks / totalTasks) * 100) 
         : 100;
@@ -66,7 +55,7 @@ export default function ComplianceOverviewClient({
       // Group compliance checks by type and get the most recent one
       const checksByType: Record<string, { completedDate?: number; dueDate?: number; status?: string }> = {};
       
-      (building.complianceChecks || []).forEach(check => {
+      buildingComplianceChecks.forEach(check => {
         if (!checksByType[check.checkType] || 
             (check.completedDate || check.dueDate || 0) > (checksByType[check.checkType].completedDate || checksByType[check.checkType].dueDate || 0)) {
           checksByType[check.checkType] = check;
@@ -83,12 +72,12 @@ export default function ComplianceOverviewClient({
         : 0;
 
       // Use check-based compliance if available, otherwise use task-based
-      const compliance = building.complianceChecks?.length > 0 ? checkCompliance : taskCompliance;
+      const compliance = buildingComplianceChecks.length > 0 ? checkCompliance : taskCompliance;
 
       return {
-        id: building.id,
+        id: building._id,
         name: building.name,
-        location: building.division || "",
+        location: building.divisionId || "",
         compliance: `${compliance}%`,
         pm: "", // Property Manager - not in schema yet
         annualFlatDoor: formatComplianceCheck(checksByType[COMPLIANCE_CHECK_TYPES.ANNUAL_FLAT_DOOR]),
@@ -101,7 +90,7 @@ export default function ComplianceOverviewClient({
         legionellaRisk: formatComplianceCheck(checksByType[COMPLIANCE_CHECK_TYPES.LEGIONELLA_RISK]),
       };
     });
-  }, [buildings]);
+  }, [buildings, allTasks, allComplianceChecks]);
 
   const filteredBuildings = formattedBuildings.filter((building) => {
     if (
@@ -130,7 +119,7 @@ export default function ComplianceOverviewClient({
         </div>
 
         <ComplianceDynamicFilters
-          divisions={divisions}
+          divisions={divisions.map(d => ({ id: d._id, name: d.name, type: d.type }))}
           selectedDivisions={selectedDivisions}
           setSelectedDivisions={setSelectedDivisions}
           showArchived={showArchived}

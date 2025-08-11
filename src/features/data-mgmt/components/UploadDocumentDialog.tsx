@@ -4,9 +4,10 @@ import React, { useState, useRef, useActionState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { X, FilePlus, FileText, Hash, Tag, Building2, Calendar, Shield, Info } from "lucide-react";
-import { uploadDocumentForDataMgmtAction } from "@/features/data-mgmt/actions/document-upload.action";
-import { FormState } from "@/common/types/form";
-import { db } from "~/lib/db";
+import { uploadDocumentAction } from "@/features/documents/actions/upload-document.action";
+import { FormState } from "@/common/types/form.types";
+import { useQuery } from "convex/react";
+import { api } from "~/convex/_generated/api";
 import { Tenant } from "@/features/tenant/models";
 import { Building } from "@/features/buildings/models";
 
@@ -30,7 +31,7 @@ export default function UploadDocumentDialog({
   const [docType, setDocType] = useState("");
   const [code, setCode] = useState("");
   const [reference, setReference] = useState("");
-  const [building, setBuilding] = useState(defaultBuilding?.id || "");
+  const [building, setBuilding] = useState(defaultBuilding?._id || "");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [subCategory, setSubCategory] = useState("");
@@ -46,22 +47,39 @@ export default function UploadDocumentDialog({
   // Use action state for form submission
   const initialState: FormState = { error: null, success: false };
   const [state, formAction, isPending] = useActionState(
-    uploadDocumentForDataMgmtAction,
+    async (prevState: FormState, formData: FormData) => {
+      try {
+        const file = formData.get("file") as File;
+        const buildingId = formData.get("building") as string;
+        
+        if (!file || !buildingId) {
+          return { error: "Please select a file and building", success: false };
+        }
+        
+        await uploadDocumentAction({
+          file,
+          buildingId,
+          category: formData.get("category") as string || undefined,
+          docCategory: formData.get("docCategory") as string || undefined,
+          description: formData.get("description") as string || undefined,
+        });
+        
+        return { error: null, success: true };
+      } catch (error) {
+        return { 
+          error: error instanceof Error ? error.message : "Failed to upload document", 
+          success: false 
+        };
+      }
+    },
     initialState
   );
   
   // Subscribe to buildings if tenant is provided
-  const { data: buildingsData, isLoading: buildingsLoading } = tenant ? db.useQuery({
-    buildings: {
-      $: {
-        where: {
-          tenant: tenant.id,
-        },
-      },
-    },
-  }) : { data: null, isLoading: false };
+  const buildingsData = useQuery(api.buildings.getBuildings, {});
+  const buildingsLoading = buildingsData === undefined;
   
-  const buildings = buildingsData?.buildings || [];
+  const buildings = buildingsData || [];
 
   // Reset form state when dialog closes or on success
   const handleClose = () => {
@@ -69,7 +87,7 @@ export default function UploadDocumentDialog({
     setDocType("");
     setCode("");
     setReference("");
-    setBuilding(defaultBuilding?.id || "");
+    setBuilding(defaultBuilding?._id || "");
     setDescription("");
     setCategory("");
     setSubCategory("");
@@ -201,7 +219,7 @@ export default function UploadDocumentDialog({
 
                 <form action={formAction} className="space-y-4">
                   {/* Hidden fields for server action */}
-                  {tenant && <input type="hidden" name="tenantId" value={tenant.id} />}
+                  {tenant && <input type="hidden" name="tenantId" value={tenant._id} />}
                   
                   {/* Error display */}
                   {state.error && (
@@ -336,7 +354,7 @@ export default function UploadDocumentDialog({
                             {buildingsLoading ? "Loading..." : "Select Building (Required)"}
                           </option>
                           {!buildingsLoading && buildings.map((b) => (
-                            <option key={b.id} value={b.id}>
+                            <option key={b._id} value={b._id}>
                               {b.name}
                             </option>
                           ))}

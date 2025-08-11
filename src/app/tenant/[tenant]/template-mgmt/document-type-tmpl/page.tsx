@@ -1,6 +1,7 @@
 import { requireAuth } from "@/features/auth";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
-import DocumentTemplateManagement from "@/features/templates/components/DocumentTemplateManagement";
+// TODO: Migrate DocumentTemplateManagement from InstantDB to Convex
+// import DocumentTemplateManagement from "@/features/templates/components/DocumentTemplateManagement";
 
 interface DocumentTypeTemplatePageProps {
   params: Promise<{ tenant: string }>;
@@ -16,5 +17,11 @@ export default async function DocumentTypeTemplatePage({ params }: DocumentTypeT
 
   await requireAuth(tenant);
 
-  return <DocumentTemplateManagement tenant={tenant} />;
+  // TODO: Migrate DocumentTemplateManagement from InstantDB to Convex
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Document Templates</h1>
+      <p className="text-gray-600">Document template management is currently being migrated to the new system.</p>
+    </div>
+  );
 }

@@ -63,13 +63,13 @@ export default function TeamForm({ team, companies, supervisors, onSubmit, onCan
           </label>
           <select
             name="companyId"
-            defaultValue={(team as TeamWithRelations)?.company?.id || ""}
+            defaultValue={(team as TeamWithRelations)?.company?._id || ""}
             disabled={isPending}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
           >
             <option value="">Select a company</option>
             {companies.map((company) => (
-              <option key={company.id} value={company.id}>
+              <option key={company._id} value={company._id}>
                 {company.name}
               </option>
             ))}
@@ -82,13 +82,13 @@ export default function TeamForm({ team, companies, supervisors, onSubmit, onCan
           </label>
           <select
             name="supervisorId"
-            defaultValue={(team as TeamWithRelations)?.supervisor?.id || ""}
+            defaultValue={(team as TeamWithRelations)?.supervisor?._id || ""}
             disabled={isPending}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
           >
             <option value="">Select a supervisor</option>
             {supervisors.map((user) => (
-              <option key={user.id} value={user.profile?.id}>
+              <option key={user._id} value={user.profile?._id}>
                 {user.profile?.name || user.email}
               </option>
             ))}

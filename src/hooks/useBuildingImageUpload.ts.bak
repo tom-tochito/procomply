@@ -1,0 +1,36 @@
+"use client";
+
+import { useState } from "react";
+import { uploadBuildingImageAction } from "@/features/buildings/actions/upload-building-image.action";
+
+export function useBuildingImageUpload() {
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const uploadImage = async (file: File, buildingId: string) => {
+    setIsUploading(true);
+    setError(null);
+
+    try {
+      const result = await uploadBuildingImageAction(file, buildingId);
+
+      if (!result.success) {
+        throw new Error(result.error || "Upload failed");
+      }
+
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Upload failed";
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  return {
+    uploadImage,
+    isUploading,
+    error,
+  };
+}

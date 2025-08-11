@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@auth/core": "^0.40.0",
+    "@aws-sdk/client-s3": "^3.864.0",
     "@convex-dev/auth": "^0.0.88",
     "@headlessui/react": "^2.2.2",
     "@opennextjs/cloudflare": "^1.3.1",
@@ -25,7 +26,8 @@
     "next": "15.1.6",
     "react": "^19.0.0",
     "react-chartjs-2": "^5.3.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "sonner": "^2.0.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

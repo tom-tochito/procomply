@@ -445,7 +445,7 @@ const DocumentDetailsDialog: React.FC<DocumentDetailsDialogProps> = ({
                       <p className="text-gray-500 text-xs mb-0.5">
                         Document ID:
                       </p>
-                      <p className="text-gray-800 font-medium">{document.id}</p>
+                      <p className="text-gray-800 font-medium">{document._id}</p>
                     </div>
                     <div>
                       <p className="text-gray-500 text-xs mb-0.5">MIME Type:</p>

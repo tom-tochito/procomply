@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { createBuildingAction } from "@/features/buildings/actions/buildings.actions";
+import React, { useEffect, useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "~/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Tenant } from "@/features/tenant/models";
 import { Division } from "@/features/divisions/models";
-import { FormState } from "@/common/types/form.types";
 import BuildingForm from "./BuildingForm";
+import { toast } from "sonner";
 
 interface AddBuildingModalProps {
   isOpen: boolean;
@@ -22,76 +23,98 @@ export default function AddBuildingModal({
   divisions,
 }: AddBuildingModalProps) {
   const router = useRouter();
-  const [successState, setSuccessState] = React.useState(false);
+  const [successState, setSuccessState] = useState(false);
+  const createBuilding = useMutation(api.buildings.createBuilding);
 
-  const handleSubmit = async (prevState: FormState, formData: FormData) => {
+  const handleSubmit = async (prevState: { error: string | null; success: boolean }, formData: FormData) => {
     try {
-      const result = await createBuildingAction(tenant, formData);
+      // Extract form data
+      const name = formData.get("name") as string;
+      const internalCode = formData.get("internalCode") as string;
+      const divisionId = formData.get("divisionId") as string;
+      const complexId = formData.get("complexId") as string;
+      const address = formData.get("address") as string;
+      const city = formData.get("city") as string;
+      const country = formData.get("country") as string;
+      const templateId = formData.get("templateId") as string;
+
+      // Create building using Convex
+      // Additional fields are stored in the data property
+      const buildingData = {
+        internalCode,
+        complexId,
+        address,
+        city,
+        country,
+      };
+
+      await createBuilding({
+        name,
+        divisionId: divisionId ? divisionId as any : undefined,
+        templateId: templateId ? templateId as any : undefined,
+        data: buildingData,
+      });
+
+      setSuccessState(true);
+      toast.success("Building created successfully");
+      router.refresh();
       
-      if (result.success) {
-        setSuccessState(true);
-        return { error: null, success: true };
-      } else {
-        return { error: result.error || "Failed to create building", success: false };
-      }
-    } catch (error) {
-      console.error("Error saving building:", error);
-      return { error: "Failed to create building", success: false };
+      return {
+        success: true,
+        error: null,
+      };
+    } catch (error: unknown) {
+      console.error("Error creating building:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to create building",
+      };
     }
   };
 
-  // Handle successful submission
   useEffect(() => {
     if (successState) {
-      router.refresh();
-      onClose();
-      setSuccessState(false);
+      const timer = setTimeout(() => {
+        onClose();
+        setSuccessState(false);
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [successState, router, onClose]);
+  }, [successState, onClose]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center p-4 animate-dialog-enter">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl relative max-h-[90vh] overflow-y-auto">
-        {/* Modal Header */}
-        <div className="flex justify-between items-center p-4 md:p-5 border-b sticky top-0 bg-white z-10">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Add New Building
-          </h3>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Add New Building</h2>
           <button
-            type="button"
-            className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
             onClick={onClose}
-            aria-label="Close modal"
+            className="text-gray-500 hover:text-gray-700"
           >
             <svg
-              className="w-3 h-3"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
               fill="none"
-              viewBox="0 0 14 14"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
               <path
-                stroke="currentColor"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth="2"
-                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
               />
             </svg>
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-4 md:p-5">
-          <BuildingForm 
-            divisions={divisions}
-            tenant={tenant}
-            onSubmit={handleSubmit} 
-            onCancel={onClose}
-          />
-        </div>
+        <BuildingForm
+          divisions={divisions || []}
+          tenant={{ id: tenant._id, name: tenant.name, slug: tenant.slug }}
+          onSubmit={handleSubmit}
+          onCancel={onClose}
+        />
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 import { getCurrentUserTenant } from "./tenants";
 import { getUserIdentity } from "./auth";
 
@@ -168,10 +169,8 @@ export const createTask = mutation({
       throw new Error("Not authenticated");
     }
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_tokenIdentifier", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
-      .unique();
+    const userId = identity.subject as Id<"users">;
+    const user = await ctx.db.get(userId);
 
     if (!user) {
       throw new Error("User not found");

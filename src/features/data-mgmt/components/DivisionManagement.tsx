@@ -1,26 +1,22 @@
 "use client";
 
 import React, { useState } from "react";
+import { useQuery } from "convex/react";
+import { api } from "~/convex/_generated/api";
 import CompanySearch from "./CompanySearch";
 import DivisionTable from "@/features/division/components/DivisionTable";
 import AddDivisionModal from "@/features/divisions/components/AddDivisionModal";
 import { Plus } from "lucide-react";
-import { Tenant } from "@/features/tenant/models";
-import { DivisionWithRelations } from "@/features/divisions/models";
 
-interface DivisionManagementProps {
-  initialDivisions: DivisionWithRelations[];
-  tenant: Tenant;
-}
-
-export default function DivisionManagement({
-  initialDivisions,
-  tenant,
-}: DivisionManagementProps) {
+export default function DivisionManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  const filteredDivisions = initialDivisions.filter((division) => {
+  // Fetch divisions and tenant data
+  const divisions = useQuery(api.divisions.getDivisions, {}) || [];
+  const tenant = useQuery(api.tenants.getCurrentTenant, {});
+
+  const filteredDivisions = divisions.filter((division) => {
     if (
       searchTerm &&
       !division.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -30,26 +26,37 @@ export default function DivisionManagement({
     return true;
   });
 
+  if (!tenant) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <>
-      <div className="flex flex-wrap gap-3 mb-6">
-        <CompanySearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+    <div className="flex flex-col gap-6">
+      {/* Search and Add Button */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex-1 max-w-md">
+          <CompanySearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        </div>
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="px-4 py-2 bg-[#F30] text-white rounded-md hover:bg-[#E62E00] transition-colors flex items-center gap-2"
+          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#7600FF] hover:bg-[#6600e5] rounded-md transition-colors"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4 mr-2" />
           Add Division
         </button>
       </div>
 
-      <DivisionTable divisions={filteredDivisions} searchTerm={searchTerm} />
+      {/* Divisions Table */}
+      <div className="bg-white rounded-lg shadow">
+        <DivisionTable divisions={filteredDivisions} />
+      </div>
 
+      {/* Add Division Modal */}
       <AddDivisionModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         tenant={tenant}
       />
-    </>
+    </div>
   );
 }

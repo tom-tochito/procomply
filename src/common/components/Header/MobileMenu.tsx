@@ -14,12 +14,14 @@ import {
   X,
 } from "lucide-react";
 import type { Tenant } from "@/features/tenant/models";
+import { useLogout } from "~/src/hooks/useLogout";
 
 interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
   tenantSlug: string;
   tenant?: Tenant;
+  user?: any;
 }
 
 const DATA_MGMT_ITEMS: Array<{
@@ -38,6 +40,7 @@ const DATA_MGMT_ITEMS: Array<{
 export function MobileMenu({ isOpen, onClose, tenantSlug, tenant }: MobileMenuProps) {
   const [dataMgmtOpen, setDataMgmtOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const logout = useLogout();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -70,8 +73,7 @@ export function MobileMenu({ isOpen, onClose, tenantSlug, tenant }: MobileMenuPr
 
   const handleLogout = async () => {
     if (!tenant) return;
-    const { logoutAction } = await import("@/features/auth");
-    await logoutAction(tenant);
+    await logout(generateTenantRedirectUrl(tenant.slug, "/login"));
   };
 
   const closeMobileMenu = () => {

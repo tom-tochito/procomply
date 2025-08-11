@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { db } from "~/lib/db";
-import { id } from "@instantdb/react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
 import { Tenant } from "@/features/tenant/models";
 import { Country } from "../models";
-import { getCurrentTimestamp } from "@/common/utils/date";
-import { startTransition } from "react";
 import SearchBar from "./SearchBar";
 import PageHeader from "./PageHeader";
 import CountryTable from "./CountryTable";
@@ -21,26 +20,19 @@ export default function CountryManagementDB({ tenant }: CountryManagementDBProps
   const [formOpen, setFormOpen] = useState(false);
   const [editingCountry, setEditingCountry] = useState<Country | null>(null);
 
-  // Fetch countries from InstantDB
-  const { data } = db.useQuery({
-    countries: {
-      $: {
-        where: {
-          "tenant.id": tenant.id,
-        },
-        order: {
-          code: "asc",
-        },
-      },
-    },
-  });
+  const createCountry = useMutation(api.countries.createCountry);
+  const updateCountry = useMutation(api.countries.updateCountry);
+  const deleteCountry = useMutation(api.countries.deleteCountry);
 
-  const countries = data?.countries || [];
+  // Fetch countries from Convex
+  const countries = useQuery(api.countries.getCountries, {
+    tenantId: tenant._id as Id<"tenants">,
+  }) || [];
 
   const filteredCountries = countries.filter(
     (country) =>
       country.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      country.description.toLowerCase().includes(searchTerm.toLowerCase())
+      country.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleEdit = (country: Country) => {
@@ -48,42 +40,39 @@ export default function CountryManagementDB({ tenant }: CountryManagementDBProps
     setFormOpen(true);
   };
 
-  const handleSave = (countryData: Omit<Country, "id">) => {
-    startTransition(() => {
+  const handleSave = async (countryData: Omit<Country, "_id" | "_creationTime">) => {
+    try {
       if (editingCountry) {
         // Update existing country
-        db.transact([
-          db.tx.countries[editingCountry.id].update({
-            code: countryData.code,
-            description: countryData.description,
-            updatedAt: getCurrentTimestamp(),
-          }),
-        ]);
+        await updateCountry({
+          countryId: editingCountry._id as Id<"countries">,
+          code: countryData.code,
+          name: countryData.name,
+        });
       } else {
         // Create new country
-        const newCountryId = id();
-        db.transact([
-          db.tx.countries[newCountryId]
-            .update({
-              code: countryData.code,
-              description: countryData.description,
-              isActive: true,
-              createdAt: getCurrentTimestamp(),
-              updatedAt: getCurrentTimestamp(),
-            })
-            .link({ tenant: tenant.id }),
-        ]);
+        await createCountry({
+          code: countryData.code,
+          name: countryData.name,
+          tenantId: tenant._id as Id<"tenants">,
+        });
       }
-    });
-    setFormOpen(false);
-    setEditingCountry(null);
+      setFormOpen(false);
+      setEditingCountry(null);
+    } catch (error) {
+      console.error("Error saving country:", error);
+    }
   };
 
-  const handleDelete = (country: Country) => {
-    if (window.confirm(`Are you sure you want to delete "${country.description}"?`)) {
-      startTransition(() => {
-        db.transact([db.tx.countries[country.id].delete()]);
-      });
+  const handleDelete = async (country: Country) => {
+    if (window.confirm(`Are you sure you want to delete "${country.name}"?`)) {
+      try {
+        await deleteCountry({
+          countryId: country._id as Id<"countries">,
+        });
+      } catch (error) {
+        console.error("Error deleting country:", error);
+      }
     }
   };
 
@@ -109,7 +98,7 @@ export default function CountryManagementDB({ tenant }: CountryManagementDBProps
       <SearchBar
         value={searchTerm}
         onChange={setSearchTerm}
-        placeholder="Search by code or description..."
+        placeholder="Search by code or name..."
       />
 
       <CountryTable
@@ -127,7 +116,7 @@ export default function CountryManagementDB({ tenant }: CountryManagementDBProps
           onClose={handleClose}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onSave={handleSave as any}
-          editData={editingCountry ? { code: editingCountry.code, description: editingCountry.description } : undefined}
+          editData={editingCountry ? { code: editingCountry.code, name: editingCountry.name } : undefined}
         />
       )}
     </div>

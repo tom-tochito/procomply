@@ -1,51 +1,47 @@
+"use client";
+
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import CompanyManagement from "@/features/data-mgmt/components/CompanyManagement";
-import { getCompaniesByTenant } from "@/features/companies/repository/companies.repository";
-import { requireAuth } from "@/features/auth";
-import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
+import { useParams } from "next/navigation";
 
-interface CompanyPageProps {
-  params: Promise<{
-    tenant: string;
-  }>;
-}
-
-export default async function CompanyPage({ params }: CompanyPageProps) {
-  const { tenant } = await params;
-
-  // Get tenant data
-  const tenantData = await findTenantBySlug(tenant);
-  if (!tenantData) {
-    throw new Error("Tenant not found");
-  }
-
-  // Require authentication
-  await requireAuth(tenantData);
-
-  // Fetch companies from InstantDB
-  const companies = await getCompaniesByTenant(tenantData);
+export default function CompanyPage() {
+  const params = useParams();
+  const tenant = params.tenant as string;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header with Navigation */}
         <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-            Company
-          </h1>
-          <div className="flex items-center text-sm text-gray-600 mt-2">
-            <Link
-              href={generateTenantRedirectUrl(tenant, "/dashboard")}
-              className="hover:text-blue-600"
-            >
-              <span>Data Mgmt</span>
-            </Link>
-            <span className="mx-2">/</span>
-            <span>Company</span>
-          </div>
+          <nav className="text-sm mb-4">
+            <ol className="list-none p-0 inline-flex">
+              <li className="flex items-center">
+                <Link
+                  href={generateTenantRedirectUrl(tenant, "/")}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  Home
+                </Link>
+                <span className="mx-2 text-gray-400">/</span>
+              </li>
+              <li className="flex items-center">
+                <Link
+                  href={generateTenantRedirectUrl(tenant, "/data-mgmt")}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  Data Management
+                </Link>
+                <span className="mx-2 text-gray-400">/</span>
+              </li>
+              <li className="text-gray-700">Company</li>
+            </ol>
+          </nav>
+          <h1 className="text-3xl font-bold text-gray-900">Company Management</h1>
         </div>
 
-        <CompanyManagement initialCompanies={companies} tenant={tenantData} />
+        {/* Company Management Component */}
+        <CompanyManagement />
       </div>
     </div>
   );

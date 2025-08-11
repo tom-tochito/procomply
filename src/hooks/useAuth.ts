@@ -6,7 +6,7 @@ import { api } from "../../convex/_generated/api";
 
 export function useAuth() {
   const { signIn, signOut } = useAuthActions();
-  const user = useQuery(api.users.viewer);
+  const user = useQuery(api.users.viewer, {});
   
   return {
     user,

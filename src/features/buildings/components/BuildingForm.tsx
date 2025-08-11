@@ -2,10 +2,11 @@
 
 import React, { useActionState, useRef, useState, useEffect } from "react";
 import Image from "next/image";
+import { useQuery } from "convex/react";
+import { api } from "~/convex/_generated/api";
 import type { Building, BuildingWithDivision, BuildingWithTemplate } from "@/features/buildings/models";
 import type { Division } from "@/features/divisions/models";
 import type { TemplateField } from "@/features/templates/models";
-import { db } from "~/lib/db";
 import DynamicFieldRenderer from "./DynamicFieldRenderer";
 
 interface BuildingFormProps {
@@ -28,30 +29,15 @@ export default function BuildingForm({ building, divisions, tenant, onSubmit, on
   );
   
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>(
-    (building as BuildingWithTemplate)?.template?.id || ""
+    (building as BuildingWithTemplate)?.template?._id || ""
   );
   const [templateData, setTemplateData] = useState<Record<string, unknown>>(
     building?.data || {}
   );
 
   // Fetch templates for the current tenant
-  const { data: templatesData, isLoading: templatesLoading, error: templatesError } = db.useQuery({
-    templates: {
-      $: {
-        where: {
-          "tenant.id": tenant.id,
-          type: "building",
-          isActive: true,
-        },
-        order: {
-          name: "asc",
-        },
-      },
-    },
-  });
-
-  const templates = templatesData?.templates || [];
-  const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
+  const templates = useQuery(api.templates.getTemplates, { type: "building" }) || [];
+  const selectedTemplate = templates.find(t => t._id === selectedTemplateId);
 
   // Update template data when template changes
   useEffect(() => {
@@ -113,36 +99,24 @@ export default function BuildingForm({ building, divisions, tenant, onSubmit, on
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Building Template *
               </label>
-              {templatesLoading ? (
-                <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
-                  <span className="text-gray-500">Loading templates...</span>
-                </div>
-              ) : templatesError ? (
-                <div className="w-full px-3 py-2 border border-red-300 rounded-md bg-red-50">
-                  <span className="text-red-600">Error loading templates</span>
-                </div>
-              ) : (
-                <>
-                  <select
-                    value={selectedTemplateId}
-                    onChange={(e) => setSelectedTemplateId(e.target.value)}
-                    disabled={isPending || templatesLoading}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#7600FF] focus:border-[#7600FF]"
-                    required
-                  >
-                    <option value="">Select a template</option>
-                    {templates.map((template) => (
-                      <option key={template.id} value={template.id}>
-                        {template.name}
-                      </option>
-                    ))}
-                  </select>
-                  {templates.length === 0 && (
-                    <p className="text-xs text-amber-600 mt-1">
-                      No templates found. Please create a template first in Template Management.
-                    </p>
-                  )}
-                </>
+              <select
+                value={selectedTemplateId}
+                onChange={(e) => setSelectedTemplateId(e.target.value)}
+                disabled={isPending}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#7600FF] focus:border-[#7600FF]"
+                required
+              >
+                <option value="">Select a template</option>
+                {templates.map((template) => (
+                  <option key={template._id} value={template._id}>
+                    {template.name}
+                  </option>
+                ))}
+              </select>
+              {templates.length === 0 && (
+                <p className="text-xs text-amber-600 mt-1">
+                  No templates found. Please create a template first in Template Management.
+                </p>
               )}
               <p className="text-xs text-gray-500 mt-1">
                 Templates define which fields are available for this building
@@ -176,13 +150,13 @@ export default function BuildingForm({ building, divisions, tenant, onSubmit, on
             </label>
             <select
               name="divisionId"
-              defaultValue={(building && 'divisionEntity' in building) ? building.divisionEntity?.id : building?.division || ""}
+              defaultValue={(building && 'divisionEntity' in building) ? building.divisionEntity?._id : building?.division || ""}
               disabled={isPending}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#7600FF] focus:border-[#7600FF]"
             >
               <option value="">Select a division</option>
               {divisions?.map((division) => (
-                <option key={division.id} value={division.id}>
+                <option key={division._id} value={division._id}>
                   {division.name}
                 </option>
               ))}

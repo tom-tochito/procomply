@@ -229,6 +229,36 @@ Templates use a `fields` array in JSON format with typed TemplateField[]. Each f
 - Validate field keys are unique within template
 - Preview the generated form before saving
 
+## 16. File Upload Pattern
+
+File uploads use server actions that handle both Cloudflare R2 storage and Convex metadata in a single operation:
+
+1. **Server Actions for Uploads**: Create focused server actions for specific upload tasks
+   ```typescript
+   // Good: Task-specific upload action
+   export async function uploadDocumentAction(params: {
+     file: File;
+     buildingId: string;
+     category?: string;
+   }) {
+     // Upload to R2
+     // Create Convex record
+   }
+   
+   // Bad: Generic upload with complex metadata
+   export async function uploadFileAction(file: File, metadata: ComplexMetadata)
+   ```
+
+2. **File Storage Structure**: 
+   - Store files in R2 with logical paths: `type/parentId/timestamp-filename`
+   - Examples: `documents/building123/1234567-report.pdf`, `buildings/abc123/image-1234567.jpg`
+
+3. **Atomic Operations**: Always upload file and create database record in the same action
+   - Use `fetchMutation` from `convex/nextjs` in server actions
+   - Return success/error status with relevant IDs
+
+4. **File URLs**: Use the `getStorageFileUrl` helper to construct public URLs from file paths
+
 # important-instruction-reminders
 Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.

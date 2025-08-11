@@ -12,7 +12,7 @@ interface CountryFormProps {
 // Define a type for the country data
 interface CountryData {
   code: string;
-  description: string;
+  name: string;
 }
 
 export default function CountryForm({
@@ -23,7 +23,7 @@ export default function CountryForm({
 }: CountryFormProps) {
   // Form state for all fields in the modal
   const [code, setCode] = useState(editData?.code || "");
-  const [description, setDescription] = useState(editData?.description || "");
+  const [name, setName] = useState(editData?.name || "");
 
   const handleClose = () => {
     onClose();
@@ -33,7 +33,7 @@ export default function CountryForm({
     e.preventDefault();
     onSave({
       code,
-      description,
+      name,
     });
   };
 
@@ -88,13 +88,13 @@ export default function CountryForm({
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Description*:
+                        Name*:
                       </label>
                       <input
                         type="text"
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
                         required
                         placeholder="e.g. England"
                       />

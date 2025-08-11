@@ -33,6 +33,7 @@ export default defineSchema({
   
   userProfiles: defineTable({
     userId: v.id("users"),
+    tenantId: v.optional(v.id("tenants")),
     role: v.string(), // "user" or "admin"
     name: v.optional(v.string()),
     phone: v.optional(v.string()),
@@ -331,7 +332,7 @@ export default defineSchema({
   countries: defineTable({
     tenantId: v.id("tenants"),
     code: v.string(),
-    description: v.string(),
+    name: v.string(),
     isActive: v.boolean(),
     createdAt: v.number(),
     updatedAt: v.number(),

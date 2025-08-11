@@ -1,6 +1,8 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 import { getUserIdentity } from "./auth";
+import { getCurrentUserTenant } from "./tenants";
 
 export const viewer = query({
   args: {},
@@ -33,10 +35,8 @@ export const viewer = query({
       return null;
     }
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_tokenIdentifier", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
-      .unique();
+    const userId = identity.subject as Id<"users">;
+    const user = await ctx.db.get(userId);
 
     if (!user) {
       return null;
@@ -55,8 +55,8 @@ export const viewer = query({
       .first();
 
     return {
-      id: user._id,
-      email: user.email ?? "",
+      id: user._id as Id<"users">,
+      email: (user.email ?? "") as string,
       profile,
       tenantId: userTenant?.tenantId ?? null,
     };
@@ -79,10 +79,8 @@ export const createUserProfile = mutation({
       throw new Error("Not authenticated");
     }
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_tokenIdentifier", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
-      .unique();
+    const userId = identity.subject as Id<"users">;
+    const user = await ctx.db.get(userId);
 
     if (!user) {
       throw new Error("User not found");
@@ -128,10 +126,8 @@ export const updateUserProfile = mutation({
       throw new Error("Not authenticated");
     }
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_tokenIdentifier", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
-      .unique();
+    const userId = identity.subject as Id<"users">;
+    const user = await ctx.db.get(userId);
 
     if (!user) {
       throw new Error("User not found");
@@ -152,6 +148,46 @@ export const updateUserProfile = mutation({
     });
 
     return null;
+  },
+});
+
+export const getUsers = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await getUserIdentity(ctx);
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    // Get current user's tenant
+    const tenantId = await getCurrentUserTenant(ctx);
+
+    // Get all users in the same tenant
+    const userTenants = await ctx.db
+      .query("userTenants")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
+
+    const users = await Promise.all(
+      userTenants.map(async (ut) => {
+        const user = await ctx.db.get(ut.userId);
+        if (!user) return null;
+
+        const profile = await ctx.db
+          .query("userProfiles")
+          .withIndex("by_userId", (q) => q.eq("userId", user._id))
+          .first();
+
+        return {
+          _id: user._id,
+          email: user.email,
+          name: user.name,
+          profile,
+        };
+      })
+    );
+
+    return users.filter(Boolean);
   },
 });
 
