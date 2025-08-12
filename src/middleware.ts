@@ -50,6 +50,19 @@ export default convexAuthNextjsMiddleware(async (request: NextRequest, ctx: any)
   const { pathname } = request.nextUrl;
   const subdomain = extractSubdomain(request);
 
+  // Handle path-based tenant routes (e.g., /tenant/play/dashboard)
+  if (pathname.startsWith("/tenant/")) {
+    const pathParts = pathname.split("/");
+    const tenantSlug = pathParts[2]; // Extract tenant from path
+    
+    if (tenantSlug && !ctx.isAuthenticated && !isPublicRoute(pathname)) {
+      // Redirect to login page for this tenant
+      return NextResponse.redirect(
+        new URL(`/tenant/${tenantSlug}/login`, request.url)
+      );
+    }
+  }
+
   if (subdomain) {
     // Block access to admin page from subdomains
     if (pathname.startsWith("/admin")) {
