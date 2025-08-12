@@ -2,8 +2,9 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import type { Tenant } from "@/features/tenant/models";
-import { useLogout } from "@/features/auth/hooks/useLogout";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
+import { useRouter } from "next/navigation";
 
 interface UserAvatarProps {
   user?: { _id?: string; email?: string; name?: string; role?: string } | null;
@@ -13,7 +14,8 @@ interface UserAvatarProps {
 export function UserAvatar({ user, tenant }: UserAvatarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const logout = useLogout();
+  const { signOut } = useAuthActions();
+  const router = useRouter();
 
   const getInitials = () => {
     if (user?.name) {
@@ -49,7 +51,8 @@ export function UserAvatar({ user, tenant }: UserAvatarProps) {
 
   const handleLogout = async () => {
     if (!tenant) return;
-    await logout(generateTenantRedirectUrl(tenant.slug, "/login"));
+    await signOut();
+    router.push(generateTenantRedirectUrl(tenant.slug, "/login"));
   };
 
   return (

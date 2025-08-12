@@ -1,9 +1,7 @@
 import Image from "next/image";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import logo from "@/common/assets/images/logo/dark.png";
 import { LoginForm } from "@/features/auth/components/LoginForm";
-import { getAuthCookies } from "@/features/auth";
-import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import { findTenantBySlug } from "@/features/tenant/repository";
 
 interface PageProps {
@@ -12,9 +10,6 @@ interface PageProps {
 
 export default async function LoginPage({ params }: PageProps) {
   const { tenant: slug } = await params;
-
-  const auth = await getAuthCookies();
-  if (auth) redirect(generateTenantRedirectUrl(slug, "/dashboard"));
 
   const tenant = await findTenantBySlug(slug);
   if (!tenant) notFound();

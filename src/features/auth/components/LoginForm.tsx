@@ -1,27 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useMutation } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
-import { Doc } from "../../../../convex/_generated/dataModel";
-import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
-import { useLocalStorage } from "../hooks/useLocalStorage";
-import { Id } from "../../../../convex/_generated/dataModel";
+import { useAuthActions } from "@convex-dev/auth/react";
 
-type Tenant = Doc<"tenants">;
-
-interface LoginFormProps {
-  tenant: Tenant;
-}
-
-export function LoginForm({ tenant }: LoginFormProps) {
-  const router = useRouter();
-  const signIn = useMutation(api.simpleAuth.signInWithEmail);
-  const [, setUserId] = useLocalStorage<Id<"users"> | null>("userId", null);
+export function LoginForm() {
+  const { signIn } = useAuthActions();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,21 +16,40 @@ export function LoginForm({ tenant }: LoginFormProps) {
     setIsLoading(true);
 
     try {
-      // Simple sign in - accepts any email
-      const result = await signIn({ email });
-      
-      // Store user ID in local storage
-      setUserId(result.userId);
-      
-      // Redirect to dashboard
-      router.push(generateTenantRedirectUrl(tenant.slug, "/dashboard"));
+      // Send magic link email
+      await signIn("resend", { email });
+      setIsSuccess(true);
     } catch (err) {
       console.error("Login error:", err);
-      setError("Failed to sign in. Please try again.");
+      setError("Failed to send magic link. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (isSuccess) {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-md bg-green-50 p-4 text-sm text-green-800">
+          <p className="font-semibold">Check your email!</p>
+          <p className="mt-1">
+            We've sent a magic link to {email}. Click the link in the email to
+            log in.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setIsSuccess(false);
+            setEmail("");
+          }}
+          className="w-full rounded border border-gray-300 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#F30] focus:ring-offset-2"
+        >
+          Try a different email
+        </button>
+      </div>
+    );
+  }
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
@@ -79,7 +85,7 @@ export function LoginForm({ tenant }: LoginFormProps) {
         disabled={isLoading}
         className="w-full rounded bg-[#F30] py-2 text-sm font-semibold text-white hover:bg-[#E02D00] focus:outline-none focus:ring-2 focus:ring-[#F30] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isLoading ? "Signing in..." : "Sign In"}
+        {isLoading ? "Sending magic link..." : "Send Magic Link"}
       </button>
     </form>
   );

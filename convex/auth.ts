@@ -1,14 +1,6 @@
-import { auth } from "./auth.config";
+import Resend from "@auth/core/providers/resend";
+import { convexAuth } from "@convex-dev/auth/server";
 
-export const { getSessionId } = auth;
-
-// Custom getUserIdentity function
-export async function getUserIdentity(ctx: { auth: any }) {
-  const userId = await auth.getUserId(ctx);
-  if (!userId) return null;
-  
-  return {
-    subject: userId,
-    tokenIdentifier: userId,
-  };
-}
+export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
+  providers: [Resend],
+});

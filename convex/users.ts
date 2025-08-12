@@ -2,13 +2,32 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { getCurrentUserTenant } from "./tenants";
+import { auth } from "./auth";
 
-// This query is deprecated - use simpleAuth.getCurrentUser instead
+// Get the current authenticated user
 export const viewer = query({
   args: {},
-  returns: v.null(),
-  handler: async () => {
-    return null;
+  returns: v.union(
+    v.object({
+      _id: v.id("users"),
+      _creationTime: v.number(),
+      email: v.string(),
+      emailVerified: v.optional(v.boolean()),
+      name: v.optional(v.string()),
+      role: v.optional(v.string()),
+      phone: v.optional(v.string()),
+      phoneMobile: v.optional(v.string()),
+      position: v.optional(v.string()),
+      companyId: v.optional(v.id("companies")),
+    }),
+    v.null()
+  ),
+  handler: async (ctx) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return null;
+    
+    const user = await ctx.db.get(userId);
+    return user || null;
   },
 });
 

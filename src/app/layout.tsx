@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { ConvexClientProvider } from "@/lib/ConvexClientProvider";
 
 const inter = Inter({
@@ -21,7 +22,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className={`${inter.variable} antialiased h-full`}>
-        <ConvexClientProvider>{children}</ConvexClientProvider>
+        <ConvexAuthNextjsServerProvider>
+          <ConvexClientProvider>
+            {children}
+          </ConvexClientProvider>
+        </ConvexAuthNextjsServerProvider>
       </body>
     </html>
   );

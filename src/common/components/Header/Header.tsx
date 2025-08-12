@@ -11,7 +11,8 @@ import type { Tenant } from "@/features/tenant/models";
 import { UserAvatar } from "./UserAvatar";
 import { NavigationLinks } from "./NavigationLinks";
 import { MobileMenu } from "./MobileMenu";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useQuery } from "convex/react";
+import { api } from "~/convex/_generated/api";
 
 interface HeaderProps {
   tenant: Tenant;
@@ -23,7 +24,7 @@ export default function Header({ tenant }: HeaderProps) {
   const tenantSlug = paramsHook.tenant as string;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const { user } = useAuth();
+  const user = useQuery(api.users.viewer);
 
   const isLoginPage = pathname.includes("/login");
   if (isLoginPage) return null;

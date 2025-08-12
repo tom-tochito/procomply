@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { convexAuthNextjsMiddleware } from "@convex-dev/auth/nextjs/server";
 import { ROOT_DOMAIN } from "~/src/common/constants";
 
 function extractSubdomain(request: NextRequest): string | null {
@@ -40,7 +41,12 @@ function extractSubdomain(request: NextRequest): string | null {
   return isSubdomain ? hostname.replace(`.${formattedRootDomain}`, "") : null;
 }
 
-export async function middleware(request: NextRequest) {
+const isPublicRoute = (pathname: string): boolean => {
+  // Allow login page and auth endpoints
+  return pathname.includes("/login") || pathname.startsWith("/api/auth");
+};
+
+export default convexAuthNextjsMiddleware(async (request: NextRequest, ctx: any) => {
   const { pathname } = request.nextUrl;
   const subdomain = extractSubdomain(request);
 
@@ -50,15 +56,22 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
+    // Check authentication for tenant routes
+    const tenantPath = `/tenant/${subdomain}${pathname}`;
+    if (!ctx.isAuthenticated && !isPublicRoute(tenantPath)) {
+      // Redirect to login page
+      return NextResponse.redirect(
+        new URL(`/tenant/${subdomain}/login`, request.url)
+      );
+    }
+
     // Rewrite to tenant
-    return NextResponse.rewrite(
-      new URL(`/tenant/${subdomain}${pathname}`, request.url)
-    );
+    return NextResponse.rewrite(new URL(tenantPath, request.url));
   }
 
   // On the root domain, allow normal access
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: ["/((?!api|_next|[\\w-]+\\.\\w+).*)"],
