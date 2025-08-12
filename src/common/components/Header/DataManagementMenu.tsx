@@ -23,7 +23,7 @@ const MENU_ITEMS: Array<{
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 }> = [
-  { href: "/data/buildings", label: "Building", icon: Building2 },
+  { href: "/data/building", label: "Building", icon: Building2 },
   { href: "/data/company", label: "Company", icon: Building2 },
   { href: "/data/division", label: "Division", icon: Menu },
   { href: "/data/task", label: "Task", icon: ClipboardList },
