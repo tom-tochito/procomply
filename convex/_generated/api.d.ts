@@ -13,15 +13,16 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as auth from "../auth.js";
 import type * as buildings from "../buildings.js";
 import type * as companies from "../companies.js";
 import type * as complianceChecks from "../complianceChecks.js";
 import type * as countries from "../countries.js";
 import type * as divisions from "../divisions.js";
 import type * as documents from "../documents.js";
+import type * as http from "../http.js";
 import type * as inspections from "../inspections.js";
 import type * as legislation from "../legislation.js";
-import type * as simpleAuth from "../simpleAuth.js";
 import type * as tasks from "../tasks.js";
 import type * as teams from "../teams.js";
 import type * as templateEntities from "../templateEntities.js";
@@ -38,15 +39,16 @@ import type * as users from "../users.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  auth: typeof auth;
   buildings: typeof buildings;
   companies: typeof companies;
   complianceChecks: typeof complianceChecks;
   countries: typeof countries;
   divisions: typeof divisions;
   documents: typeof documents;
+  http: typeof http;
   inspections: typeof inspections;
   legislation: typeof legislation;
-  simpleAuth: typeof simpleAuth;
   tasks: typeof tasks;
   teams: typeof teams;
   templateEntities: typeof templateEntities;

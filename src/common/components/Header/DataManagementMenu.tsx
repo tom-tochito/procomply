@@ -23,13 +23,13 @@ const MENU_ITEMS: Array<{
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 }> = [
-  { href: "/data-mgmt/buildings", label: "Building", icon: Building2 },
-  { href: "/data-mgmt/company", label: "Company", icon: Building2 },
-  { href: "/data-mgmt/division", label: "Division", icon: Menu },
-  { href: "/data-mgmt/task", label: "Task", icon: ClipboardList },
-  { href: "/data-mgmt/document", label: "Document", icon: FileText },
-  { href: "/data-mgmt/person", label: "Person", icon: UserCircle },
-  { href: "/data-mgmt/team", label: "Team", icon: Users },
+  { href: "/data/buildings", label: "Building", icon: Building2 },
+  { href: "/data/company", label: "Company", icon: Building2 },
+  { href: "/data/division", label: "Division", icon: Menu },
+  { href: "/data/task", label: "Task", icon: ClipboardList },
+  { href: "/data/document", label: "Document", icon: FileText },
+  { href: "/data/person", label: "Person", icon: UserCircle },
+  { href: "/data/team", label: "Team", icon: Users },
 ];
 
 export function DataManagementMenu({ tenantSlug }: DataManagementMenuProps) {

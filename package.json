@@ -10,8 +10,9 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
-    "seed": "dotenv -e .env.development -- tsx scripts/seed.ts"
+    "cloudflare:types": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "convex:dev": "convex dev",
+    "convex:deploy": "convex deploy"
   },
   "dependencies": {
     "@auth/core": "^0.40.0",
