@@ -54,6 +54,7 @@ export default defineSchema({
     .index("phone", ["phone"])
     .index("by_phoneVerificationTime", ["phoneVerificationTime"])
     .index("by_role", ["role"])
+    .index("by_company", ["companyId"])
     .index("by_createdAt", ["createdAt"])
     .index("by_updatedAt", ["updatedAt"]),
 

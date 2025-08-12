@@ -51,6 +51,7 @@ export default function EditBuildingModal({
 
       await updateBuilding({
         buildingId: building._id as any,
+        tenantId: building.tenantId,
         name,
         divisionId: divisionId ? divisionId as any : undefined,
         templateId: templateId ? templateId as any : undefined,

@@ -1,51 +1,26 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { requireTenantAccess } from "./helpers/tenantAccess";
 
 export const getCountries = query({
   args: {
-    tenantId: v.optional(v.id("tenants")),
+    tenantId: v.id("tenants"),
   },
+  returns: v.array(
+    v.object({
+      _id: v.id("countries"),
+      _creationTime: v.number(),
+      tenantId: v.id("tenants"),
+      code: v.string(),
+      name: v.string(),
+      isActive: v.boolean(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+  ),
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-    const user = await ctx.db.get(userId);
-    
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    let tenantId = args.tenantId;
-
-    // If no tenant specified, get user's tenants
-    if (!tenantId) {
-      const userTenants = await ctx.db
-        .query("userTenants")
-        .withIndex("by_user", (q) => q.eq("userId", userId))
-        .collect();
-      
-      if (userTenants.length === 0) {
-        throw new Error("User not assigned to any tenant");
-      }
-      
-      // Use the first tenant if not specified
-      tenantId = userTenants[0].tenantId;
-    } else {
-      // Check user has access to the specified tenant
-      const userTenant = await ctx.db
-        .query("userTenants")
-        .withIndex("by_user_and_tenant", (q) => 
-          q.eq("userId", userId).eq("tenantId", tenantId as Id<"tenants">)
-        )
-        .unique();
-        
-      if (!userTenant) {
-        throw new Error("Access denied to this tenant");
-      }
-    }
+    const { tenantId } = await requireTenantAccess(ctx, args.tenantId);
 
     return await ctx.db
       .query("countries")
@@ -56,49 +31,12 @@ export const getCountries = query({
 
 export const createCountry = mutation({
   args: {
+    tenantId: v.id("tenants"),
     code: v.string(),
     name: v.string(),
-    tenantId: v.optional(v.id("tenants")),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-    const user = await ctx.db.get(userId);
-    
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    let tenantId = args.tenantId;
-
-    // If no tenant specified, get user's tenants
-    if (!tenantId) {
-      const userTenants = await ctx.db
-        .query("userTenants")
-        .withIndex("by_user", (q) => q.eq("userId", userId))
-        .collect();
-      
-      if (userTenants.length === 0) {
-        throw new Error("User not assigned to any tenant");
-      }
-      
-      // Use the first tenant if not specified
-      tenantId = userTenants[0].tenantId;
-    } else {
-      // Check user has access to the specified tenant
-      const userTenant = await ctx.db
-        .query("userTenants")
-        .withIndex("by_user_and_tenant", (q) => 
-          q.eq("userId", userId).eq("tenantId", tenantId as Id<"tenants">)
-        )
-        .unique();
-        
-      if (!userTenant) {
-        throw new Error("Access denied to this tenant");
-      }
-    }
+    const { tenantId } = await requireTenantAccess(ctx, args.tenantId);
 
     const now = Date.now();
     
@@ -119,34 +57,16 @@ export const updateCountry = mutation({
     code: v.string(),
     name: v.string(),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-
     // Get the country to check tenant access
     const country = await ctx.db.get(args.countryId);
     if (!country) {
       throw new Error("Country not found");
     }
-    const user = await ctx.db.get(userId);
-    
-    if (!user) {
-      throw new Error("User not found");
-    }
 
-    // Check user has access to this tenant
-    const userTenant = await ctx.db
-      .query("userTenants")
-      .withIndex("by_user_and_tenant", (q) => 
-        q.eq("userId", userId).eq("tenantId", country.tenantId)
-      )
-      .unique();
-      
-    if (!userTenant) {
-      throw new Error("Access denied");
-    }
+    // Verify tenant access
+    await requireTenantAccess(ctx, country.tenantId);
 
     return await ctx.db.patch(args.countryId, {
       code: args.code,
@@ -160,34 +80,16 @@ export const deleteCountry = mutation({
   args: {
     countryId: v.id("countries"),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-
     // Get the country to check tenant access
     const country = await ctx.db.get(args.countryId);
     if (!country) {
       throw new Error("Country not found");
     }
-    const user = await ctx.db.get(userId);
-    
-    if (!user) {
-      throw new Error("User not found");
-    }
 
-    // Check user has access to this tenant
-    const userTenant = await ctx.db
-      .query("userTenants")
-      .withIndex("by_user_and_tenant", (q) => 
-        q.eq("userId", userId).eq("tenantId", country.tenantId)
-      )
-      .unique();
-      
-    if (!userTenant) {
-      throw new Error("Access denied");
-    }
+    // Verify tenant access
+    await requireTenantAccess(ctx, country.tenantId);
 
     return await ctx.db.delete(args.countryId);
   },

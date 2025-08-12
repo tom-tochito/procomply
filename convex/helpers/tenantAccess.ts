@@ -25,9 +25,9 @@ export async function getTenantAccess(
 
   const isAdmin = user.role === "admin";
 
-  // If no tenant specified, throw error - tenantId should always be provided
+  // Tenant ID must always be provided - it should come from the URL params
   if (!requestedTenantId) {
-    throw new Error("Tenant ID is required");
+    throw new Error("Tenant ID is required. It should be derived from the URL slug.");
   }
 
   // Admins can access any tenant
@@ -55,4 +55,13 @@ export async function requireTenantAccess(
   tenantId: Id<"tenants"> | undefined
 ) {
   return getTenantAccess(ctx, tenantId);
+}
+
+// For backward compatibility - when tenantId is optional in args
+export async function getTenantWithOptionalArg(
+  ctx: Context,
+  requestedTenantId: Id<"tenants"> | undefined
+): Promise<Id<"tenants">> {
+  const { tenantId } = await getTenantAccess(ctx, requestedTenantId);
+  return tenantId;
 }

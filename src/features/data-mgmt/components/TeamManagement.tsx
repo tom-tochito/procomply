@@ -14,8 +14,11 @@ export default function TeamManagement() {
 
   // Fetch data from Convex
   const tenant = useQuery(api.tenants.getCurrentTenant, {});
-  const teams = useQuery(api.teams.getTeams, {}) || [];
-  const companies = useQuery(api.companies.getCompanies, {}) || [];
+  const teams = useQuery(api.teams.getTeams, tenant ? { tenantId: tenant._id } : "skip") || [];
+  const companies = useQuery(
+    api.companies.getCompanies, 
+    tenant ? { tenantId: tenant._id } : "skip"
+  ) || [];
   const users = useQuery(api.users.getUsers, tenant ? { tenantId: tenant._id } : "skip") || [];
 
   // Transform teams data to include company and supervisor names

@@ -1,11 +1,12 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
-import { getCurrentUserTenant } from "./tenants";
+import { requireTenantAccess } from "./helpers/tenantAccess";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const getTeams = query({
   args: {
+    tenantId: v.id("tenants"),
     companyId: v.optional(v.id("companies")),
   },
   returns: v.array(
@@ -30,15 +31,7 @@ export const getTeams = query({
     })
   ),
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-    
-    const tenantId = await getCurrentUserTenant(ctx, userId);
-    if (!tenantId) {
-      throw new Error("No tenant found for user");
-    }
+    const { tenantId } = await requireTenantAccess(ctx, args.tenantId);
     
     let teams = await ctx.db
       .query("teams")
@@ -73,7 +66,10 @@ export const getTeams = query({
 });
 
 export const getTeam = query({
-  args: { teamId: v.id("teams") },
+  args: { 
+    tenantId: v.id("tenants"),
+    teamId: v.id("teams") 
+  },
   returns: v.union(
     v.object({
       _id: v.id("teams"),
@@ -95,13 +91,8 @@ export const getTeam = query({
     if (!team) return null;
 
     // Ensure user has access
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-    
-    const tenantId = await getCurrentUserTenant(ctx, userId);
-    if (!tenantId || team.tenantId !== tenantId) {
+    const { tenantId } = await requireTenantAccess(ctx, args.tenantId);
+    if (team.tenantId !== tenantId) {
       throw new Error("Access denied");
     }
 
@@ -123,6 +114,7 @@ export const getTeam = query({
 
 export const createTeam = mutation({
   args: {
+    tenantId: v.id("tenants"),
     companyId: v.optional(v.id("companies")),
     supervisorId: v.optional(v.id("users")),
     code: v.optional(v.string()),
@@ -130,15 +122,7 @@ export const createTeam = mutation({
   },
   returns: v.id("teams"),
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-    
-    const tenantId = await getCurrentUserTenant(ctx, userId);
-    if (!tenantId) {
-      throw new Error("No tenant found for user");
-    }
+    const { tenantId } = await requireTenantAccess(ctx, args.tenantId);
     const now = Date.now();
 
     return await ctx.db.insert("teams", {
@@ -155,6 +139,7 @@ export const createTeam = mutation({
 
 export const updateTeam = mutation({
   args: {
+    tenantId: v.id("tenants"),
     teamId: v.id("teams"),
     companyId: v.optional(v.id("companies")),
     supervisorId: v.optional(v.id("users")),
@@ -169,13 +154,8 @@ export const updateTeam = mutation({
     }
 
     // Ensure user has access
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-    
-    const tenantId = await getCurrentUserTenant(ctx, userId);
-    if (!tenantId || team.tenantId !== tenantId) {
+    const { tenantId } = await requireTenantAccess(ctx, args.tenantId);
+    if (team.tenantId !== tenantId) {
       throw new Error("Access denied");
     }
 
@@ -191,7 +171,10 @@ export const updateTeam = mutation({
 });
 
 export const deleteTeam = mutation({
-  args: { teamId: v.id("teams") },
+  args: { 
+    tenantId: v.id("tenants"),
+    teamId: v.id("teams") 
+  },
   returns: v.null(),
   handler: async (ctx, args) => {
     const team = await ctx.db.get(args.teamId);
@@ -200,13 +183,8 @@ export const deleteTeam = mutation({
     }
 
     // Ensure user has access
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-    
-    const tenantId = await getCurrentUserTenant(ctx, userId);
-    if (!tenantId || team.tenantId !== tenantId) {
+    const { tenantId } = await requireTenantAccess(ctx, args.tenantId);
+    if (team.tenantId !== tenantId) {
       throw new Error("Access denied");
     }
 

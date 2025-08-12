@@ -49,15 +49,8 @@ export function TaskModal({
         const assigneeId = formData.get("assigneeId") as string;
         const categoryId = formData.get("categoryId") as string;
 
-        // Get userId from localStorage (for testing)
-        const userId = localStorage.getItem("userId");
-        if (!userId) {
-          throw new Error("User not authenticated");
-        }
-
         await createTask({
           tenantId: tenant._id,
-          creatorId: userId.replace(/"/g, '') as Id<"users">, // Remove quotes from localStorage
           title,
           description,
           priority,

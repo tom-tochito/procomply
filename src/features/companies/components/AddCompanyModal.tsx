@@ -34,6 +34,7 @@ export default function AddCompanyModal({
 
       // Create company using Convex
       await createCompany({
+        tenantId: tenant._id,
         name,
         referral,
       });

@@ -44,6 +44,7 @@ export default function DocumentManagement({
   
   // Fetch documents from Convex
   const documents = useQuery(api.documents.getDocuments, {
+    tenantId: tenant._id,
     buildingId: selectedBuilding ? selectedBuilding as Id<"buildings"> : undefined,
   }) || [];
 

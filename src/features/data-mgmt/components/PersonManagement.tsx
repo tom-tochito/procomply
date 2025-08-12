@@ -16,7 +16,10 @@ export default function PersonManagement() {
   // Fetch data from Convex
   const tenant = useQuery(api.tenants.getCurrentTenant, {});
   const users = useQuery(api.users.getUsers, tenant ? { tenantId: tenant._id } : "skip") || [];
-  const companies = useQuery(api.companies.getCompanies, {}) || [];
+  const companies = useQuery(
+    api.companies.getCompanies, 
+    tenant ? { tenantId: tenant._id } : "skip"
+  ) || [];
 
   const categories = ["all", "internal", "contractor", "emergency", "supplier", "other"];
 

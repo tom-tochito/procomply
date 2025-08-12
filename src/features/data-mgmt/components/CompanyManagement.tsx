@@ -12,9 +12,14 @@ export default function CompanyManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Fetch companies and tenant data
-  const companies = useQuery(api.companies.getCompanies, {}) || [];
+  // Fetch tenant data first
   const tenant = useQuery(api.tenants.getCurrentTenant, {});
+  
+  // Fetch companies with tenantId
+  const companies = useQuery(
+    api.companies.getCompanies, 
+    tenant ? { tenantId: tenant._id } : "skip"
+  ) || [];
 
   const filteredCompanies = companies.filter((company) => {
     if (

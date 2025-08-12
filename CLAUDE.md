@@ -30,14 +30,14 @@ Component filenames must be descriptive of their function (e.g., ProfileCard.tsx
 
 ## 6. Styling and Theming
 
-- Styling: All styling must be done exclusively with Tailwind CSS classNames. Inline style attributes are forbidden.
-- Theming: The primary color for the UI theme must be #7600FF.
+- All styling must use Tailwind CSS classNames only. No inline styles.
+- Primary theme color: #7600FF
 
 ## 7. Project Configuration
 
-- Language: All code must be written in TypeScript (.tsx).
-- Package Manager: The project must be configured to use pnpm.
-- Build Integrity: The generated code and file structure must be valid and able to pass both `pnpm lint` and `pnpm build` commands without errors or warnings. Always run `pnpm build` after making significant changes to ensure the application compiles successfully.
+- Language: TypeScript (.tsx)
+- Package Manager: pnpm
+- Build Integrity: Code must pass `pnpm lint` and `pnpm build` without errors
 
 ## 8. Shadcn
 
@@ -75,7 +75,7 @@ Key Convex principles:
 - **Function Registration**: Use `query`, `mutation`, and `action` for public functions. Use `internalQuery`, `internalMutation`, and `internalAction` for private functions.
 - **Always use validators**: Include `args` and `returns` validators for all Convex functions. If no return, use `returns: v.null()`.
 - **Schema Definition**: Define your schema in `convex/schema.ts` using `defineSchema` and `defineTable`.
-- **No filter, use indexes**: Don't use `filter` in queries. Define indexes in the schema and use `withIndex` instead.
+- **No filter, use indexes**: Always use `withIndex` for queries instead of `filter()`. Define appropriate indexes in the schema.
 - **Transactions**: Use `ctx.db.insert`, `ctx.db.replace`, `ctx.db.patch`, and `ctx.db.delete` for mutations.
 
 Example Convex query:
@@ -134,11 +134,9 @@ All entity types must be derived from Convex schema using the generated types:
   - `getCurrentTimestamp()` - Get current time as timestamp
   - `dateInputToTimestamp()` - Convert HTML date input to timestamp
   - `timestampToDateInput()` - Convert timestamp to HTML date input value
-- Always pass full entity models to functions/components instead of just IDs
-  - Pass full `Tenant` object, not `tenantId`
-  - Pass full `Building` object, not `buildingId`
-  - Pass full `User` object, not `userId`
+- Always pass full entity models to functions/components instead of just IDs when the data is already available
   - This pattern improves type safety and reduces the need for additional queries
+  - Exception: Convex queries/mutations should receive IDs as parameters
 
 Example pattern:
 
@@ -269,6 +267,55 @@ File uploads use server actions that handle both Cloudflare R2 storage and Conve
    - Return success/error status with relevant IDs
 
 4. **File URLs**: Use the `getStorageFileUrl` helper to construct public URLs from file paths
+
+## 16. Multi-Tenant Architecture
+
+### Tenant Access Control
+
+All Convex queries and mutations must enforce tenant-based access control:
+
+1. **Required Tenant ID**: All queries and mutations that access tenant-scoped data MUST require `tenantId` as a parameter:
+   ```typescript
+   args: { 
+     tenantId: v.id("tenants"),
+     // other args...
+   }
+   ```
+
+2. **URL-Based Tenant System**: 
+   - All tenant-scoped URLs follow the pattern: `/tenant/[slug]/*`
+   - Tenant ID must be derived from the URL slug, never randomly selected
+   - Frontend components receive tenant data from server components or URL params
+
+3. **Access Control Helper**: Use the `requireTenantAccess` helper for all tenant-scoped operations:
+   ```typescript
+   import { requireTenantAccess } from "./helpers/tenantAccess";
+   
+   export const getSomeData = query({
+     args: { tenantId: v.id("tenants") },
+     handler: async (ctx, args) => {
+       const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, args.tenantId);
+       // Query implementation...
+     },
+   });
+   ```
+
+4. **Admin Access**: 
+   - Users with `role: "admin"` can access any tenant's data
+   - Regular users can only access tenants they're assigned to via the `userTenants` table
+
+5. **Frontend Pattern**:
+   ```typescript
+   // Server component gets tenant from URL
+   const { tenant: tenantSlug } = await params;
+   const tenant = await getTenantBySlug(tenantSlug);
+   
+   // Pass tenant to client components
+   <SomeComponent tenant={tenant} />
+   
+   // Client component uses tenant._id in queries
+   const data = useQuery(api.someQuery, { tenantId: tenant._id });
+   ```
 
 # important-instruction-reminders
 

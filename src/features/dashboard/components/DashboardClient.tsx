@@ -20,11 +20,11 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
 
   // Fetch dashboard data from Convex
   const buildings = useQuery(api.buildings.getBuildings, { tenantId }) || [];
-  const tasks = useQuery(api.tasks.getTasks, {}) || [];
+  const tasks = useQuery(api.tasks.getTasks, { tenantId }) || [];
   const divisions = useQuery(api.divisions.getDivisions, { tenantId }) || [];
-  const inspections = useQuery(api.inspections.getInspections, {}) || [];
-  const documents = useQuery(api.documents.getDocuments, {}) || [];
-  const complianceChecks = useQuery(api.complianceChecks.getComplianceChecks, {}) || [];
+  const inspections = useQuery(api.inspections.getInspections, { tenantId }) || [];
+  const documents = useQuery(api.documents.getDocuments, { tenantId }) || [];
+  const complianceChecks = useQuery(api.complianceChecks.getComplianceChecks, { tenantId }) || [];
 
   // Calculate statistics
   const totalBuildings = buildings.length;

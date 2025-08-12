@@ -85,7 +85,7 @@ export default function UploadDocumentDialog({
   );
   
   // Subscribe to buildings if tenant is provided
-  const buildingsData = useQuery(api.buildings.getBuildings, {});
+  const buildingsData = useQuery(api.buildings.getBuildings, tenant ? { tenantId: tenant._id } : "skip");
   const buildingsLoading = buildingsData === undefined;
   
   const buildings = buildingsData || [];
@@ -353,7 +353,7 @@ export default function UploadDocumentDialog({
                         </label>
                         <select
                           className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-all focus:border-[#F30] focus:outline-none focus:ring-2 focus:ring-[#F30]/20 hover:border-gray-400"
-                          name="buildingId"
+                          name="building"
                           value={building}
                           onChange={(e) => setBuilding(e.target.value)}
                           required

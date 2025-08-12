@@ -40,7 +40,7 @@ export default function BuildingsList({ tenant }: BuildingsListProps) {
   });
 
   // Fetch tasks for buildings
-  const tasks = useQuery(api.tasks.getTasks, {});
+  const tasks = useQuery(api.tasks.getTasks, { tenantId: tenant._id });
 
   // Transform buildings to include stats
   const buildingsWithStats = useMemo(() => {

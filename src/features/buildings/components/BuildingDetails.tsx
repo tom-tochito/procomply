@@ -41,14 +41,18 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
 
   // Fetch building data using Convex
-  const building = useQuery(api.buildings.getBuilding, { buildingId: buildingId as any });
+  const building = useQuery(api.buildings.getBuilding, { 
+    buildingId: buildingId as any,
+    tenantId: tenant._id 
+  });
   const divisions = useQuery(api.divisions.getDivisions, { tenantId: tenant._id }) || [];
-  const tasks = useQuery(api.tasks.getTasks, { buildingId: buildingId as any }) || [];
+  const tasks = useQuery(api.tasks.getTasks, { tenantId: tenant._id, buildingId: buildingId as any }) || [];
   const teams = useQuery(api.teams.getTeams, {}) || [];
   const users = useQuery(api.users.getUsers, { tenantId: tenant._id }) || [];
 
   // Calculate compliance
   const complianceChecks = useQuery(api.complianceChecks.getComplianceChecks, { 
+    tenantId: tenant._id,
     buildingId: buildingId as any 
   }) || [];
   

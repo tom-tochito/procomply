@@ -26,8 +26,8 @@ export default function ComplianceOverviewClient({
   // Fetch buildings, tasks, compliance checks, and divisions separately
   const buildings = useQuery(api.buildings.getBuildings, { tenantId: tenant._id }) || [];
   const divisions = useQuery(api.divisions.getDivisions, { tenantId: tenant._id }) || [];
-  const allTasks = useQuery(api.tasks.getTasks, {}) || [];
-  const allComplianceChecks = useQuery(api.complianceChecks.getComplianceChecks, {}) || [];
+  const allTasks = useQuery(api.tasks.getTasks, { tenantId: tenant._id }) || [];
+  const allComplianceChecks = useQuery(api.complianceChecks.getComplianceChecks, { tenantId: tenant._id }) || [];
   
   const buildingsLoading = buildings === undefined || divisions === undefined || 
                           allTasks === undefined || allComplianceChecks === undefined;

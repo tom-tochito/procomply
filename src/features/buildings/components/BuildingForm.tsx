@@ -36,7 +36,10 @@ export default function BuildingForm({ building, divisions, tenant, onSubmit, on
   );
 
   // Fetch templates for the current tenant
-  const templates = useQuery(api.templates.getTemplates, { type: "building" }) || [];
+  const templates = useQuery(api.templates.getTemplates, { 
+    tenantId: tenant.id as any,
+    type: "building" 
+  }) || [];
   const selectedTemplate = templates.find(t => t._id === selectedTemplateId);
 
   // Update template data when template changes
