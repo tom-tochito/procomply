@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { Doc } from "./_generated/dataModel";
 
 export const getDivisions = query({
   args: {
@@ -112,7 +113,7 @@ export const updateDivision = mutation({
       throw new Error("Access denied");
     }
 
-    const updates: any = { updatedAt: Date.now() };
+    const updates: Partial<Doc<"divisions">> = { updatedAt: Date.now() };
     if (args.name !== undefined) updates.name = args.name;
     if (args.type !== undefined) updates.type = args.type;
     if (args.description !== undefined) updates.description = args.description;

@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
+import { Doc, Id } from "./_generated/dataModel";
 import { requireTenantAccess } from "./helpers/tenantAccess";
 
 export const getTasks = query({
@@ -213,7 +213,7 @@ export const updateTask = mutation({
 
     const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, task.tenantId);
 
-    const updates: any = { updatedAt: Date.now() };
+    const updates: Partial<Doc<"tasks">> = { updatedAt: Date.now() };
     if (args.buildingId !== undefined) updates.buildingId = args.buildingId;
     if (args.templateId !== undefined) updates.templateId = args.templateId;
     if (args.assigneeId !== undefined) updates.assigneeId = args.assigneeId;

@@ -65,7 +65,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
           <h2 className="text-xl font-semibold text-gray-900">Contacts</h2>
           <button
             onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#7600FF] text-white rounded-lg hover:bg-[#6000CC] transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#F30] text-white rounded-lg hover:bg-[#D30] transition-colors"
           >
             <Plus className="h-4 w-4" />
             Add Contact
@@ -81,13 +81,13 @@ export default function ContactsTab({ building }: ContactsTabProps) {
               placeholder="Search contacts..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7600FF] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F30] focus:border-transparent"
             />
           </div>
           <select
             value={departmentFilter}
             onChange={(e) => setDepartmentFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7600FF] focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F30] focus:border-transparent"
           >
             <option value="all">All Departments</option>
             {departments.map((dept) => (
@@ -118,7 +118,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
           {!searchTerm && departmentFilter === "all" && (
             <button
               onClick={() => setShowAddModal(true)}
-              className="mt-4 text-[#7600FF] hover:text-[#6000CC] font-medium"
+              className="mt-4 text-[#F30] hover:text-[#D30] font-medium"
             >
               Add your first contact
             </button>
@@ -180,7 +180,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                     name="name"
                     defaultValue={editingContact?.name}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7600FF] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F30] focus:border-transparent"
                   />
                 </div>
 
@@ -192,7 +192,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                     type="text"
                     name="role"
                     defaultValue={editingContact?.role}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7600FF] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F30] focus:border-transparent"
                   />
                 </div>
 
@@ -204,7 +204,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                     type="email"
                     name="email"
                     defaultValue={editingContact?.email}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7600FF] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F30] focus:border-transparent"
                   />
                 </div>
 
@@ -216,7 +216,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                     type="tel"
                     name="phone"
                     defaultValue={editingContact?.phone}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7600FF] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F30] focus:border-transparent"
                   />
                 </div>
 
@@ -228,7 +228,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                     type="tel"
                     name="mobile"
                     defaultValue={editingContact?.mobile}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7600FF] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F30] focus:border-transparent"
                   />
                 </div>
 
@@ -240,7 +240,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                     type="text"
                     name="department"
                     defaultValue={editingContact?.department}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7600FF] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F30] focus:border-transparent"
                   />
                 </div>
 
@@ -252,7 +252,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                     name="notes"
                     rows={3}
                     defaultValue={editingContact?.notes}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7600FF] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F30] focus:border-transparent"
                   />
                 </div>
 
@@ -262,7 +262,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                       type="checkbox"
                       name="isPrimary"
                       defaultChecked={editingContact?.isPrimary ?? false}
-                      className="rounded border-gray-300 text-[#7600FF] focus:ring-[#7600FF]"
+                      className="rounded border-gray-300 text-[#F30] focus:ring-[#F30]"
                     />
                     <span className="text-sm text-gray-700">
                       Primary Contact
@@ -274,7 +274,7 @@ export default function ContactsTab({ building }: ContactsTabProps) {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 bg-[#7600FF] text-white py-2 px-4 rounded-lg hover:bg-[#6000CC] disabled:opacity-50"
+                    className="flex-1 bg-[#F30] text-white py-2 px-4 rounded-lg hover:bg-[#D30] disabled:opacity-50"
                   >
                     {isSubmitting
                       ? "Saving..."

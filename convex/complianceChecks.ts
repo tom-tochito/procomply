@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
+import { Doc, Id } from "./_generated/dataModel";
 import { requireTenantAccess } from "./helpers/tenantAccess";
 
 export const getComplianceChecks = query({
@@ -91,7 +91,7 @@ export const updateComplianceCheck = mutation({
 
     const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, check.tenantId);
 
-    const updates: any = { updatedAt: Date.now() };
+    const updates: Partial<Doc<"complianceChecks">> = { updatedAt: Date.now() };
     if (args.checkType !== undefined) updates.checkType = args.checkType;
     if (args.status !== undefined) updates.status = args.status;
     if (args.dueDate !== undefined) updates.dueDate = args.dueDate;

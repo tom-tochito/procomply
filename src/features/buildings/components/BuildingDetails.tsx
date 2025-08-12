@@ -8,6 +8,7 @@ import { getFileUrl } from "@/common/utils/file";
 import { TaskModal } from "@/features/tasks/components/TaskModal";
 import { useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
+import { Id } from "~/convex/_generated/dataModel";
 import { Tenant } from "@/features/tenant/models";
 import { TaskUI } from "@/features/tasks/models";
 import TabNavigation from "./TabNavigation";
@@ -42,18 +43,18 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
 
   // Fetch building data using Convex
   const building = useQuery(api.buildings.getBuilding, { 
-    buildingId: buildingId as any,
+    buildingId: buildingId as Id<"buildings">,
     tenantId: tenant._id 
   });
   const divisions = useQuery(api.divisions.getDivisions, { tenantId: tenant._id }) || [];
-  const tasks = useQuery(api.tasks.getTasks, { tenantId: tenant._id, buildingId: buildingId as any }) || [];
-  const teams = useQuery(api.teams.getTeams, {}) || [];
+  const tasks = useQuery(api.tasks.getTasks, { tenantId: tenant._id, buildingId: buildingId as Id<"buildings"> }) || [];
+  const teams = useQuery(api.teams.getTeams, { tenantId: tenant._id }) || [];
   const users = useQuery(api.users.getUsers, { tenantId: tenant._id }) || [];
 
   // Calculate compliance
   const complianceChecks = useQuery(api.complianceChecks.getComplianceChecks, { 
     tenantId: tenant._id,
-    buildingId: buildingId as any 
+    buildingId: buildingId as Id<"buildings"> 
   }) || [];
   
   const totalChecks = Object.keys(COMPLIANCE_CHECK_TYPES).length;
@@ -63,7 +64,7 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
   if (!building) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7600FF]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F30]"></div>
       </div>
     );
   }
@@ -173,26 +174,26 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
       case "contacts":
         return (
           <div className="mt-6">
-            <ContactsTab building={building as any} />
+            <ContactsTab building={building} />
           </div>
         );
       case "notes":
         return (
           <div className="mt-6">
-            <NotesTab building={building as any} />
+            <NotesTab building={building} />
           </div>
         );
       case "year-planner":
         return (
           <div className="mt-6">
-            <YearPlannerTab building={building as any} />
+            <YearPlannerTab building={building} />
           </div>
         );
       default:
         return (
           <div className="mt-6">
             <BuildingInfo
-              building={building as any}
+              building={building}
               divisions={divisions}
             />
           </div>
@@ -273,7 +274,7 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
         }}
         tenant={tenant}
         building={building}
-        task={editTask as any}
+        task={editTask}
         mode={modalMode}
       />
     </div>

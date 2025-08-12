@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
+import { Doc, Id } from "./_generated/dataModel";
 import { requireTenantAccess } from "./helpers/tenantAccess";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
@@ -159,7 +159,7 @@ export const updateTeam = mutation({
       throw new Error("Access denied");
     }
 
-    const updates: any = { updatedAt: Date.now() };
+    const updates: Partial<Doc<"teams">> = { updatedAt: Date.now() };
     if (args.companyId !== undefined) updates.companyId = args.companyId;
     if (args.supervisorId !== undefined) updates.supervisorId = args.supervisorId;
     if (args.code !== undefined) updates.code = args.code;

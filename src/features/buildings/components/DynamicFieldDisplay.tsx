@@ -70,7 +70,7 @@ export default function DynamicFieldDisplay({ field, value }: DynamicFieldDispla
               href={value}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#7600FF] hover:text-[#6600EE] underline"
+              className="text-[#F30] hover:text-[#D30] underline"
             >
               View File
             </a>

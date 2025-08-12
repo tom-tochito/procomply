@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "~/convex/_generated/api";
+import { Id } from "~/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
 import { Building } from "@/features/buildings/models";
 import { Division } from "@/features/divisions/models";
@@ -30,32 +31,20 @@ export default function EditBuildingModal({
     try {
       // Extract form data
       const name = formData.get("name") as string;
-      const internalCode = formData.get("internalCode") as string;
       const divisionId = formData.get("divisionId") as string;
-      const complexId = formData.get("complexId") as string;
-      const address = formData.get("address") as string;
-      const city = formData.get("city") as string;
-      const country = formData.get("country") as string;
       const templateId = formData.get("templateId") as string;
-
-      // Update building using Convex
-      // Additional fields are stored in the data property
-      const buildingData = {
-        ...(building.data || {}),
-        internalCode,
-        complexId,
-        address,
-        city,
-        country,
-      };
+      const templateDataStr = formData.get("templateData") as string;
+      
+      // Parse template data if provided
+      const templateData = templateDataStr ? JSON.parse(templateDataStr) : building.templateData || {};
 
       await updateBuilding({
-        buildingId: building._id as any,
+        buildingId: building._id,
         tenantId: building.tenantId,
         name,
-        divisionId: divisionId ? divisionId as any : undefined,
-        templateId: templateId ? templateId as any : undefined,
-        data: buildingData,
+        divisionId: divisionId ? divisionId as Id<"divisions"> : undefined,
+        templateId: templateId ? templateId as Id<"templates"> : undefined,
+        templateData: templateData,
       });
 
       setSuccessState(true);

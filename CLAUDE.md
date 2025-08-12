@@ -77,6 +77,11 @@ Key Convex principles:
 - **Schema Definition**: Define your schema in `convex/schema.ts` using `defineSchema` and `defineTable`.
 - **No filter, use indexes**: Always use `withIndex` for queries instead of `filter()`. Define appropriate indexes in the schema.
 - **Transactions**: Use `ctx.db.insert`, `ctx.db.replace`, `ctx.db.patch`, and `ctx.db.delete` for mutations.
+- **Type Safety**: Never use `any` type. Always use proper Convex types:
+  - Use `Id<"tableName">` for document IDs
+  - Use `Doc<"tableName">` for full document types
+  - Use `Partial<Doc<"tableName">>` for update objects
+  - Import types from `convex/_generated/dataModel`
 
 Example Convex query:
 
@@ -99,6 +104,36 @@ export const getBuildings = query({
       .query("buildings")
       .withIndex("by_tenant", (q) => q.eq("tenantId", args.tenantId))
       .collect();
+  },
+});
+```
+
+Example Convex mutation with proper typing:
+
+```typescript
+import { mutation } from "./_generated/server";
+import { v } from "convex/values";
+import { Doc } from "./_generated/dataModel";
+
+export const updateBuilding = mutation({
+  args: {
+    buildingId: v.id("buildings"),
+    name: v.optional(v.string()),
+    templateId: v.optional(v.id("templates")),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const building = await ctx.db.get(args.buildingId);
+    if (!building) {
+      throw new Error("Building not found");
+    }
+
+    const updates: Partial<Doc<"buildings">> = { updatedAt: Date.now() };
+    if (args.name !== undefined) updates.name = args.name;
+    if (args.templateId !== undefined) updates.templateId = args.templateId;
+
+    await ctx.db.patch(args.buildingId, updates);
+    return null;
   },
 });
 ```

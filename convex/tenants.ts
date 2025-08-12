@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { Doc } from "./_generated/dataModel";
 import { Id } from "./_generated/dataModel";
 // Helper to get current user's tenant
 export async function getCurrentUserTenant(ctx: any, userId?: Id<"users">): Promise<Id<"tenants"> | null> {
@@ -142,7 +143,7 @@ export const updateTenant = mutation({
       throw new Error("Tenant not found");
     }
 
-    const updates: any = { updatedAt: Date.now() };
+    const updates: Partial<Doc<"tenants">> = { updatedAt: Date.now() };
     if (args.name !== undefined) updates.name = args.name;
     if (args.description !== undefined) updates.description = args.description;
 

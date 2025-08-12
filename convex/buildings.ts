@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { Doc, Id } from "./_generated/dataModel";
 import { requireTenantAccess } from "./helpers/tenantAccess";
 
 export const getBuildings = query({
@@ -17,7 +18,7 @@ export const getBuildings = query({
       name: v.string(),
       image: v.optional(v.string()),
       division: v.optional(v.string()),
-      data: v.optional(v.any()),
+      templateData: v.optional(v.any()),
       createdAt: v.number(),
       updatedAt: v.number(),
     })
@@ -30,18 +31,18 @@ export const getBuildings = query({
       .query("buildings")
       .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
       .collect();
-    
+
     // Filter by division if provided
     if (args.divisionId) {
-      return buildings.filter(b => b.divisionId === args.divisionId);
+      return buildings.filter((b) => b.divisionId === args.divisionId);
     }
-    
+
     return buildings;
   },
 });
 
 export const getBuilding = query({
-  args: { 
+  args: {
     buildingId: v.id("buildings"),
     tenantId: v.id("tenants"),
   },
@@ -57,10 +58,10 @@ export const getBuilding = query({
     }
 
     // Get related data
-    const template = building.templateId 
-      ? await ctx.db.get(building.templateId) 
+    const template = building.templateId
+      ? await ctx.db.get(building.templateId)
       : undefined;
-    
+
     const divisionEntity = building.divisionId
       ? await ctx.db.get(building.divisionId)
       : undefined;
@@ -81,7 +82,7 @@ export const createBuilding = mutation({
     divisionId: v.optional(v.id("divisions")),
     image: v.optional(v.string()),
     division: v.optional(v.string()),
-    data: v.optional(v.any()),
+    templateData: v.optional(v.any()),
   },
   returns: v.id("buildings"),
   handler: async (ctx, args) => {
@@ -96,7 +97,7 @@ export const createBuilding = mutation({
       divisionId: args.divisionId,
       image: args.image,
       division: args.division,
-      data: args.data,
+      templateData: args.templateData,
       createdAt: now,
       updatedAt: now,
     });
@@ -112,7 +113,7 @@ export const updateBuilding = mutation({
     divisionId: v.optional(v.id("divisions")),
     image: v.optional(v.string()),
     division: v.optional(v.string()),
-    data: v.optional(v.any()),
+    templateData: v.optional(v.any()),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -128,13 +129,13 @@ export const updateBuilding = mutation({
       throw new Error("Access denied");
     }
 
-    const updates: any = { updatedAt: Date.now() };
+    const updates: Partial<Doc<"buildings">> = { updatedAt: Date.now() };
     if (args.name !== undefined) updates.name = args.name;
     if (args.templateId !== undefined) updates.templateId = args.templateId;
     if (args.divisionId !== undefined) updates.divisionId = args.divisionId;
     if (args.image !== undefined) updates.image = args.image;
     if (args.division !== undefined) updates.division = args.division;
-    if (args.data !== undefined) updates.data = args.data;
+    if (args.templateData !== undefined) updates.templateData = args.templateData;
 
     await ctx.db.patch(args.buildingId, updates);
     return null;
@@ -142,7 +143,7 @@ export const updateBuilding = mutation({
 });
 
 export const deleteBuilding = mutation({
-  args: { 
+  args: {
     buildingId: v.id("buildings"),
     tenantId: v.id("tenants"),
   },
@@ -166,7 +167,7 @@ export const deleteBuilding = mutation({
       .query("tasks")
       .withIndex("by_building", (q) => q.eq("buildingId", args.buildingId))
       .collect();
-    
+
     for (const task of tasks) {
       await ctx.db.delete(task._id);
     }
@@ -176,7 +177,7 @@ export const deleteBuilding = mutation({
       .query("documents")
       .withIndex("by_building", (q) => q.eq("buildingId", args.buildingId))
       .collect();
-    
+
     for (const doc of documents) {
       await ctx.db.delete(doc._id);
     }
@@ -186,7 +187,7 @@ export const deleteBuilding = mutation({
       .query("complianceChecks")
       .withIndex("by_building", (q) => q.eq("buildingId", args.buildingId))
       .collect();
-    
+
     for (const check of complianceChecks) {
       await ctx.db.delete(check._id);
     }
@@ -196,7 +197,7 @@ export const deleteBuilding = mutation({
       .query("contacts")
       .withIndex("by_building", (q) => q.eq("buildingId", args.buildingId))
       .collect();
-    
+
     for (const contact of contacts) {
       await ctx.db.delete(contact._id);
     }
@@ -206,7 +207,7 @@ export const deleteBuilding = mutation({
       .query("notes")
       .withIndex("by_building", (q) => q.eq("buildingId", args.buildingId))
       .collect();
-    
+
     for (const note of notes) {
       await ctx.db.delete(note._id);
     }
@@ -216,7 +217,7 @@ export const deleteBuilding = mutation({
       .query("yearPlannerEvents")
       .withIndex("by_building", (q) => q.eq("buildingId", args.buildingId))
       .collect();
-    
+
     for (const event of events) {
       await ctx.db.delete(event._id);
     }

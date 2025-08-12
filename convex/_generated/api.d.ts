@@ -26,7 +26,6 @@ import type * as inspections from "../inspections.js";
 import type * as legislation from "../legislation.js";
 import type * as tasks from "../tasks.js";
 import type * as teams from "../teams.js";
-import type * as templateEntities from "../templateEntities.js";
 import type * as templates from "../templates.js";
 import type * as tenants from "../tenants.js";
 import type * as users from "../users.js";
@@ -53,7 +52,6 @@ declare const fullApi: ApiFromModules<{
   legislation: typeof legislation;
   tasks: typeof tasks;
   teams: typeof teams;
-  templateEntities: typeof templateEntities;
   templates: typeof templates;
   tenants: typeof tenants;
   users: typeof users;

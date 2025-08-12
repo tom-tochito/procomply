@@ -32,7 +32,7 @@ export default function BuildingInfo({ building, divisions = [] }: BuildingInfoP
     }
 
     const templateFields = buildingWithTemplate.template.fields || [];
-    const buildingData = building.data || {};
+    const buildingData = building.templateData || {};
 
     if (templateFields.length === 0) {
       return (

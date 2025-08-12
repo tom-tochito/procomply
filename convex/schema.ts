@@ -84,8 +84,8 @@ export default defineSchema({
     divisionId: v.optional(v.id("divisions")),
     name: v.string(),
     image: v.optional(v.string()),
+    templateData: v.optional(v.any()),
     division: v.optional(v.string()),
-    data: v.optional(v.any()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -99,6 +99,7 @@ export default defineSchema({
     tenantId: v.id("tenants"),
     name: v.string(),
     type: v.string(),
+    entity: v.string(),
     fields: v.array(templateFieldValidator),
     isActive: v.boolean(),
     createdAt: v.number(),
@@ -106,8 +107,10 @@ export default defineSchema({
   })
     .index("by_tenant", ["tenantId"])
     .index("by_type", ["type"])
+    .index("by_entity", ["entity"])
     .index("by_active", ["isActive"])
     .index("by_tenant_and_type", ["tenantId", "type"])
+    .index("by_tenant_and_entity", ["tenantId", "entity"])
     .index("by_createdAt", ["createdAt"])
     .index("by_updatedAt", ["updatedAt"]),
 

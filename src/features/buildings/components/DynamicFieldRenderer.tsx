@@ -27,7 +27,7 @@ export default function DynamicFieldRenderer({
             placeholder={field.placeholder}
             required={field.required}
             disabled={disabled}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#7600FF] focus:border-[#7600FF]"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
           />
         );
 
@@ -40,7 +40,7 @@ export default function DynamicFieldRenderer({
             required={field.required}
             disabled={disabled}
             rows={field.rows || 4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#7600FF] focus:border-[#7600FF]"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
           />
         );
 
@@ -55,7 +55,7 @@ export default function DynamicFieldRenderer({
             disabled={disabled}
             min={field.min}
             max={field.max}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#7600FF] focus:border-[#7600FF]"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
           />
         );
 
@@ -67,7 +67,7 @@ export default function DynamicFieldRenderer({
             onChange={(e) => onChange(e.target.value)}
             required={field.required}
             disabled={disabled}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#7600FF] focus:border-[#7600FF]"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
           />
         );
 
@@ -78,7 +78,7 @@ export default function DynamicFieldRenderer({
             onChange={(e) => onChange(e.target.value)}
             required={field.required}
             disabled={disabled}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#7600FF] focus:border-[#7600FF]"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
           >
             <option value="">{field.placeholder || "Select an option"}</option>
             {field.options?.map((option) => (
@@ -102,7 +102,7 @@ export default function DynamicFieldRenderer({
             }}
             required={field.required}
             disabled={disabled}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#7600FF] focus:border-[#7600FF]"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
             size={Math.min(field.options?.length || 4, 6)}
           >
             {field.options?.map((option) => (
@@ -122,7 +122,7 @@ export default function DynamicFieldRenderer({
               onChange={(e) => onChange(e.target.checked)}
               required={field.required}
               disabled={disabled}
-              className="h-4 w-4 text-[#7600FF] focus:ring-[#7600FF] border-gray-300 rounded"
+              className="h-4 w-4 text-[#F30] focus:ring-[#F30] border-gray-300 rounded"
             />
             <span className="ml-2 text-sm text-gray-700">
               {field.placeholder || field.label}
@@ -139,7 +139,7 @@ export default function DynamicFieldRenderer({
             placeholder={field.placeholder || "https://example.com"}
             required={field.required}
             disabled={disabled}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#7600FF] focus:border-[#7600FF]"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
           />
         );
 
@@ -170,7 +170,7 @@ export default function DynamicFieldRenderer({
               accept={field.accept}
               required={field.required && !value}
               disabled={disabled}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#7600FF] focus:border-[#7600FF]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
             />
           </div>
         );

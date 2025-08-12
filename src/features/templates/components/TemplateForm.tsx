@@ -31,7 +31,7 @@ export default function TemplateForm({
             value={String(value)}
             onChange={(e) => onChange(field.key, e.target.value)}
             placeholder={field.placeholder}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#7600FF] focus:ring-[#7600FF] sm:text-sm disabled:bg-gray-100"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#F30] focus:ring-[#F30] sm:text-sm disabled:bg-gray-100"
             disabled={readOnly}
             required={field.required}
           />
@@ -45,7 +45,7 @@ export default function TemplateForm({
             onChange={(e) => onChange(field.key, e.target.value)}
             placeholder={field.placeholder}
             rows={field.rows || 3}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#7600FF] focus:ring-[#7600FF] sm:text-sm disabled:bg-gray-100"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#F30] focus:ring-[#F30] sm:text-sm disabled:bg-gray-100"
             disabled={readOnly}
             required={field.required}
           />
@@ -61,7 +61,7 @@ export default function TemplateForm({
             placeholder={field.placeholder}
             min={field.min}
             max={field.max}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#7600FF] focus:ring-[#7600FF] sm:text-sm disabled:bg-gray-100"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#F30] focus:ring-[#F30] sm:text-sm disabled:bg-gray-100"
             disabled={readOnly}
             required={field.required}
           />
@@ -74,7 +74,7 @@ export default function TemplateForm({
             id={field.key}
             value={value ? timestampToDateInput(Number(value)) : ""}
             onChange={(e) => onChange(field.key, e.target.value ? dateInputToTimestamp(e.target.value) : null)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#7600FF] focus:ring-[#7600FF] sm:text-sm disabled:bg-gray-100"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#F30] focus:ring-[#F30] sm:text-sm disabled:bg-gray-100"
             disabled={readOnly}
             required={field.required}
           />
@@ -86,7 +86,7 @@ export default function TemplateForm({
             id={field.key}
             value={String(value)}
             onChange={(e) => onChange(field.key, e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#7600FF] focus:ring-[#7600FF] sm:text-sm disabled:bg-gray-100"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#F30] focus:ring-[#F30] sm:text-sm disabled:bg-gray-100"
             disabled={readOnly}
             required={field.required}
           >
@@ -109,7 +109,7 @@ export default function TemplateForm({
               const selectedOptions = Array.from(e.target.selectedOptions, (option) => option.value);
               onChange(field.key, selectedOptions);
             }}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#7600FF] focus:ring-[#7600FF] sm:text-sm disabled:bg-gray-100"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#F30] focus:ring-[#F30] sm:text-sm disabled:bg-gray-100"
             disabled={readOnly}
             required={field.required}
             size={4}
@@ -131,7 +131,7 @@ export default function TemplateForm({
                 id={field.key}
                 checked={!!value}
                 onChange={(e) => onChange(field.key, e.target.checked)}
-                className="rounded border-gray-300 text-[#7600FF] shadow-sm focus:border-[#7600FF] focus:ring-[#7600FF] disabled:bg-gray-100"
+                className="rounded border-gray-300 text-[#F30] shadow-sm focus:border-[#F30] focus:ring-[#F30] disabled:bg-gray-100"
                 disabled={readOnly}
                 required={field.required}
               />
@@ -148,7 +148,7 @@ export default function TemplateForm({
             value={String(value)}
             onChange={(e) => onChange(field.key, e.target.value)}
             placeholder={field.placeholder}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#7600FF] focus:ring-[#7600FF] sm:text-sm disabled:bg-gray-100"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#F30] focus:ring-[#F30] sm:text-sm disabled:bg-gray-100"
             disabled={readOnly}
             required={field.required}
           />
@@ -168,7 +168,7 @@ export default function TemplateForm({
                 }
               }}
               accept={field.accept}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-[#7600FF] file:text-white hover:file:bg-[#6600CC] disabled:opacity-50"
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-[#F30] file:text-white hover:file:bg-[#D30] disabled:opacity-50"
               disabled={readOnly}
               required={field.required && !value}
             />

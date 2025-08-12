@@ -4,6 +4,7 @@ import React, { useActionState, useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
+import { Id } from "~/convex/_generated/dataModel";
 import type { Building, BuildingWithDivision, BuildingWithTemplate } from "@/features/buildings/models";
 import type { Division } from "@/features/divisions/models";
 import type { TemplateField } from "@/features/templates/models";
@@ -32,13 +33,13 @@ export default function BuildingForm({ building, divisions, tenant, onSubmit, on
     (building as BuildingWithTemplate)?.template?._id || ""
   );
   const [templateData, setTemplateData] = useState<Record<string, unknown>>(
-    building?.data || {}
+    building?.templateData || {}
   );
 
   // Fetch templates for the current tenant
   const templates = useQuery(api.templates.getTemplates, { 
-    tenantId: tenant.id as any,
-    type: "building" 
+    tenantId: tenant.id as Id<"tenants">,
+    entity: "building" 
   }) || [];
   const selectedTemplate = templates.find(t => t._id === selectedTemplateId);
 
@@ -106,7 +107,7 @@ export default function BuildingForm({ building, divisions, tenant, onSubmit, on
                 value={selectedTemplateId}
                 onChange={(e) => setSelectedTemplateId(e.target.value)}
                 disabled={isPending}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#7600FF] focus:border-[#7600FF]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
                 required
               >
                 <option value="">Select a template</option>
@@ -143,7 +144,7 @@ export default function BuildingForm({ building, divisions, tenant, onSubmit, on
               defaultValue={building?.name}
               required
               disabled={isPending}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#7600FF] focus:border-[#7600FF]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
             />
           </div>
 
@@ -155,7 +156,7 @@ export default function BuildingForm({ building, divisions, tenant, onSubmit, on
               name="divisionId"
               defaultValue={(building && 'divisionEntity' in building) ? building.divisionEntity?._id : building?.division || ""}
               disabled={isPending}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#7600FF] focus:border-[#7600FF]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
             >
               <option value="">Select a division</option>
               {divisions?.map((division) => (
@@ -204,7 +205,7 @@ export default function BuildingForm({ building, divisions, tenant, onSubmit, on
             accept="image/*"
             onChange={handleImageChange}
             disabled={isPending}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#7600FF] focus:border-[#7600FF]"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
           />
           <p className="text-xs text-gray-500 mt-1">
             Recommended: 16:9 aspect ratio, max 5MB
@@ -261,7 +262,7 @@ export default function BuildingForm({ building, divisions, tenant, onSubmit, on
         <button
           type="submit"
           disabled={isPending || (!building && !selectedTemplateId)}
-          className="px-4 py-2 bg-[#7600FF] text-white rounded-md hover:bg-[#6600EE] disabled:opacity-50"
+          className="px-4 py-2 bg-[#F30] text-white rounded-md hover:bg-[#D30] disabled:opacity-50"
         >
           {isPending ? "Saving..." : building ? "Update Building" : "Create Building"}
         </button>
