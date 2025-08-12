@@ -23,6 +23,7 @@ import type * as documents from "../documents.js";
 import type * as http from "../http.js";
 import type * as inspections from "../inspections.js";
 import type * as legislation from "../legislation.js";
+import type * as simpleAuth from "../simpleAuth.js";
 import type * as tasks from "../tasks.js";
 import type * as teams from "../teams.js";
 import type * as templateEntities from "../templateEntities.js";
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   inspections: typeof inspections;
   legislation: typeof legislation;
+  simpleAuth: typeof simpleAuth;
   tasks: typeof tasks;
   teams: typeof teams;
   templateEntities: typeof templateEntities;

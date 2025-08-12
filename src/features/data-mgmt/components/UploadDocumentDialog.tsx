@@ -10,6 +10,7 @@ import { useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { Tenant } from "@/features/tenant/models";
 import { Building } from "@/features/buildings/models";
+import { Id } from "~/convex/_generated/dataModel";
 
 // Props definition
 interface UploadDocumentDialogProps {
@@ -56,9 +57,17 @@ export default function UploadDocumentDialog({
           return { error: "Please select a file and building", success: false };
         }
         
+        // Get userId from localStorage (for testing)
+        const userId = localStorage.getItem("userId");
+        if (!userId || !tenant) {
+          return { error: "User not authenticated", success: false };
+        }
+        
         await uploadDocumentAction({
           file,
           buildingId,
+          tenantId: tenant._id,
+          uploaderId: userId.replace(/"/g, '') as Id<"users">, // Remove quotes from localStorage
           category: formData.get("category") as string || undefined,
           docCategory: formData.get("docCategory") as string || undefined,
           description: formData.get("description") as string || undefined,

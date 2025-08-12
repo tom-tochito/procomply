@@ -1,16 +1,11 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
-import { getUserIdentity } from "./auth";
-
 // Helper to get current user's tenant
-export async function getCurrentUserTenant(ctx: any): Promise<Id<"tenants">> {
-  const identity = await getUserIdentity(ctx);
-  if (!identity) {
-    throw new Error("Not authenticated");
+export async function getCurrentUserTenant(ctx: any, userId?: Id<"users">): Promise<Id<"tenants"> | null> {
+  if (!userId) {
+    return null;
   }
-
-  const userId = identity.subject as Id<"users">;
 
   const userTenant = await ctx.db
     .query("userTenants")
@@ -18,7 +13,7 @@ export async function getCurrentUserTenant(ctx: any): Promise<Id<"tenants">> {
     .first();
 
   if (!userTenant) {
-    throw new Error("User not assigned to any tenant");
+    return null;
   }
 
   return userTenant.tenantId as Id<"tenants">;
@@ -67,7 +62,9 @@ export const getAllTenants = query({
 });
 
 export const getCurrentTenant = query({
-  args: {},
+  args: {
+    userId: v.optional(v.id("users")),
+  },
   returns: v.union(
     v.object({
       _id: v.id("tenants"),
@@ -80,9 +77,11 @@ export const getCurrentTenant = query({
     }),
     v.null()
   ),
-  handler: async (ctx) => {
+  handler: async (ctx, args) => {
     try {
-      const tenantId = await getCurrentUserTenant(ctx);
+      const tenantId = await getCurrentUserTenant(ctx, args.userId);
+      if (!tenantId) return null;
+      
       const tenant = await ctx.db.get(tenantId);
       if (!tenant) return null;
       

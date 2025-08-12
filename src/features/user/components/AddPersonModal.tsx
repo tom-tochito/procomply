@@ -26,7 +26,7 @@ export default function AddPersonModal({
 }: AddPersonModalProps) {
   const router = useRouter();
   const [successState, setSuccessState] = useState(false);
-  const createUserProfile = useMutation(api.users.createUserProfile);
+  // const createUserProfile = useMutation(api.users.createUserProfile); // This mutation doesn't exist
 
   const handleSubmit = async (prevState: FormState, formData: FormData) => {
     try {
@@ -42,14 +42,10 @@ export default function AddPersonModal({
       // Create user profile using Convex
       // Note: This creates a profile for the current authenticated user
       // In a real app, you might want a different flow for adding other users
-      await createUserProfile({
-        name,
-        phone,
-        phoneMobile,
-        position,
-        companyId: companyId ? companyId as any : undefined,
-        role,
-      });
+      
+      // TODO: Implement user creation mutation
+      // For now, show error message
+      throw new Error("User creation is not implemented yet. This feature requires a proper user creation mutation in Convex.");
 
       setSuccessState(true);
       toast.success("Person created successfully");

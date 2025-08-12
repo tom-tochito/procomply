@@ -2,11 +2,11 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import type { Tenant } from "@/features/tenant/models";
-import { useLogout } from "~/src/hooks/useLogout";
+import { useLogout } from "@/features/auth/hooks/useLogout";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 
 interface UserAvatarProps {
-  user?: { email?: string; profile?: { name?: string } };
+  user?: { _id?: string; email?: string; name?: string; role?: string } | null;
   tenant: Tenant;
 }
 
@@ -16,8 +16,8 @@ export function UserAvatar({ user, tenant }: UserAvatarProps) {
   const logout = useLogout();
 
   const getInitials = () => {
-    if (user?.profile?.name) {
-      const names = user.profile.name.trim().split(" ");
+    if (user?.name) {
+      const names = user.name.trim().split(" ");
       if (names.length >= 2) {
         return `${names[0][0]}${names[1][0]}`.toUpperCase();
       }
@@ -72,7 +72,7 @@ export function UserAvatar({ user, tenant }: UserAvatarProps) {
           <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 py-1 border border-gray-200">
             <div className="px-4 py-2 border-b border-gray-100">
               <p className="text-sm font-medium">
-                {user?.profile?.name || "User"}
+                {user?.name || "User"}
               </p>
               <p className="text-xs text-gray-500">
                 {user?.email || "Unknown"}

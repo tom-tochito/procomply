@@ -42,10 +42,10 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
 
   // Fetch building data using Convex
   const building = useQuery(api.buildings.getBuilding, { buildingId: buildingId as any });
-  const divisions = useQuery(api.divisions.getDivisions, {}) || [];
+  const divisions = useQuery(api.divisions.getDivisions, { tenantId: tenant._id }) || [];
   const tasks = useQuery(api.tasks.getTasks, { buildingId: buildingId as any }) || [];
   const teams = useQuery(api.teams.getTeams, {}) || [];
-  const users = useQuery(api.users.getUsers, {}) || [];
+  const users = useQuery(api.users.getUsers, { tenantId: tenant._id }) || [];
 
   // Calculate compliance
   const complianceChecks = useQuery(api.complianceChecks.getComplianceChecks, { 
@@ -150,7 +150,7 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
               filterByAssignee={filterByAssignee}
               setFilterByAssignee={setFilterByAssignee}
               uniqueTeams={[]}
-              uniqueAssignees={users.map(u => u?._id || '')}
+              uniqueAssignees={users.map((u: any) => u?._id || '')}
               onAddNewTask={handleAddTask}
             />
             <TaskTable

@@ -24,8 +24,8 @@ export default function ComplianceOverviewClient({
   const [buildingManagers, setBuildingManagers] = useState("Building Managers");
 
   // Fetch buildings, tasks, compliance checks, and divisions separately
-  const buildings = useQuery(api.buildings.getBuildings, {}) || [];
-  const divisions = useQuery(api.divisions.getDivisions, {}) || [];
+  const buildings = useQuery(api.buildings.getBuildings, { tenantId: tenant._id }) || [];
+  const divisions = useQuery(api.divisions.getDivisions, { tenantId: tenant._id }) || [];
   const allTasks = useQuery(api.tasks.getTasks, {}) || [];
   const allComplianceChecks = useQuery(api.complianceChecks.getComplianceChecks, {}) || [];
   

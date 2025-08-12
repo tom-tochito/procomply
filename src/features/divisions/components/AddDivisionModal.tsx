@@ -34,6 +34,7 @@ export default function AddDivisionModal({
 
       // Create division using Convex
       await createDivision({
+        tenantId: tenant._id,
         name,
         type,
         description,

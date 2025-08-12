@@ -1,15 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAuth } from "./useAuth";
+import { useLocalStorage } from "./useLocalStorage";
+import { Id } from "../../../../convex/_generated/dataModel";
 
 export function useLogout() {
   const router = useRouter();
-  const { signOut } = useAuth();
+  const [, setUserId] = useLocalStorage<Id<"users"> | null>("userId", null);
 
   const logout = async (redirectPath: string = "/") => {
     try {
-      await signOut();
+      // Clear user session
+      setUserId(null);
+      // Clear any other auth-related data
+      localStorage.removeItem("userId");
       router.push(redirectPath);
     } catch (error) {
       console.error("Logout error:", error);

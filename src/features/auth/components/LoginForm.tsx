@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthActions } from "@convex-dev/auth/react";
+import { useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
 import { Doc } from "../../../../convex/_generated/dataModel";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
+import { useLocalStorage } from "../hooks/useLocalStorage";
+import { Id } from "../../../../convex/_generated/dataModel";
 
 type Tenant = Doc<"tenants">;
 
@@ -12,145 +15,61 @@ interface LoginFormProps {
   tenant: Tenant;
 }
 
-type Step = "email" | "code";
-
 export function LoginForm({ tenant }: LoginFormProps) {
   const router = useRouter();
-  const { signIn } = useAuthActions();
-  const [step, setStep] = useState<Step>("email");
+  const signIn = useMutation(api.simpleAuth.signInWithEmail);
+  const [, setUserId] = useLocalStorage<Id<"users"> | null>("userId", null);
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const codeInputRef = useRef<HTMLInputElement>(null);
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
     try {
-      // Send verification code
-      await signIn("password", {
-        email,
-        flow: "email-verification",
-      });
-
-      // Move to code step
-      setStep("code");
-    } catch (err) {
-      console.error("Email submission error:", err);
-      setError("Failed to send verification code. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCodeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
-
-    const code = codeInputRef.current?.value || "";
-
-    try {
-      // Verify code and complete sign in
-      await signIn("password", {
-        email,
-        code,
-        flow: "email-verification",
-      });
-
+      // Simple sign in - accepts any email
+      const result = await signIn({ email });
+      
+      // Store user ID in local storage
+      setUserId(result.userId);
+      
       // Redirect to dashboard
       router.push(generateTenantRedirectUrl(tenant.slug, "/dashboard"));
     } catch (err) {
-      console.error("Code verification error:", err);
-      setError("Invalid verification code. Please try again.");
-      if (codeInputRef.current) {
-        codeInputRef.current.value = "";
-      }
+      console.error("Login error:", err);
+      setError("Failed to sign in. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (step === "email") {
-    return (
-      <form className="space-y-4" onSubmit={handleEmailSubmit}>
-        {error && (
-          <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
-            {error}
-          </div>
-        )}
-
-        <div>
-          <label
-            htmlFor="email"
-            className="mb-1 block text-sm font-medium text-gray-700"
-          >
-            Email
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
-            className="block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-[#F30] focus:outline-none focus:ring-1 focus:ring-[#F30] disabled:bg-gray-100"
-            placeholder="Enter your email"
-            autoFocus
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full rounded bg-[#F30] py-2 text-sm font-semibold text-white hover:bg-[#E02D00] focus:outline-none focus:ring-2 focus:ring-[#F30] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? "Sending code..." : "Send Verification Code"}
-        </button>
-      </form>
-    );
-  }
-
   return (
-    <form className="space-y-4" onSubmit={handleCodeSubmit}>
+    <form className="space-y-4" onSubmit={handleSubmit}>
       {error && (
         <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
           {error}
         </div>
       )}
 
-      <div className="space-y-2">
-        <p className="text-sm text-gray-600">
-          We sent a verification code to <strong>{email}</strong>
-        </p>
-        <button
-          type="button"
-          onClick={() => setStep("email")}
-          className="text-sm text-[#F30] hover:underline"
-        >
-          Use a different email
-        </button>
-      </div>
-
       <div>
         <label
-          htmlFor="code"
+          htmlFor="email"
           className="mb-1 block text-sm font-medium text-gray-700"
         >
-          Verification Code
+          Email
         </label>
         <input
-          ref={codeInputRef}
-          id="code"
-          name="code"
-          type="text"
+          id="email"
+          name="email"
+          type="email"
           required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           disabled={isLoading}
           className="block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-[#F30] focus:outline-none focus:ring-1 focus:ring-[#F30] disabled:bg-gray-100"
-          placeholder="Enter 6-digit code"
+          placeholder="Enter your email"
           autoFocus
         />
       </div>
@@ -160,7 +79,7 @@ export function LoginForm({ tenant }: LoginFormProps) {
         disabled={isLoading}
         className="w-full rounded bg-[#F30] py-2 text-sm font-semibold text-white hover:bg-[#E02D00] focus:outline-none focus:ring-2 focus:ring-[#F30] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isLoading ? "Verifying..." : "Verify & Login"}
+        {isLoading ? "Signing in..." : "Sign In"}
       </button>
     </form>
   );

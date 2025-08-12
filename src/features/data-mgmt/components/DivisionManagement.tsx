@@ -13,8 +13,8 @@ export default function DivisionManagement() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Fetch divisions and tenant data
-  const divisions = useQuery(api.divisions.getDivisions, {}) || [];
   const tenant = useQuery(api.tenants.getCurrentTenant, {});
+  const divisions = useQuery(api.divisions.getDivisions, tenant ? { tenantId: tenant._id } : "skip") || [];
 
   const filteredDivisions = divisions.filter((division) => {
     if (

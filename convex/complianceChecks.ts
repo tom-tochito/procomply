@@ -14,23 +14,21 @@ export const getComplianceChecks = query({
       throw new Error("Not authenticated");
     }
 
-    // Get user profile to check tenant access
-    const userProfile = await ctx.db
-      .query("userProfiles")
-      .withIndex("by_userId", (q) => q.eq("userId", identity.subject as Id<"users">))
-      .first();
-
-    if (!userProfile) {
-      throw new Error("User profile not found");
+    // Get user to check tenant access
+    const userId = identity.subject as Id<"users">;
+    const user = await ctx.db.get(userId);
+    
+    if (!user) {
+      throw new Error("User not found");
     }
 
-    const tenantId = args.tenantId || userProfile.tenantId;
+    const tenantId = args.tenantId || user.tenantId;
     if (!tenantId) {
       throw new Error("No tenant specified");
     }
 
     // Check user has access to this tenant
-    if (userProfile.tenantId !== tenantId) {
+    if (user.tenantId !== tenantId) {
       throw new Error("Access denied to this tenant");
     }
 
@@ -80,23 +78,21 @@ export const createComplianceCheck = mutation({
       throw new Error("Not authenticated");
     }
 
-    // Get user profile to check tenant access
-    const userProfile = await ctx.db
-      .query("userProfiles")
-      .withIndex("by_userId", (q) => q.eq("userId", identity.subject as Id<"users">))
-      .first();
-
-    if (!userProfile) {
-      throw new Error("User profile not found");
+    // Get user to check tenant access
+    const userId = identity.subject as Id<"users">;
+    const user = await ctx.db.get(userId);
+    
+    if (!user) {
+      throw new Error("User not found");
     }
 
-    const tenantId = args.tenantId || userProfile.tenantId;
+    const tenantId = args.tenantId || user.tenantId;
     if (!tenantId) {
       throw new Error("No tenant specified");
     }
 
     // Check user has access to this tenant
-    if (userProfile.tenantId !== tenantId) {
+    if (user.tenantId !== tenantId) {
       throw new Error("Access denied to this tenant");
     }
 
@@ -137,13 +133,11 @@ export const updateComplianceCheck = mutation({
       throw new Error("Compliance check not found");
     }
 
-    // Get user profile to check tenant access
-    const userProfile = await ctx.db
-      .query("userProfiles")
-      .withIndex("by_userId", (q) => q.eq("userId", identity.subject as Id<"users">))
-      .first();
-
-    if (!userProfile || userProfile.tenantId !== check.tenantId) {
+    // Get user to check tenant access
+    const userId = identity.subject as Id<"users">;
+    const user = await ctx.db.get(userId);
+    
+    if (!user || user.tenantId !== check.tenantId) {
       throw new Error("Access denied");
     }
 
@@ -174,13 +168,11 @@ export const deleteComplianceCheck = mutation({
       throw new Error("Compliance check not found");
     }
 
-    // Get user profile to check tenant access
-    const userProfile = await ctx.db
-      .query("userProfiles")
-      .withIndex("by_userId", (q) => q.eq("userId", identity.subject as Id<"users">))
-      .first();
-
-    if (!userProfile || userProfile.tenantId !== check.tenantId) {
+    // Get user to check tenant access
+    const userId = identity.subject as Id<"users">;
+    const user = await ctx.db.get(userId);
+    
+    if (!user || user.tenantId !== check.tenantId) {
       throw new Error("Access denied");
     }
 

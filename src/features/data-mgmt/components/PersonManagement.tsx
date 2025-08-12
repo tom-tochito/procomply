@@ -14,22 +14,22 @@ export default function PersonManagement() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Fetch data from Convex
-  const users = useQuery(api.users.getUsers, {}) || [];
   const tenant = useQuery(api.tenants.getCurrentTenant, {});
+  const users = useQuery(api.users.getUsers, tenant ? { tenantId: tenant._id } : "skip") || [];
   const companies = useQuery(api.companies.getCompanies, {}) || [];
 
   const categories = ["all", "internal", "contractor", "emergency", "supplier", "other"];
 
   // Transform users to Contact format
   const persons: Contact[] = users
-    .filter(user => user !== null)
-    .map(user => ({
+    .filter((user: any) => user !== null)
+    .map((user: any) => ({
       id: user._id,
-      name: user.profile?.name || user.email || "Unknown",
+      name: user.name || user.email || "Unknown",
       email: user.email || "",
-      phone: user.profile?.phone || "",
-      phoneMobile: user.profile?.phoneMobile || "",
-      company: companies.find(c => c._id === user.profile?.companyId)?.name || "",
+      phone: user.phone || "",
+      phoneMobile: user.phoneMobile || "",
+      company: companies.find(c => c._id === user.companyId)?.name || "",
       category: "internal" // Default category, could be stored in user profile
     }));
 

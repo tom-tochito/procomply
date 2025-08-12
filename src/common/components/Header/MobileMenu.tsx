@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 import type { Tenant } from "@/features/tenant/models";
-import { useLogout } from "~/src/hooks/useLogout";
+import { useLogout } from "@/features/auth/hooks/useLogout";
 
 interface MobileMenuProps {
   isOpen: boolean;

@@ -88,8 +88,8 @@ export default function TeamForm({ team, companies, supervisors, onSubmit, onCan
           >
             <option value="">Select a supervisor</option>
             {supervisors.map((user) => (
-              <option key={user._id} value={user.profile?._id}>
-                {user.profile?.name || user.email}
+              <option key={user._id} value={user._id}>
+                {user.name || user.email}
               </option>
             ))}
           </select>

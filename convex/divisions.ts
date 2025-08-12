@@ -1,9 +1,9 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { getCurrentUserTenant } from "./tenants";
 
 export const getDivisions = query({
   args: {
+    tenantId: v.optional(v.id("tenants")),
     type: v.optional(v.string()),
   },
   returns: v.array(
@@ -19,13 +19,16 @@ export const getDivisions = query({
     })
   ),
   handler: async (ctx, args) => {
-    const tenantId = await getCurrentUserTenant(ctx);
-    
-    let query = ctx.db
-      .query("divisions")
-      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId));
-    
-    let divisions = await query.collect();
+    // Filter by tenantId if provided
+    let divisions;
+    if (args.tenantId) {
+      divisions = await ctx.db
+        .query("divisions")
+        .withIndex("by_tenant", (q) => q.eq("tenantId", args.tenantId!))
+        .collect();
+    } else {
+      divisions = await ctx.db.query("divisions").collect();
+    }
     
     // Apply filter
     if (args.type) {
@@ -37,7 +40,10 @@ export const getDivisions = query({
 });
 
 export const getDivision = query({
-  args: { divisionId: v.id("divisions") },
+  args: { 
+    divisionId: v.id("divisions"),
+    tenantId: v.optional(v.id("tenants")), // Optional for access check
+  },
   returns: v.union(
     v.object({
       _id: v.id("divisions"),
@@ -55,9 +61,8 @@ export const getDivision = query({
     const division = await ctx.db.get(args.divisionId);
     if (!division) return null;
 
-    // Ensure user has access
-    const tenantId = await getCurrentUserTenant(ctx);
-    if (division.tenantId !== tenantId) {
+    // Optional access check if tenantId is provided
+    if (args.tenantId && division.tenantId !== args.tenantId) {
       throw new Error("Access denied");
     }
 
@@ -67,17 +72,17 @@ export const getDivision = query({
 
 export const createDivision = mutation({
   args: {
+    tenantId: v.id("tenants"), // Required for testing
     name: v.string(),
     type: v.string(),
     description: v.optional(v.string()),
   },
   returns: v.id("divisions"),
   handler: async (ctx, args) => {
-    const tenantId = await getCurrentUserTenant(ctx);
     const now = Date.now();
 
     return await ctx.db.insert("divisions", {
-      tenantId,
+      tenantId: args.tenantId,
       name: args.name,
       type: args.type,
       description: args.description,
@@ -90,6 +95,7 @@ export const createDivision = mutation({
 export const updateDivision = mutation({
   args: {
     divisionId: v.id("divisions"),
+    tenantId: v.optional(v.id("tenants")), // Optional for access check
     name: v.optional(v.string()),
     type: v.optional(v.string()),
     description: v.optional(v.string()),
@@ -101,9 +107,8 @@ export const updateDivision = mutation({
       throw new Error("Division not found");
     }
 
-    // Ensure user has access
-    const tenantId = await getCurrentUserTenant(ctx);
-    if (division.tenantId !== tenantId) {
+    // Optional access check if tenantId is provided
+    if (args.tenantId && division.tenantId !== args.tenantId) {
       throw new Error("Access denied");
     }
 
@@ -118,7 +123,10 @@ export const updateDivision = mutation({
 });
 
 export const deleteDivision = mutation({
-  args: { divisionId: v.id("divisions") },
+  args: { 
+    divisionId: v.id("divisions"),
+    tenantId: v.optional(v.id("tenants")), // Optional for access check
+  },
   returns: v.null(),
   handler: async (ctx, args) => {
     const division = await ctx.db.get(args.divisionId);
@@ -126,9 +134,8 @@ export const deleteDivision = mutation({
       throw new Error("Division not found");
     }
 
-    // Ensure user has access
-    const tenantId = await getCurrentUserTenant(ctx);
-    if (division.tenantId !== tenantId) {
+    // Optional access check if tenantId is provided
+    if (args.tenantId && division.tenantId !== args.tenantId) {
       throw new Error("Access denied");
     }
 

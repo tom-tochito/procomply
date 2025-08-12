@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 import { getCurrentUserTenant } from "./tenants";
 
 export const getCompanies = query({
@@ -23,7 +24,15 @@ export const getCompanies = query({
     })
   ),
   handler: async (ctx, args) => {
-    const tenantId = await getCurrentUserTenant(ctx);
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    
+    const tenantId = await getCurrentUserTenant(ctx, identity.subject as Id<"users">);
+    if (!tenantId) {
+      throw new Error("No tenant found for user");
+    }
     
     let companies = await ctx.db
       .query("companies")
@@ -63,8 +72,13 @@ export const getCompany = query({
     if (!company) return null;
 
     // Ensure user has access
-    const tenantId = await getCurrentUserTenant(ctx);
-    if (company.tenantId !== tenantId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    
+    const tenantId = await getCurrentUserTenant(ctx, identity.subject as Id<"users">);
+    if (!tenantId || company.tenantId !== tenantId) {
       throw new Error("Access denied");
     }
 
@@ -84,7 +98,15 @@ export const createCompany = mutation({
   },
   returns: v.id("companies"),
   handler: async (ctx, args) => {
-    const tenantId = await getCurrentUserTenant(ctx);
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    
+    const tenantId = await getCurrentUserTenant(ctx, identity.subject as Id<"users">);
+    if (!tenantId) {
+      throw new Error("No tenant found for user");
+    }
     const now = Date.now();
 
     return await ctx.db.insert("companies", {
@@ -121,8 +143,13 @@ export const updateCompany = mutation({
     }
 
     // Ensure user has access
-    const tenantId = await getCurrentUserTenant(ctx);
-    if (company.tenantId !== tenantId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    
+    const tenantId = await getCurrentUserTenant(ctx, identity.subject as Id<"users">);
+    if (!tenantId || company.tenantId !== tenantId) {
       throw new Error("Access denied");
     }
 
@@ -150,8 +177,13 @@ export const deleteCompany = mutation({
     }
 
     // Ensure user has access
-    const tenantId = await getCurrentUserTenant(ctx);
-    if (company.tenantId !== tenantId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    
+    const tenantId = await getCurrentUserTenant(ctx, identity.subject as Id<"users">);
+    if (!tenantId || company.tenantId !== tenantId) {
       throw new Error("Access denied");
     }
 
@@ -167,7 +199,7 @@ export const deleteCompany = mutation({
 
     // Check if company has employees
     const employeesInCompany = await ctx.db
-      .query("userProfiles")
+      .query("users")
       .filter(q => q.eq(q.field("companyId"), args.companyId))
       .first();
 

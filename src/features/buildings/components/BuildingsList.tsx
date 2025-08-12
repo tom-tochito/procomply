@@ -29,11 +29,13 @@ export default function BuildingsList({ tenant }: BuildingsListProps) {
 
   // Fetch buildings with Convex
   const buildings = useQuery(api.buildings.getBuildings, {
+    tenantId: tenant._id,
     divisionId: selectedDivision !== "Active Divisions" ? selectedDivision as any : undefined,
   });
 
   // Fetch divisions data
   const divisions = useQuery(api.divisions.getDivisions, {
+    tenantId: tenant._id,
     type: "Active",
   });
 

@@ -13,21 +13,21 @@ export default function TeamManagement() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Fetch data from Convex
-  const teams = useQuery(api.teams.getTeams, {}) || [];
   const tenant = useQuery(api.tenants.getCurrentTenant, {});
+  const teams = useQuery(api.teams.getTeams, {}) || [];
   const companies = useQuery(api.companies.getCompanies, {}) || [];
-  const users = useQuery(api.users.getUsers, {}) || [];
+  const users = useQuery(api.users.getUsers, tenant ? { tenantId: tenant._id } : "skip") || [];
 
   // Transform teams data to include company and supervisor names
-  const teamsWithDetails = teams.map(team => {
+  const teamsWithDetails = teams.map((team: any) => {
     // Find user by matching profile id
-    const supervisor = users.find(u => u && u.profile?._id === team.supervisorId);
+    const supervisor = users.find((u: any) => u && u._id === team.supervisorId);
     return {
       id: team._id,
       code: team.code || "",
       description: team.description,
       company: companies.find(c => c._id === team.companyId)?.name || "",
-      supervisor: supervisor?.profile?.name || supervisor?.email || ""
+      supervisor: supervisor?.name || supervisor?.email || ""
     };
   });
 
@@ -75,7 +75,7 @@ export default function TeamManagement() {
         onClose={() => setIsAddModalOpen(false)}
         tenant={tenant}
         companies={companies}
-        supervisors={users.filter(u => u !== null) as any}
+        supervisors={users.filter((u: any) => u !== null) as any}
       />
     </div>
   );

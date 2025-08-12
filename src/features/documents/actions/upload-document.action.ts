@@ -17,6 +17,8 @@ const s3Client = new S3Client({
 interface UploadDocumentParams {
   file: File;
   buildingId: string;
+  tenantId: string;
+  uploaderId: string;
   category?: string;
   docCategory?: string;
   description?: string;
@@ -48,6 +50,8 @@ export async function uploadDocumentAction(params: UploadDocumentParams) {
 
     // Create document record in Convex
     const documentId = await fetchMutation(api.documents.createDocument, {
+      tenantId: metadata.tenantId as any,
+      uploaderId: metadata.uploaderId as any,
       buildingId: buildingId as any,
       name: file.name,
       type: file.type,

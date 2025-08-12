@@ -49,6 +49,7 @@ export default function AddBuildingModal({
       };
 
       await createBuilding({
+        tenantId: tenant._id,
         name,
         divisionId: divisionId ? divisionId as any : undefined,
         templateId: templateId ? templateId as any : undefined,

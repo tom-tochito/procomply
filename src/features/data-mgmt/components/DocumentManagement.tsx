@@ -39,8 +39,8 @@ export default function DocumentManagement({
   const [selectedDocument, setSelectedDocument] = useState<DocumentWithSimplifiedRelations | null>(null);
 
   // Fetch buildings and divisions
-  const buildings = useQuery(api.buildings.getBuildings, {}) || [];
-  const divisions = useQuery(api.divisions.getDivisions, {}) || [];
+  const buildings = useQuery(api.buildings.getBuildings, { tenantId: tenant._id }) || [];
+  const divisions = useQuery(api.divisions.getDivisions, { tenantId: tenant._id }) || [];
   
   // Fetch documents from Convex
   const documents = useQuery(api.documents.getDocuments, {

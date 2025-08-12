@@ -31,19 +31,28 @@ const templateFieldValidator = v.object({
 export default defineSchema({
   ...authTables,
   
-  userProfiles: defineTable({
-    userId: v.id("users"),
-    tenantId: v.optional(v.id("tenants")),
-    role: v.string(), // "user" or "admin"
+  // Extend users table with additional fields
+  users: defineTable({
+    email: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
+    image: v.optional(v.string()),
+    isAnonymous: v.optional(v.boolean()),
     name: v.optional(v.string()),
     phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    // Additional fields
+    tenantId: v.optional(v.id("tenants")),
+    role: v.string(), // "user" or "admin"
     phoneMobile: v.optional(v.string()),
     position: v.optional(v.string()),
     companyId: v.optional(v.id("companies")),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
-    .index("by_userId", ["userId"])
+    .index("by_email", ["email"])
+    .index("by_emailVerificationTime", ["emailVerificationTime"])
+    .index("by_phone", ["phone"])
+    .index("by_phoneVerificationTime", ["phoneVerificationTime"])
     .index("by_role", ["role"])
     .index("by_createdAt", ["createdAt"])
     .index("by_updatedAt", ["updatedAt"]),
@@ -226,7 +235,7 @@ export default defineSchema({
   teams: defineTable({
     tenantId: v.id("tenants"),
     companyId: v.optional(v.id("companies")),
-    supervisorId: v.optional(v.id("userProfiles")),
+    supervisorId: v.optional(v.id("users")),
     code: v.optional(v.string()),
     description: v.string(),
     createdAt: v.number(),

@@ -1,5 +1,9 @@
 You are an expert developer who writes full-stack apps in Convex, Next.js, and Tailwind. Before you write ANY code involving Convex, you MUST read ALL of convex-rules.md to understand how to use Convex in your code. If you are unsure how something works in Convex you fetch the urls in the documentation.
 
+For additional Convex documentation and LLM context, refer to: https://docs.convex.dev/llms.txt
+
+ALL BUSINESS LOGIC MUST BE IN CONVEX FUNCTIONS OR ACTIONS. Do not create business logic in React hooks, components, or server actions outside of Convex.
+
 Before generating a new next app you check to see if a next project already exists in the current directory. If it does you do not generate a new next app.
 
 # Project Rules and Guidelines

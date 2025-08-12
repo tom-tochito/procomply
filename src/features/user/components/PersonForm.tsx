@@ -50,7 +50,7 @@ export default function PersonForm({ person, companies, onSubmit, onCancel }: Pe
           <input
             type="text"
             name="name"
-            defaultValue={person?.profile?.name || ""}
+            defaultValue={person?.name || ""}
             disabled={isPending}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
           />
@@ -63,7 +63,7 @@ export default function PersonForm({ person, companies, onSubmit, onCancel }: Pe
           <input
             type="text"
             name="position"
-            defaultValue={person?.profile?.position || ""}
+            defaultValue={person?.position || ""}
             disabled={isPending}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
             placeholder="e.g., Fire Risk Assessor, Manager"
@@ -77,7 +77,7 @@ export default function PersonForm({ person, companies, onSubmit, onCancel }: Pe
           <input
             type="tel"
             name="phone"
-            defaultValue={person?.profile?.phone || ""}
+            defaultValue={person?.phone || ""}
             disabled={isPending}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
           />
@@ -90,7 +90,7 @@ export default function PersonForm({ person, companies, onSubmit, onCancel }: Pe
           <input
             type="tel"
             name="phoneMobile"
-            defaultValue={person?.profile?.phoneMobile || ""}
+            defaultValue={person?.phoneMobile || ""}
             disabled={isPending}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
           />
@@ -121,7 +121,7 @@ export default function PersonForm({ person, companies, onSubmit, onCancel }: Pe
           </label>
           <select
             name="role"
-            defaultValue={person?.profile?.role || "user"}
+            defaultValue={person?.role || "user"}
             disabled={isPending}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
           >

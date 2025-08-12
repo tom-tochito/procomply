@@ -11,7 +11,7 @@ import type { Tenant } from "@/features/tenant/models";
 import { UserAvatar } from "./UserAvatar";
 import { NavigationLinks } from "./NavigationLinks";
 import { MobileMenu } from "./MobileMenu";
-import { useAuth } from "~/src/hooks/useAuth";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 interface HeaderProps {
   tenant: Tenant;
@@ -64,10 +64,7 @@ export default function Header({ tenant }: HeaderProps) {
 
         {tenant && (
           <UserAvatar 
-            user={user ? {
-              email: user.email,
-              profile: user.profile ? { name: user.profile.name } : undefined
-            } : undefined} 
+            user={user} 
             tenant={tenant} 
           />
         )}
@@ -78,10 +75,7 @@ export default function Header({ tenant }: HeaderProps) {
         onClose={() => setMobileMenuOpen(false)}
         tenantSlug={tenantSlug}
         tenant={tenant}
-        user={user ? {
-          email: user.email,
-          profile: user.profile ? { name: user.profile.name } : undefined
-        } : undefined}
+        user={user}
       />
     </header>
   );
