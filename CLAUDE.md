@@ -71,6 +71,7 @@ catch (error: unknown) {
 For all conventions and best practices related to Convex, refer to the `convex-rules.md` document.
 
 Key Convex principles:
+
 - **Function Registration**: Use `query`, `mutation`, and `action` for public functions. Use `internalQuery`, `internalMutation`, and `internalAction` for private functions.
 - **Always use validators**: Include `args` and `returns` validators for all Convex functions. If no return, use `returns: v.null()`.
 - **Schema Definition**: Define your schema in `convex/schema.ts` using `defineSchema` and `defineTable`.
@@ -78,18 +79,21 @@ Key Convex principles:
 - **Transactions**: Use `ctx.db.insert`, `ctx.db.replace`, `ctx.db.patch`, and `ctx.db.delete` for mutations.
 
 Example Convex query:
+
 ```typescript
 import { query } from "./_generated/server";
 import { v } from "convex/values";
 
 export const getBuildings = query({
   args: { tenantId: v.id("tenants") },
-  returns: v.array(v.object({
-    _id: v.id("buildings"),
-    _creationTime: v.number(),
-    name: v.string(),
-    tenantId: v.id("tenants"),
-  })),
+  returns: v.array(
+    v.object({
+      _id: v.id("buildings"),
+      _creationTime: v.number(),
+      name: v.string(),
+      tenantId: v.id("tenants"),
+    })
+  ),
   handler: async (ctx, args) => {
     return await ctx.db
       .query("buildings")
@@ -152,20 +156,12 @@ export interface BuildingWithStats extends Building {
 }
 ```
 
-## 14. Server-Side Repository Pattern
-
-Only use server-side repositories for:
-
-- Authentication (auth)
-- Tenant operations (tenant)
-- File storage operations (storage)
-
-All other data operations should use Convex queries and mutations. Do NOT create server-side repositories for entities like buildings, divisions, tasks, etc.
-
-## 15. Template System Rules
+## 14. Template System Rules
 
 ### Template Field Definitions
+
 Templates use a `fields` array in JSON format with typed TemplateField[]. Each field must have:
+
 - `key`: Unique identifier (alphanumeric, no spaces, camelCase)
 - `label`: Display name for the field
 - `type`: Field type (text, textarea, number, date, select, multiselect, checkbox, image, file, url)
@@ -173,18 +169,21 @@ Templates use a `fields` array in JSON format with typed TemplateField[]. Each f
 - Additional properties based on type (options, min/max, rows, accept)
 
 ### Template Data Storage
+
 - Building data is stored in the `data` field as JSON (Record<string, any>)
 - Keys in `data` must match field `key` values from the template
 - Always validate data against template field definitions before saving
 - Use type guards when retrieving data to ensure type safety
 
 ### Template Operations
+
 1. **Creating/Updating Buildings:**
+
    ```typescript
    // In a Convex mutation
    import { mutation } from "./_generated/server";
    import { v } from "convex/values";
-   
+
    export const updateBuilding = mutation({
      args: {
        buildingId: v.id("buildings"),
@@ -194,19 +193,19 @@ Templates use a `fields` array in JSON format with typed TemplateField[]. Each f
      handler: async (ctx, args) => {
        const building = await ctx.db.get(args.buildingId);
        if (!building) throw new Error("Building not found");
-       
+
        const template = await ctx.db.get(building.templateId);
        if (!template) throw new Error("Template not found");
-       
+
        // Validate data against template fields
        const templateData: Record<string, any> = {};
-       template.fields.forEach(field => {
+       template.fields.forEach((field) => {
          if (field.required && !args.data[field.key]) {
            throw new Error(`${field.label} is required`);
          }
          templateData[field.key] = args.data[field.key];
        });
-       
+
        await ctx.db.patch(args.buildingId, { data: templateData });
        return null;
      },
@@ -214,6 +213,7 @@ Templates use a `fields` array in JSON format with typed TemplateField[]. Each f
    ```
 
 2. **Displaying Buildings:**
+
    - Fetch building with template relation using Convex queries
    - Loop through template.fields to determine display order and formatting
    - Retrieve values from building.data using field keys
@@ -227,17 +227,19 @@ Templates use a `fields` array in JSON format with typed TemplateField[]. Each f
    - Never modify field keys after template is in use
 
 ### Template Builder Component
+
 - Use a simple form-based interface (no drag-and-drop)
 - Provide field type selection via dropdown
 - Show/hide type-specific options based on selection
 - Validate field keys are unique within template
 - Preview the generated form before saving
 
-## 16. File Upload Pattern
+## 15. File Upload Pattern
 
 File uploads use server actions that handle both Cloudflare R2 storage and Convex metadata in a single operation:
 
 1. **Server Actions for Uploads**: Create focused server actions for specific upload tasks
+
    ```typescript
    // Good: Task-specific upload action
    export async function uploadDocumentAction(params: {
@@ -248,23 +250,29 @@ File uploads use server actions that handle both Cloudflare R2 storage and Conve
      // Upload to R2
      // Create Convex record
    }
-   
+
    // Bad: Generic upload with complex metadata
-   export async function uploadFileAction(file: File, metadata: ComplexMetadata)
+   export async function uploadFileAction(
+     file: File,
+     metadata: ComplexMetadata
+   );
    ```
 
-2. **File Storage Structure**: 
+2. **File Storage Structure**:
+
    - Store files in R2 with logical paths: `type/parentId/timestamp-filename`
    - Examples: `documents/building123/1234567-report.pdf`, `buildings/abc123/image-1234567.jpg`
 
 3. **Atomic Operations**: Always upload file and create database record in the same action
+
    - Use `fetchMutation` from `convex/nextjs` in server actions
    - Return success/error status with relevant IDs
 
 4. **File URLs**: Use the `getStorageFileUrl` helper to construct public URLs from file paths
 
 # important-instruction-reminders
+
 Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
-NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+NEVER proactively create documentation files (\*.md) or README files. Only create documentation files if explicitly requested by the User.
