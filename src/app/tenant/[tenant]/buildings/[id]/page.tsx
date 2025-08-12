@@ -1,5 +1,4 @@
 import BuildingDetails from "@/features/buildings/components/BuildingDetails";
-import { requireAuth } from "@/features/auth";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 
 interface BuildingDetailsPageProps {
@@ -20,8 +19,6 @@ export default async function BuildingDetailsPage({
     throw new Error("Tenant not found");
   }
 
-  // Require authentication
-  await requireAuth(tenant);
 
   return (
     <BuildingDetails

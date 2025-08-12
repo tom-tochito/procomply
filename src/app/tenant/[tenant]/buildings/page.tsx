@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import BuildingsList from "@/features/buildings/components/BuildingsList";
-import { requireAuth } from "@/features/auth";
 import { getTenantBySlug } from "@/features/tenant/utils/get-tenant";
 
 interface BuildingsPageProps {
@@ -15,9 +14,6 @@ export default async function BuildingsPage({ params }: BuildingsPageProps) {
 
   // Get tenant data
   const tenant = await getTenantBySlug(tenantSlug);
-
-  // Require authentication
-  await requireAuth(tenant);
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -1,4 +1,3 @@
-import { requireAuth } from "@/features/auth";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 // TODO: Migrate BuildingTemplateManagement from InstantDB to Convex
 // import BuildingTemplateManagement from "@/features/templates/components/BuildingTemplateManagement";
@@ -16,7 +15,6 @@ export default async function BuildingTemplatesPage({
     throw new Error("Tenant not found");
   }
 
-  await requireAuth(tenant);
 
   // TODO: Migrate BuildingTemplateManagement from InstantDB to Convex
   return (

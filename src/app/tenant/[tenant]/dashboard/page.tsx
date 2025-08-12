@@ -1,4 +1,3 @@
-import { requireAuth } from "@/features/auth";
 import { getTenantBySlug } from "@/features/tenant/utils/get-tenant";
 import DashboardClient from "@/features/dashboard/components/DashboardClient";
 
@@ -14,7 +13,6 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   // Get tenant data first
   const tenantData = await getTenantBySlug(tenant);
   
-  await requireAuth(tenantData);
 
   return <DashboardClient tenant={tenantData} />;
 }

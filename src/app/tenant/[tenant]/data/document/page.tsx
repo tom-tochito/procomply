@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import DocumentManagement from "@/features/data-mgmt/components/DocumentManagement";
-import { requireAuth } from "@/features/auth";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 
 interface DocumentPageProps {
@@ -19,8 +18,6 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
     throw new Error("Tenant not found");
   }
 
-  // Require authentication
-  await requireAuth(tenantData);
 
   // Documents are now fetched directly in the client component using InstantDB subscriptions
 

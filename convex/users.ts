@@ -11,7 +11,7 @@ export const viewer = query({
     v.object({
       _id: v.id("users"),
       _creationTime: v.number(),
-      email: v.string(),
+      email: v.optional(v.string()),
       emailVerified: v.optional(v.boolean()),
       name: v.optional(v.string()),
       role: v.optional(v.string()),

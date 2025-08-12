@@ -1,4 +1,3 @@
-import { requireAuth } from "@/features/auth";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 import GenericTemplateManagement from "@/features/template-mgmt/components/GenericTemplateManagement";
 
@@ -14,7 +13,6 @@ export default async function RiskAreaPage({ params }: RiskAreaPageProps) {
     throw new Error("Tenant not found");
   }
 
-  await requireAuth(tenant);
 
   return (
     <div className="min-h-screen bg-gray-50">

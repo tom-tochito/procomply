@@ -1,4 +1,3 @@
-import { requireAuth } from "@/features/auth";
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
 // TODO: Migrate TaskTemplateManagement from InstantDB to Convex
 // import TaskTemplateManagement from "@/features/templates/components/TaskTemplateManagement";
@@ -15,7 +14,6 @@ export default async function TaskTemplatePage({ params }: TaskTemplatePageProps
     throw new Error("Tenant not found");
   }
 
-  await requireAuth(tenant);
 
   // TODO: Migrate TaskTemplateManagement from InstantDB to Convex
   return (
