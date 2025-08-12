@@ -20,6 +20,7 @@ import type * as complianceChecks from "../complianceChecks.js";
 import type * as countries from "../countries.js";
 import type * as divisions from "../divisions.js";
 import type * as documents from "../documents.js";
+import type * as helpers_tenantAccess from "../helpers/tenantAccess.js";
 import type * as http from "../http.js";
 import type * as inspections from "../inspections.js";
 import type * as legislation from "../legislation.js";
@@ -46,6 +47,7 @@ declare const fullApi: ApiFromModules<{
   countries: typeof countries;
   divisions: typeof divisions;
   documents: typeof documents;
+  "helpers/tenantAccess": typeof helpers_tenantAccess;
   http: typeof http;
   inspections: typeof inspections;
   legislation: typeof legislation;

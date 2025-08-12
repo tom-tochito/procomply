@@ -1,10 +1,11 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { requireTenantAccess } from "./helpers/tenantAccess";
 
 export const getDocuments = query({
   args: {
-    tenantId: v.optional(v.id("tenants")),
+    tenantId: v.id("tenants"),
     buildingId: v.optional(v.id("buildings")),
     category: v.optional(v.string()),
     docCategory: v.optional(v.string()),
@@ -49,16 +50,13 @@ export const getDocuments = query({
     })
   ),
   handler: async (ctx, args) => {
-    // Filter by tenantId if provided
-    let documents;
-    if (args.tenantId) {
-      documents = await ctx.db
-        .query("documents")
-        .withIndex("by_tenant", (q) => q.eq("tenantId", args.tenantId!))
-        .collect();
-    } else {
-      documents = await ctx.db.query("documents").collect();
-    }
+    const { tenantId } = await requireTenantAccess(ctx, args.tenantId);
+    
+    // Get documents for the tenant
+    let documents = await ctx.db
+      .query("documents")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
     
     // Apply filters
     if (args.buildingId !== undefined) {
@@ -100,7 +98,6 @@ export const getDocuments = query({
 export const getDocument = query({
   args: { 
     documentId: v.id("documents"),
-    tenantId: v.optional(v.id("tenants")), // Optional for access check
   },
   returns: v.union(
     v.object({
@@ -139,10 +136,8 @@ export const getDocument = query({
     const document = await ctx.db.get(args.documentId);
     if (!document) return null;
 
-    // Optional access check if tenantId is provided
-    if (args.tenantId && document.tenantId !== args.tenantId) {
-      throw new Error("Access denied");
-    }
+    // Check user has access to the document's tenant
+    await requireTenantAccess(ctx, document.tenantId);
 
     // Get related data
     const building = document.buildingId 
@@ -187,11 +182,12 @@ export const createDocument = mutation({
   },
   returns: v.id("documents"),
   handler: async (ctx, args) => {
+    const { tenantId, userId } = await requireTenantAccess(ctx, args.tenantId);
 
     const now = Date.now();
 
     return await ctx.db.insert("documents", {
-      tenantId: args.tenantId,
+      tenantId,
       buildingId: args.buildingId,
       templateId: args.templateId,
       uploaderId: args.uploaderId,

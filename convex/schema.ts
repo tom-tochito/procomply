@@ -42,16 +42,16 @@ export default defineSchema({
     phoneVerificationTime: v.optional(v.number()),
     // Additional fields
     tenantId: v.optional(v.id("tenants")),
-    role: v.string(), // "user" or "admin"
+    role: v.optional(v.string()), // "user" or "admin"
     phoneMobile: v.optional(v.string()),
     position: v.optional(v.string()),
     companyId: v.optional(v.id("companies")),
-    createdAt: v.number(),
-    updatedAt: v.number(),
+    createdAt: v.optional(v.number()),
+    updatedAt: v.optional(v.number()),
   })
-    .index("by_email", ["email"])
+    .index("email", ["email"])
     .index("by_emailVerificationTime", ["emailVerificationTime"])
-    .index("by_phone", ["phone"])
+    .index("phone", ["phone"])
     .index("by_phoneVerificationTime", ["phoneVerificationTime"])
     .index("by_role", ["role"])
     .index("by_createdAt", ["createdAt"])

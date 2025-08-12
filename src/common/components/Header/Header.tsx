@@ -24,7 +24,7 @@ export default function Header({ tenant }: HeaderProps) {
   const tenantSlug = paramsHook.tenant as string;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const user = useQuery(api.users.viewer);
+  const user = useQuery(api.users.currentUser);
 
   const isLoginPage = pathname.includes("/login");
   if (isLoginPage) return null;

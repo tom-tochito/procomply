@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 // Generic query for template entities
 export const getTemplateEntities = query({
@@ -14,27 +15,43 @@ export const getTemplateEntities = query({
     tenantId: v.optional(v.id("tenants")),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
-
-    // Get user profile to check tenant access
-    const userId = identity.subject as Id<"users">;
     const user = await ctx.db.get(userId);
     
     if (!user) {
       throw new Error("User not found");
     }
 
-    const tenantId = args.tenantId || user.tenantId;
-    if (!tenantId) {
-      throw new Error("No tenant specified");
-    }
+    let tenantId = args.tenantId;
 
-    // Check user has access to this tenant
-    if (user.tenantId !== tenantId) {
-      throw new Error("Access denied to this tenant");
+    // If no tenant specified, get user's tenants
+    if (!tenantId) {
+      const userTenants = await ctx.db
+        .query("userTenants")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .collect();
+      
+      if (userTenants.length === 0) {
+        throw new Error("User not assigned to any tenant");
+      }
+      
+      // Use the first tenant if not specified
+      tenantId = userTenants[0].tenantId;
+    } else {
+      // Check user has access to the specified tenant
+      const userTenant = await ctx.db
+        .query("userTenants")
+        .withIndex("by_user_and_tenant", (q) => 
+          q.eq("userId", userId).eq("tenantId", tenantId as Id<"tenants">)
+        )
+        .unique();
+        
+      if (!userTenant) {
+        throw new Error("Access denied to this tenant");
+      }
     }
 
     return await ctx.db
@@ -58,27 +75,43 @@ export const createTemplateEntity = mutation({
     tenantId: v.optional(v.id("tenants")),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
-
-    // Get user profile to check tenant access
-    const userId = identity.subject as Id<"users">;
     const user = await ctx.db.get(userId);
     
     if (!user) {
       throw new Error("User not found");
     }
 
-    const tenantId = args.tenantId || user.tenantId;
-    if (!tenantId) {
-      throw new Error("No tenant specified");
-    }
+    let tenantId = args.tenantId;
 
-    // Check user has access to this tenant
-    if (user.tenantId !== tenantId) {
-      throw new Error("Access denied to this tenant");
+    // If no tenant specified, get user's tenants
+    if (!tenantId) {
+      const userTenants = await ctx.db
+        .query("userTenants")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .collect();
+      
+      if (userTenants.length === 0) {
+        throw new Error("User not assigned to any tenant");
+      }
+      
+      // Use the first tenant if not specified
+      tenantId = userTenants[0].tenantId;
+    } else {
+      // Check user has access to the specified tenant
+      const userTenant = await ctx.db
+        .query("userTenants")
+        .withIndex("by_user_and_tenant", (q) => 
+          q.eq("userId", userId).eq("tenantId", tenantId as Id<"tenants">)
+        )
+        .unique();
+        
+      if (!userTenant) {
+        throw new Error("Access denied to this tenant");
+      }
     }
 
     const now = Date.now();
@@ -108,8 +141,8 @@ export const updateTemplateEntity = mutation({
     description: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
 
@@ -118,12 +151,21 @@ export const updateTemplateEntity = mutation({
     if (!entity) {
       throw new Error("Entity not found");
     }
-
-    // Get user to check tenant access
-    const userId = identity.subject as Id<"users">;
     const user = await ctx.db.get(userId);
     
-    if (!user || user.tenantId !== (entity as any).tenantId) {
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Check user has access to this tenant
+    const userTenant = await ctx.db
+      .query("userTenants")
+      .withIndex("by_user_and_tenant", (q) => 
+        q.eq("userId", userId).eq("tenantId", (entity as any).tenantId)
+      )
+      .unique();
+      
+    if (!userTenant) {
       throw new Error("Access denied");
     }
 
@@ -147,8 +189,8 @@ export const deleteTemplateEntity = mutation({
     entityId: v.string(), // Generic ID since we don't know the table
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
 
@@ -157,12 +199,21 @@ export const deleteTemplateEntity = mutation({
     if (!entity) {
       throw new Error("Entity not found");
     }
-
-    // Get user to check tenant access
-    const userId = identity.subject as Id<"users">;
     const user = await ctx.db.get(userId);
     
-    if (!user || user.tenantId !== (entity as any).tenantId) {
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Check user has access to this tenant
+    const userTenant = await ctx.db
+      .query("userTenants")
+      .withIndex("by_user_and_tenant", (q) => 
+        q.eq("userId", userId).eq("tenantId", (entity as any).tenantId)
+      )
+      .unique();
+      
+    if (!userTenant) {
       throw new Error("Access denied");
     }
 

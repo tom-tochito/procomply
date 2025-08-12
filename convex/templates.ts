@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { requireTenantAccess } from "./helpers/tenantAccess";
 
 const templateFieldValidator = v.object({
   key: v.string(),
@@ -28,7 +29,7 @@ const templateFieldValidator = v.object({
 
 export const getTemplates = query({
   args: {
-    tenantId: v.optional(v.id("tenants")),
+    tenantId: v.id("tenants"),
     type: v.optional(v.string()),
     isActive: v.optional(v.boolean()),
   },
@@ -46,34 +47,33 @@ export const getTemplates = query({
     })
   ),
   handler: async (ctx, args) => {
-    // Filter by tenantId if provided
-    let templates;
-    if (args.tenantId) {
-      templates = await ctx.db
-        .query("templates")
-        .withIndex("by_tenant", (q) => q.eq("tenantId", args.tenantId!))
-        .collect();
-    } else {
-      templates = await ctx.db.query("templates").collect();
-    }
+    const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, args.tenantId);
+
+    // Get templates for the tenant
+    const templates = await ctx.db
+      .query("templates")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
     
     // Apply filters
+    let filteredTemplates = templates;
+    
     if (args.type !== undefined) {
-      templates = templates.filter(t => t.type === args.type);
+      filteredTemplates = filteredTemplates.filter(t => t.type === args.type);
     }
     
     if (args.isActive !== undefined) {
-      templates = templates.filter(t => t.isActive === args.isActive);
+      filteredTemplates = filteredTemplates.filter(t => t.isActive === args.isActive);
     }
     
-    return templates;
+    return filteredTemplates;
   },
 });
 
 export const getTemplate = query({
   args: { 
     templateId: v.id("templates"),
-    tenantId: v.optional(v.id("tenants")), // Optional for access check
+    tenantId: v.id("tenants"),
   },
   returns: v.union(
     v.object({
@@ -90,11 +90,13 @@ export const getTemplate = query({
     v.null()
   ),
   handler: async (ctx, args) => {
+    const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, args.tenantId);
+
     const template = await ctx.db.get(args.templateId);
     if (!template) return null;
 
-    // Optional access check if tenantId is provided
-    if (args.tenantId && template.tenantId !== args.tenantId) {
+    // Verify template belongs to the tenant
+    if (template.tenantId !== tenantId) {
       throw new Error("Access denied");
     }
 
@@ -104,7 +106,7 @@ export const getTemplate = query({
 
 export const createTemplate = mutation({
   args: {
-    tenantId: v.id("tenants"), // Required for testing
+    tenantId: v.id("tenants"),
     name: v.string(),
     type: v.string(),
     fields: v.array(templateFieldValidator),
@@ -112,6 +114,8 @@ export const createTemplate = mutation({
   },
   returns: v.id("templates"),
   handler: async (ctx, args) => {
+    const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, args.tenantId);
+
     const now = Date.now();
 
     return await ctx.db.insert("templates", {
@@ -129,20 +133,22 @@ export const createTemplate = mutation({
 export const updateTemplate = mutation({
   args: {
     templateId: v.id("templates"),
-    tenantId: v.optional(v.id("tenants")), // Optional for access check
+    tenantId: v.id("tenants"),
     name: v.optional(v.string()),
     fields: v.optional(v.array(templateFieldValidator)),
     isActive: v.optional(v.boolean()),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
+    const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, args.tenantId);
+
     const template = await ctx.db.get(args.templateId);
     if (!template) {
       throw new Error("Template not found");
     }
 
-    // Optional access check if tenantId is provided
-    if (args.tenantId && template.tenantId !== args.tenantId) {
+    // Verify template belongs to the tenant
+    if (template.tenantId !== tenantId) {
       throw new Error("Access denied");
     }
 
@@ -159,17 +165,19 @@ export const updateTemplate = mutation({
 export const deleteTemplate = mutation({
   args: { 
     templateId: v.id("templates"),
-    tenantId: v.optional(v.id("tenants")), // Optional for access check
+    tenantId: v.id("tenants"),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
+    const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, args.tenantId);
+
     const template = await ctx.db.get(args.templateId);
     if (!template) {
       throw new Error("Template not found");
     }
 
-    // Optional access check if tenantId is provided
-    if (args.tenantId && template.tenantId !== args.tenantId) {
+    // Verify template belongs to the tenant
+    if (template.tenantId !== tenantId) {
       throw new Error("Access denied");
     }
 

@@ -1,10 +1,11 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { requireTenantAccess } from "./helpers/tenantAccess";
 
 export const getTasks = query({
   args: {
-    tenantId: v.optional(v.id("tenants")),
+    tenantId: v.id("tenants"),
     buildingId: v.optional(v.id("buildings")),
     status: v.optional(v.string()),
     priority: v.optional(v.string()),
@@ -43,16 +44,13 @@ export const getTasks = query({
     })
   ),
   handler: async (ctx, args) => {
-    // Filter by tenantId if provided
-    let tasks;
-    if (args.tenantId) {
-      tasks = await ctx.db
-        .query("tasks")
-        .withIndex("by_tenant", (q) => q.eq("tenantId", args.tenantId!))
-        .collect();
-    } else {
-      tasks = await ctx.db.query("tasks").collect();
-    }
+    const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, args.tenantId);
+
+    // Get tasks for the tenant
+    let tasks = await ctx.db
+      .query("tasks")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
     
     // Apply filters
     if (args.buildingId) {
@@ -95,7 +93,7 @@ export const getTasks = query({
 export const getTask = query({
   args: { 
     taskId: v.id("tasks"),
-    tenantId: v.optional(v.id("tenants")), // Optional for access check
+    tenantId: v.id("tenants"),
   },
   returns: v.union(
     v.object({
@@ -123,11 +121,13 @@ export const getTask = query({
     v.null()
   ),
   handler: async (ctx, args) => {
+    const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, args.tenantId);
+
     const task = await ctx.db.get(args.taskId);
     if (!task) return null;
 
-    // Optional access check if tenantId is provided
-    if (args.tenantId && task.tenantId !== args.tenantId) {
+    // Verify task belongs to the tenant
+    if (task.tenantId !== tenantId) {
       throw new Error("Access denied");
     }
 
@@ -155,8 +155,7 @@ export const getTask = query({
 
 export const createTask = mutation({
   args: {
-    tenantId: v.id("tenants"), // Required for testing
-    creatorId: v.id("users"), // Required for testing
+    tenantId: v.id("tenants"),
     buildingId: v.optional(v.id("buildings")),
     templateId: v.optional(v.id("templates")),
     assigneeId: v.optional(v.id("users")),
@@ -169,6 +168,7 @@ export const createTask = mutation({
   },
   returns: v.id("tasks"),
   handler: async (ctx, args) => {
+    const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, args.tenantId);
 
     const now = Date.now();
 
@@ -177,7 +177,7 @@ export const createTask = mutation({
       buildingId: args.buildingId,
       templateId: args.templateId,
       assigneeId: args.assigneeId,
-      creatorId: args.creatorId,
+      creatorId: userId, // Use the authenticated user as creator
       title: args.title,
       description: args.description,
       status: args.status,
@@ -193,7 +193,6 @@ export const createTask = mutation({
 export const updateTask = mutation({
   args: {
     taskId: v.id("tasks"),
-    tenantId: v.optional(v.id("tenants")), // Optional for access check
     buildingId: v.optional(v.id("buildings")),
     templateId: v.optional(v.id("templates")),
     assigneeId: v.optional(v.id("users")),
@@ -212,10 +211,7 @@ export const updateTask = mutation({
       throw new Error("Task not found");
     }
 
-    // Optional access check if tenantId is provided
-    if (args.tenantId && task.tenantId !== args.tenantId) {
-      throw new Error("Access denied");
-    }
+    const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, task.tenantId);
 
     const updates: any = { updatedAt: Date.now() };
     if (args.buildingId !== undefined) updates.buildingId = args.buildingId;
@@ -242,7 +238,6 @@ export const updateTask = mutation({
 export const deleteTask = mutation({
   args: { 
     taskId: v.id("tasks"),
-    tenantId: v.optional(v.id("tenants")), // Optional for access check
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -251,10 +246,7 @@ export const deleteTask = mutation({
       throw new Error("Task not found");
     }
 
-    // Optional access check if tenantId is provided
-    if (args.tenantId && task.tenantId !== args.tenantId) {
-      throw new Error("Access denied");
-    }
+    const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, task.tenantId);
 
     await ctx.db.delete(args.taskId);
     return null;

@@ -16,8 +16,9 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      // Send magic link email
-      await signIn("resend", { email });
+      const formData = new FormData();
+      formData.set("email", email);
+      await signIn("resend", formData);
       setIsSuccess(true);
     } catch (err) {
       console.error("Login error:", err);

@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { getCurrentUserTenant } from "./tenants";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const getTeams = query({
   args: {
@@ -29,12 +30,12 @@ export const getTeams = query({
     })
   ),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
     
-    const tenantId = await getCurrentUserTenant(ctx, identity.subject as Id<"users">);
+    const tenantId = await getCurrentUserTenant(ctx, userId);
     if (!tenantId) {
       throw new Error("No tenant found for user");
     }
@@ -94,12 +95,12 @@ export const getTeam = query({
     if (!team) return null;
 
     // Ensure user has access
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
     
-    const tenantId = await getCurrentUserTenant(ctx, identity.subject as Id<"users">);
+    const tenantId = await getCurrentUserTenant(ctx, userId);
     if (!tenantId || team.tenantId !== tenantId) {
       throw new Error("Access denied");
     }
@@ -129,12 +130,12 @@ export const createTeam = mutation({
   },
   returns: v.id("teams"),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
     
-    const tenantId = await getCurrentUserTenant(ctx, identity.subject as Id<"users">);
+    const tenantId = await getCurrentUserTenant(ctx, userId);
     if (!tenantId) {
       throw new Error("No tenant found for user");
     }
@@ -168,12 +169,12 @@ export const updateTeam = mutation({
     }
 
     // Ensure user has access
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
     
-    const tenantId = await getCurrentUserTenant(ctx, identity.subject as Id<"users">);
+    const tenantId = await getCurrentUserTenant(ctx, userId);
     if (!tenantId || team.tenantId !== tenantId) {
       throw new Error("Access denied");
     }
@@ -199,12 +200,12 @@ export const deleteTeam = mutation({
     }
 
     // Ensure user has access
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
     }
     
-    const tenantId = await getCurrentUserTenant(ctx, identity.subject as Id<"users">);
+    const tenantId = await getCurrentUserTenant(ctx, userId);
     if (!tenantId || team.tenantId !== tenantId) {
       throw new Error("Access denied");
     }

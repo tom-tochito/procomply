@@ -1,36 +1,16 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { requireTenantAccess } from "./helpers/tenantAccess";
 
 export const getComplianceChecks = query({
   args: {
-    tenantId: v.optional(v.id("tenants")),
+    tenantId: v.id("tenants"),
     buildingId: v.optional(v.id("buildings")),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
-    // Get user to check tenant access
-    const userId = identity.subject as Id<"users">;
-    const user = await ctx.db.get(userId);
-    
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    const tenantId = args.tenantId || user.tenantId;
-    if (!tenantId) {
-      throw new Error("No tenant specified");
-    }
-
-    // Check user has access to this tenant
-    if (user.tenantId !== tenantId) {
-      throw new Error("Access denied to this tenant");
-    }
+    const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, args.tenantId);
 
     let query = ctx.db
       .query("complianceChecks")
@@ -70,31 +50,11 @@ export const createComplianceCheck = mutation({
     dueDate: v.number(),
     completedDate: v.optional(v.number()),
     notes: v.optional(v.string()),
-    tenantId: v.optional(v.id("tenants")),
+    tenantId: v.id("tenants"),
   },
+  returns: v.id("complianceChecks"),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
-    // Get user to check tenant access
-    const userId = identity.subject as Id<"users">;
-    const user = await ctx.db.get(userId);
-    
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    const tenantId = args.tenantId || user.tenantId;
-    if (!tenantId) {
-      throw new Error("No tenant specified");
-    }
-
-    // Check user has access to this tenant
-    if (user.tenantId !== tenantId) {
-      throw new Error("Access denied to this tenant");
-    }
+    const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, args.tenantId);
 
     const now = Date.now();
     
@@ -105,7 +65,7 @@ export const createComplianceCheck = mutation({
       dueDate: args.dueDate,
       completedDate: args.completedDate,
       notes: args.notes,
-      tenantId,
+      tenantId: args.tenantId,
       createdAt: now,
       updatedAt: now,
     });
@@ -121,25 +81,15 @@ export const updateComplianceCheck = mutation({
     completedDate: v.optional(v.number()),
     notes: v.optional(v.string()),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
-    // Get the check to check tenant access
+    // Get the check to verify tenant access
     const check = await ctx.db.get(args.checkId);
     if (!check) {
       throw new Error("Compliance check not found");
     }
 
-    // Get user to check tenant access
-    const userId = identity.subject as Id<"users">;
-    const user = await ctx.db.get(userId);
-    
-    if (!user || user.tenantId !== check.tenantId) {
-      throw new Error("Access denied");
-    }
+    const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, check.tenantId);
 
     const updates: any = { updatedAt: Date.now() };
     if (args.checkType !== undefined) updates.checkType = args.checkType;
@@ -156,25 +106,15 @@ export const deleteComplianceCheck = mutation({
   args: {
     checkId: v.id("complianceChecks"),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
-    // Get the check to check tenant access
+    // Get the check to verify tenant access
     const check = await ctx.db.get(args.checkId);
     if (!check) {
       throw new Error("Compliance check not found");
     }
 
-    // Get user to check tenant access
-    const userId = identity.subject as Id<"users">;
-    const user = await ctx.db.get(userId);
-    
-    if (!user || user.tenantId !== check.tenantId) {
-      throw new Error("Access denied");
-    }
+    const { tenantId, userId, user, isAdmin } = await requireTenantAccess(ctx, check.tenantId);
 
     return await ctx.db.delete(args.checkId);
   },

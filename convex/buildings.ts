@@ -1,9 +1,10 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { requireTenantAccess } from "./helpers/tenantAccess";
 
 export const getBuildings = query({
   args: {
-    tenantId: v.optional(v.id("tenants")),
+    tenantId: v.id("tenants"),
     divisionId: v.optional(v.id("divisions")),
   },
   returns: v.array(
@@ -22,18 +23,13 @@ export const getBuildings = query({
     })
   ),
   handler: async (ctx, args) => {
-    // Get buildings - filter by tenantId if provided
-    let buildings;
-    
-    if (args.tenantId) {
-      const tenantId = args.tenantId;
-      buildings = await ctx.db
-        .query("buildings")
-        .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
-        .collect();
-    } else {
-      buildings = await ctx.db.query("buildings").collect();
-    }
+    const { tenantId } = await requireTenantAccess(ctx, args.tenantId);
+
+    // Get buildings for the tenant
+    const buildings = await ctx.db
+      .query("buildings")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
     
     // Filter by division if provided
     if (args.divisionId) {
@@ -47,14 +43,16 @@ export const getBuildings = query({
 export const getBuilding = query({
   args: { 
     buildingId: v.id("buildings"),
-    tenantId: v.optional(v.id("tenants")), // Optional for backward compatibility
+    tenantId: v.id("tenants"),
   },
   handler: async (ctx, args) => {
+    const { tenantId } = await requireTenantAccess(ctx, args.tenantId);
+
     const building = await ctx.db.get(args.buildingId);
     if (!building) return null;
 
-    // Optional access check if tenantId is provided
-    if (args.tenantId && building.tenantId !== args.tenantId) {
+    // Verify building belongs to the tenant
+    if (building.tenantId !== tenantId) {
       throw new Error("Access denied");
     }
 
@@ -77,7 +75,7 @@ export const getBuilding = query({
 
 export const createBuilding = mutation({
   args: {
-    tenantId: v.id("tenants"), // Required for testing
+    tenantId: v.id("tenants"),
     name: v.string(),
     templateId: v.optional(v.id("templates")),
     divisionId: v.optional(v.id("divisions")),
@@ -87,10 +85,12 @@ export const createBuilding = mutation({
   },
   returns: v.id("buildings"),
   handler: async (ctx, args) => {
+    const { tenantId } = await requireTenantAccess(ctx, args.tenantId);
+
     const now = Date.now();
 
     return await ctx.db.insert("buildings", {
-      tenantId: args.tenantId,
+      tenantId,
       name: args.name,
       templateId: args.templateId,
       divisionId: args.divisionId,
@@ -106,7 +106,7 @@ export const createBuilding = mutation({
 export const updateBuilding = mutation({
   args: {
     buildingId: v.id("buildings"),
-    tenantId: v.optional(v.id("tenants")), // Optional for access check
+    tenantId: v.id("tenants"),
     name: v.optional(v.string()),
     templateId: v.optional(v.id("templates")),
     divisionId: v.optional(v.id("divisions")),
@@ -116,13 +116,15 @@ export const updateBuilding = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
+    const { tenantId } = await requireTenantAccess(ctx, args.tenantId);
+
     const building = await ctx.db.get(args.buildingId);
     if (!building) {
       throw new Error("Building not found");
     }
 
-    // Optional access check if tenantId is provided
-    if (args.tenantId && building.tenantId !== args.tenantId) {
+    // Verify building belongs to the tenant
+    if (building.tenantId !== tenantId) {
       throw new Error("Access denied");
     }
 
@@ -142,17 +144,19 @@ export const updateBuilding = mutation({
 export const deleteBuilding = mutation({
   args: { 
     buildingId: v.id("buildings"),
-    tenantId: v.optional(v.id("tenants")), // Optional for access check
+    tenantId: v.id("tenants"),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
+    const { tenantId } = await requireTenantAccess(ctx, args.tenantId);
+
     const building = await ctx.db.get(args.buildingId);
     if (!building) {
       throw new Error("Building not found");
     }
 
-    // Optional access check if tenantId is provided
-    if (args.tenantId && building.tenantId !== args.tenantId) {
+    // Verify building belongs to the tenant
+    if (building.tenantId !== tenantId) {
       throw new Error("Access denied");
     }
 
