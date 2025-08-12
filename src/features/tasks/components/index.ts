@@ -1,2 +1,2 @@
 export { TaskForm } from "./TaskForm";
-export { TaskModal } from "./TaskModal";
+export { default as TaskModal } from "./TaskModal";

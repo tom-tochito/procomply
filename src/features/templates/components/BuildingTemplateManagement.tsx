@@ -69,6 +69,7 @@ export default function BuildingTemplateManagement({ tenantId }: BuildingTemplat
         templateId: editingTemplate as Id<"templates">,
         tenantId: tenantId as Id<"tenants">,
         name: templateName,
+        entity: "building",
         fields: templateFields,
       });
 

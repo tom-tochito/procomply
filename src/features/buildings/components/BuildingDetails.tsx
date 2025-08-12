@@ -5,12 +5,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import { getFileUrl } from "@/common/utils/file";
-import { TaskModal } from "@/features/tasks/components/TaskModal";
+import TaskModal from "@/features/tasks/components/TaskModal";
 import { useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { Id } from "~/convex/_generated/dataModel";
 import { Tenant } from "@/features/tenant/models";
 import { TaskUI } from "@/features/tasks/models";
+import { BuildingWithRelations } from "@/features/buildings/models";
 import TabNavigation from "./TabNavigation";
 import BuildingInfo from "./BuildingInfo";
 import TaskFilters from "./TaskFilters";
@@ -68,6 +69,13 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
       </div>
     );
   }
+
+  // Transform building to ensure compatibility with BuildingWithRelations type
+  const buildingWithRelations: BuildingWithRelations = {
+    ...building,
+    divisionEntity: building.divisionEntity === null ? undefined : building.divisionEntity,
+    template: building.template === null ? undefined : building.template,
+  };
 
   // Transform tasks to TaskUI format
   const tasksUI: TaskUI[] = tasks.map(task => ({
@@ -137,7 +145,7 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
           </Link>
           <span className="mx-2 text-gray-400">/</span>
         </li>
-        <li className="text-gray-700">{building.name}</li>
+        <li className="text-gray-700">{buildingWithRelations.name}</li>
       </ol>
     </nav>
   );
@@ -168,32 +176,32 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
       case "documents":
         return (
           <div className="mt-6">
-            <DocumentsTab building={building} tenant={tenant} />
+            <DocumentsTab building={buildingWithRelations} tenant={tenant} />
           </div>
         );
       case "contacts":
         return (
           <div className="mt-6">
-            <ContactsTab building={building} />
+            <ContactsTab building={buildingWithRelations} />
           </div>
         );
       case "notes":
         return (
           <div className="mt-6">
-            <NotesTab building={building} />
+            <NotesTab building={buildingWithRelations} />
           </div>
         );
       case "year-planner":
         return (
           <div className="mt-6">
-            <YearPlannerTab building={building} />
+            <YearPlannerTab building={buildingWithRelations} />
           </div>
         );
       default:
         return (
           <div className="mt-6">
             <BuildingInfo
-              building={building}
+              building={buildingWithRelations}
               divisions={divisions}
             />
           </div>
@@ -210,10 +218,10 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
         <div className="bg-white rounded-lg shadow mb-6">
           <div className="flex items-start p-6">
             <div className="relative w-32 h-32 mr-6 bg-gray-100 rounded-lg overflow-hidden">
-              {building.image ? (
+              {buildingWithRelations.image ? (
                 <Image
-                  src={getFileUrl(tenant.slug, building.image)}
-                  alt={building.name}
+                  src={getFileUrl(tenant.slug, buildingWithRelations.image)}
+                  alt={buildingWithRelations.name}
                   fill
                   className="object-cover"
                 />
@@ -226,9 +234,9 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
               )}
             </div>
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900">{building.name}</h1>
-              {building.divisionEntity && (
-                <p className="text-gray-600 mt-1">Division: {building.divisionEntity.name}</p>
+              <h1 className="text-3xl font-bold text-gray-900">{buildingWithRelations.name}</h1>
+              {buildingWithRelations.divisionEntity && (
+                <p className="text-gray-600 mt-1">Division: {buildingWithRelations.divisionEntity.name}</p>
               )}
               <div className="flex items-center mt-4 space-x-6">
                 <div className="flex items-center">
@@ -272,10 +280,19 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
           setIsAddTaskModalOpen(false);
           setEditTaskId(undefined);
         }}
-        tenant={tenant}
-        building={building}
-        task={editTask}
-        mode={modalMode}
+        onSave={(taskData) => {
+          // TODO: Implement save functionality
+          console.log('Save task:', taskData);
+          setIsAddTaskModalOpen(false);
+        }}
+        templateData={editTask ? {
+          description: editTask.description,
+          dueDate: editTask.dueDate.toString(),
+          priority: editTask.priority,
+          building: buildingWithRelations._id,
+        } : {
+          building: buildingWithRelations._id,
+        }}
       />
     </div>
   );

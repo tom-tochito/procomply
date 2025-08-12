@@ -77,7 +77,7 @@ Key Convex principles:
 - **Schema Definition**: Define your schema in `convex/schema.ts` using `defineSchema` and `defineTable`.
 - **No filter, use indexes**: Always use `withIndex` for queries instead of `filter()`. Define appropriate indexes in the schema.
 - **Transactions**: Use `ctx.db.insert`, `ctx.db.replace`, `ctx.db.patch`, and `ctx.db.delete` for mutations.
-- **Type Safety**: Never use `any` type. Always use proper Convex types:
+- **Type Safety**: NEVER use `any` type anywhere in the codebase. Always use proper Convex types:
   - Use `Id<"tableName">` for document IDs
   - Use `Doc<"tableName">` for full document types
   - Use `Partial<Doc<"tableName">>` for update objects
@@ -159,6 +159,9 @@ All entity types must be derived from Convex schema using the generated types:
 
 - Use `Doc<"tableName">` for base document types from `convex/_generated/dataModel`
 - Use `Id<"tableName">` for document ID types
+- **ALWAYS infer types from Convex generated types when possible** - for example:
+  - `type TemplateField = Template["fields"][number]` instead of manually defining interface
+  - `type BuildingData = Building["data"]` instead of `Record<string, any>`
 - Each feature should have a `models/index.ts` file that exports types for reuse
 - UI-specific types that extend database entities should be interfaces extending the base type
 - Common form types (like FormState) should be defined in `src/common/types/`

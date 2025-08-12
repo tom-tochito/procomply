@@ -10,7 +10,7 @@ import TeamForm from "./TeamForm";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import type { Company } from "@/features/companies/models";
-import type { FullUser } from "@/features/user/models";
+import type { FullUser } from "@/features/users/models";
 
 interface AddTeamModalProps {
   isOpen: boolean;
@@ -41,6 +41,7 @@ export default function AddTeamModal({
 
       // Create team using Convex
       await createTeam({
+        tenantId: tenant._id,
         code,
         description,
         companyId: companyId ? companyId as any : undefined,

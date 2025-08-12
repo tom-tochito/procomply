@@ -1,5 +1,5 @@
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
-import GenericTemplateManagement from "@/features/template-mgmt/components/GenericTemplateManagement";
+import GenericTemplateManagement from "@/features/templates/components/GenericTemplateManagement";
 
 interface RiskAreaPageProps {
   params: Promise<{ tenant: string }>;

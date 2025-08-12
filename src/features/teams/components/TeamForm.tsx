@@ -3,7 +3,7 @@
 import React, { useActionState } from "react";
 import type { Team, TeamWithRelations } from "@/features/teams/models";
 import type { Company } from "@/features/companies/models";
-import type { FullUser } from "@/features/user/models";
+import type { FullUser } from "@/features/users/models";
 
 interface TeamFormProps {
   team?: Team;

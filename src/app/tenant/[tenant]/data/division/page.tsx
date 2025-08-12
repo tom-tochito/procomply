@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
-import DivisionManagement from "@/features/data-mgmt/components/DivisionManagement";
+import DivisionManagement from "@/features/divisions/components/DivisionManagement";
 import { useParams } from "next/navigation";
 
 export default function DivisionPage() {

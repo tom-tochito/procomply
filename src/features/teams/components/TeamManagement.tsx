@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
-import CompanySearch from "./CompanySearch";
-import TeamTable from "@/features/team/components/TeamTable";
+import CompanySearch from "@/features/companies/components/CompanySearch";
+import TeamTable from "@/features/teams/components/TeamTable";
 import AddTeamModal from "@/features/teams/components/AddTeamModal";
 import { Plus } from "lucide-react";
 

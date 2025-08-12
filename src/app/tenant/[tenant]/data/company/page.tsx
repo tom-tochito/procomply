@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
-import CompanyManagement from "@/features/data-mgmt/components/CompanyManagement";
+import CompanyManagement from "@/features/companies/components/CompanyManagement";
 import { useParams } from "next/navigation";
 
 export default function CompanyPage() {

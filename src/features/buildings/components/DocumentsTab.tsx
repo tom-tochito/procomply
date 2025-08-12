@@ -6,7 +6,7 @@ import { useMutation } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import DocumentTable from "@/features/documents/components/DocumentTable";
 import DocumentViewer from "@/features/documents/components/DocumentViewer";
-import UploadDocumentDialog from "@/features/data-mgmt/components/UploadDocumentDialog";
+import UploadDocumentDialog from "@/features/documents/components/UploadDocumentDialog";
 import { Building } from "@/features/buildings/models";
 import { Tenant } from "@/features/tenant/models";
 import { getStorageFileUrl } from "@/common/utils/storage";
@@ -114,7 +114,6 @@ export default function DocumentsTab({
           onRowClick={handleDocumentClick}
           onDownload={handleDownload}
           onDelete={handleDelete}
-          showViewOptions={false} // Hide view options in building context
         />
       </div>
 

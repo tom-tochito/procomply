@@ -1,5 +1,5 @@
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
-import LegislationManagementDB from "@/features/template-mgmt/components/LegislationManagementDB";
+import LegislationManagementDB from "@/features/templates/components/LegislationManagementDB";
 
 interface LegislationPageProps {
   params: Promise<{ tenant: string }>;

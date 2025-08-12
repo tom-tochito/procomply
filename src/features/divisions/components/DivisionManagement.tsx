@@ -3,29 +3,23 @@
 import React, { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
-import CompanySearch from "./CompanySearch";
-import CompanyTable from "@/features/company/components/CompanyTable";
-import AddCompanyModal from "@/features/companies/components/AddCompanyModal";
+import CompanySearch from "@/features/companies/components/CompanySearch";
+import DivisionTable from "@/features/divisions/components/DivisionTable";
+import AddDivisionModal from "@/features/divisions/components/AddDivisionModal";
 import { Plus } from "lucide-react";
 
-export default function CompanyManagement() {
+export default function DivisionManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Fetch tenant data first
+  // Fetch divisions and tenant data
   const tenant = useQuery(api.tenants.getCurrentTenant, {});
-  
-  // Fetch companies with tenantId
-  const companies = useQuery(
-    api.companies.getCompanies, 
-    tenant ? { tenantId: tenant._id } : "skip"
-  ) || [];
+  const divisions = useQuery(api.divisions.getDivisions, tenant ? { tenantId: tenant._id } : "skip") || [];
 
-  const filteredCompanies = companies.filter((company) => {
+  const filteredDivisions = divisions.filter((division) => {
     if (
       searchTerm &&
-      !company.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !company.referral.toLowerCase().includes(searchTerm.toLowerCase())
+      !division.name.toLowerCase().includes(searchTerm.toLowerCase())
     ) {
       return false;
     }
@@ -48,17 +42,17 @@ export default function CompanyManagement() {
           className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#7600FF] hover:bg-[#6600e5] rounded-md transition-colors"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Add Company
+          Add Division
         </button>
       </div>
 
-      {/* Companies Table */}
+      {/* Divisions Table */}
       <div className="bg-white rounded-lg shadow">
-        <CompanyTable companies={filteredCompanies} />
+        <DivisionTable divisions={filteredDivisions} />
       </div>
 
-      {/* Add Company Modal */}
-      <AddCompanyModal
+      {/* Add Division Modal */}
+      <AddDivisionModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         tenant={tenant}

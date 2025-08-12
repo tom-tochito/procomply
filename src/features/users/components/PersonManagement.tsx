@@ -5,7 +5,7 @@ import { useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import PersonSearch from "./PersonSearch";
 import ContactCard, { Contact } from "@/features/contacts/components/ContactCard";
-import AddPersonModal from "@/features/user/components/AddPersonModal";
+import AddPersonModal from "@/features/users/components/AddPersonModal";
 import { Plus, User } from "lucide-react";
 
 export default function PersonManagement() {

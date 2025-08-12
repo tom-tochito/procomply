@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
-import TeamManagement from "@/features/data-mgmt/components/TeamManagement";
+import TeamManagement from "@/features/teams/components/TeamManagement";
 import { useParams } from "next/navigation";
 
 export default function TeamPage() {

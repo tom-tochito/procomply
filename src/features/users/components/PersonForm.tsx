@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useActionState } from "react";
-import type { FullUser } from "@/features/user/models";
+import type { FullUser } from "@/features/users/models";
 import type { Company } from "@/features/companies/models";
 
 interface PersonFormProps {

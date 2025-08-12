@@ -1,5 +1,5 @@
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
-import CountryManagementDB from "@/features/template-mgmt/components/CountryManagementDB";
+import CountryManagementDB from "@/features/templates/components/CountryManagementDB";
 
 interface CountryPageProps {
   params: Promise<{ tenant: string }>;

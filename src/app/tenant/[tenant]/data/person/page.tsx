@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
-import PersonManagement from "@/features/data-mgmt/components/PersonManagement";
+import PersonManagement from "@/features/users/components/PersonManagement";
 import { useParams } from "next/navigation";
 
 export default function PersonPage() {
