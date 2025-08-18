@@ -1,13 +1,11 @@
-"use client";
-
 import Link from "next/link";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import CompanyManagement from "@/features/companies/components/CompanyManagement";
-import { useParams } from "next/navigation";
+import { getTenantBySlug } from "~/src/features/tenant/utils/get-tenant";
 
-export default function CompanyPage() {
-  const params = useParams();
-  const tenant = params.tenant as string;
+export default async function CompanyPage({ params }: { params: Promise<{ tenant: string }> }) {
+  const { tenant: tenantSlug } = await params;
+  const tenant = await getTenantBySlug(tenantSlug);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -18,7 +16,7 @@ export default function CompanyPage() {
             <ol className="list-none p-0 inline-flex">
               <li className="flex items-center">
                 <Link
-                  href={generateTenantRedirectUrl(tenant, "/")}
+                  href={generateTenantRedirectUrl(tenantSlug, "/")}
                   className="text-gray-500 hover:text-gray-700"
                 >
                   Home
@@ -27,7 +25,7 @@ export default function CompanyPage() {
               </li>
               <li className="flex items-center">
                 <Link
-                  href={generateTenantRedirectUrl(tenant, "/data-mgmt")}
+                  href={generateTenantRedirectUrl(tenantSlug, "/data-mgmt")}
                   className="text-gray-500 hover:text-gray-700"
                 >
                   Data Management
@@ -41,7 +39,7 @@ export default function CompanyPage() {
         </div>
 
         {/* Company Management Component */}
-        <CompanyManagement />
+        <CompanyManagement tenant={tenant} />
       </div>
     </div>
   );

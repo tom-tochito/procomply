@@ -1,16 +1,20 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { Doc } from "./_generated/dataModel";
-import { Id } from "./_generated/dataModel";
+import { Doc, Id } from "./_generated/dataModel";
+import type { QueryCtx, MutationCtx } from "./_generated/server";
+
 // Helper to get current user's tenant
-export async function getCurrentUserTenant(ctx: any, userId?: Id<"users">): Promise<Id<"tenants"> | null> {
+export async function getCurrentUserTenant(
+  ctx: QueryCtx | MutationCtx,
+  userId?: Id<"users">
+): Promise<Id<"tenants"> | null> {
   if (!userId) {
     return null;
   }
 
   const userTenant = await ctx.db
     .query("userTenants")
-    .withIndex("by_user", (q: any) => q.eq("userId", userId))
+    .withIndex("by_user", (q) => q.eq("userId", userId))
     .first();
 
   if (!userTenant) {
@@ -41,6 +45,15 @@ export const getTenant = query({
 
 export const getTenantBySlug = query({
   args: { slug: v.string() },
+  returns: v.object({
+    _id: v.id("tenants"),
+    _creationTime: v.number(),
+    name: v.string(),
+    slug: v.string(),
+    description: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }),
   handler: async (ctx, args) => {
     const tenant = await ctx.db
       .query("tenants")
@@ -57,6 +70,17 @@ export const getTenantBySlug = query({
 
 export const getAllTenants = query({
   args: {},
+  returns: v.array(
+    v.object({
+      _id: v.id("tenants"),
+      _creationTime: v.number(),
+      name: v.string(),
+      slug: v.string(),
+      description: v.string(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+  ),
   handler: async (ctx) => {
     return await ctx.db.query("tenants").collect();
   },

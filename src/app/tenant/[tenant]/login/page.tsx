@@ -25,7 +25,7 @@ export default async function LoginPage({ params }: PageProps) {
           Log in to{" "}
           <span className="font-semibold capitalize">{tenant?.name}</span>
         </p>
-        <LoginForm />
+        <LoginForm tenant={tenant} />
         <p className="mt-6 text-center text-xs text-black/60">
           ProComply © 2025
         </p>

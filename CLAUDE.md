@@ -31,7 +31,7 @@ Component filenames must be descriptive of their function (e.g., ProfileCard.tsx
 ## 6. Styling and Theming
 
 - All styling must use Tailwind CSS classNames only. No inline styles.
-- Primary theme color: #7600FF
+- Primary theme color: #F30
 
 ## 7. Project Configuration
 

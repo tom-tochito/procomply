@@ -16,7 +16,7 @@ import { Id } from "~/convex/_generated/dataModel";
 interface UploadDocumentDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  tenant?: Tenant;
+  tenant: Tenant;
   defaultBuilding?: Building;
 }
 
@@ -84,8 +84,8 @@ export default function UploadDocumentDialog({
     initialState
   );
   
-  // Subscribe to buildings if tenant is provided
-  const buildingsData = useQuery(api.buildings.getBuildings, tenant ? { tenantId: tenant._id } : "skip");
+  // Subscribe to buildings
+  const buildingsData = useQuery(api.buildings.getBuildings, { tenantId: tenant._id });
   const buildingsLoading = buildingsData === undefined;
   
   const buildings = buildingsData || [];

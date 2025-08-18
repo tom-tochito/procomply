@@ -7,62 +7,59 @@ import CompanySearch from "./CompanySearch";
 import CompanyTable from "@/features/companies/components/CompanyTable";
 import AddCompanyModal from "@/features/companies/components/AddCompanyModal";
 import { Plus } from "lucide-react";
+import type { Doc } from "~/convex/_generated/dataModel";
 
-export default function CompanyManagement() {
+interface CompanyManagementProps {
+  tenant: Doc<"tenants">;
+}
+
+export default function CompanyManagement({ tenant }: CompanyManagementProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Fetch tenant data first
-  const tenant = useQuery(api.tenants.getCurrentTenant, {});
-  
   // Fetch companies with tenantId
-  const companies = useQuery(
-    api.companies.getCompanies, 
-    tenant ? { tenantId: tenant._id } : "skip"
-  ) || [];
+  const companies = useQuery(api.companies.getCompanies, { tenantId: tenant._id }) || [];
 
   const filteredCompanies = companies.filter((company) => {
-    if (
-      searchTerm &&
-      !company.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !company.referral.toLowerCase().includes(searchTerm.toLowerCase())
-    ) {
-      return false;
-    }
-    return true;
+    if (!searchTerm) return true;
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      company.name.toLowerCase().includes(searchLower) ||
+      (company.referral && company.referral.toLowerCase().includes(searchLower)) ||
+      (company.category && company.category.toLowerCase().includes(searchLower)) ||
+      (company.email && company.email.toLowerCase().includes(searchLower))
+    );
   });
-
-  if (!tenant) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Search and Add Button */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex-1 max-w-md">
-          <CompanySearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        </div>
+      <div className="flex justify-between items-center">
+        <CompanySearch
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+        />
+        
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#7600FF] hover:bg-[#6600e5] rounded-md transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#F30] text-white rounded-lg hover:bg-[#E02D00] transition-colors"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="w-5 h-5" />
           Add Company
         </button>
       </div>
 
-      {/* Companies Table */}
-      <div className="bg-white rounded-lg shadow">
-        <CompanyTable companies={filteredCompanies} />
-      </div>
-
-      {/* Add Company Modal */}
-      <AddCompanyModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        tenant={tenant}
+      <CompanyTable 
+        companies={filteredCompanies}
+        searchTerm={searchTerm}
       />
+
+      {isAddModalOpen && (
+        <AddCompanyModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          tenant={tenant}
+        />
+      )}
     </div>
   );
 }

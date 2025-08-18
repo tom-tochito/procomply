@@ -1,13 +1,18 @@
-"use client";
-
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { generateTenantRedirectUrl } from "~/src/features/tenant/utils/tenant.utils";
 import PersonManagement from "@/features/users/components/PersonManagement";
-import { useParams } from "next/navigation";
+import { findTenantBySlug } from "@/features/tenant/repository";
 
-export default function PersonPage() {
-  const params = useParams();
-  const tenant = params.tenant as string;
+interface PageProps {
+  params: Promise<{ tenant: string }>;
+}
+
+export default async function PersonPage({ params }: PageProps) {
+  const { tenant: slug } = await params;
+  
+  const tenant = await findTenantBySlug(slug);
+  if (!tenant) notFound();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -18,7 +23,7 @@ export default function PersonPage() {
             <ol className="list-none p-0 inline-flex">
               <li className="flex items-center">
                 <Link
-                  href={generateTenantRedirectUrl(tenant, "/")}
+                  href={generateTenantRedirectUrl(slug, "/")}
                   className="text-gray-500 hover:text-gray-700"
                 >
                   Home
@@ -27,7 +32,7 @@ export default function PersonPage() {
               </li>
               <li className="flex items-center">
                 <Link
-                  href={generateTenantRedirectUrl(tenant, "/data-mgmt")}
+                  href={generateTenantRedirectUrl(slug, "/data-mgmt")}
                   className="text-gray-500 hover:text-gray-700"
                 >
                   Data Management
@@ -41,7 +46,7 @@ export default function PersonPage() {
         </div>
 
         {/* Person Management Component */}
-        <PersonManagement />
+        <PersonManagement tenant={tenant} />
       </div>
     </div>
   );

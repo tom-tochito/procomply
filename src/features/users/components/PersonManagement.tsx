@@ -7,19 +7,20 @@ import PersonSearch from "./PersonSearch";
 import ContactCard, { Contact } from "@/features/contacts/components/ContactCard";
 import AddPersonModal from "@/features/users/components/AddPersonModal";
 import { Plus, User } from "lucide-react";
+import type { Doc } from "~/convex/_generated/dataModel";
 
-export default function PersonManagement() {
+interface PersonManagementProps {
+  tenant: Doc<"tenants">;
+}
+
+export default function PersonManagement({ tenant }: PersonManagementProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Fetch data from Convex
-  const tenant = useQuery(api.tenants.getCurrentTenant, {});
-  const users = useQuery(api.users.getUsers, tenant ? { tenantId: tenant._id } : "skip") || [];
-  const companies = useQuery(
-    api.companies.getCompanies, 
-    tenant ? { tenantId: tenant._id } : "skip"
-  ) || [];
+  const users = useQuery(api.users.getUsers, { tenantId: tenant._id }) || [];
+  const companies = useQuery(api.companies.getCompanies, { tenantId: tenant._id }) || [];
 
   const categories = ["all", "internal", "contractor", "emergency", "supplier", "other"];
 
@@ -31,9 +32,9 @@ export default function PersonManagement() {
       name: user.name || user.email || "Unknown",
       email: user.email || "",
       phone: user.phone || "",
-      phoneMobile: user.phoneMobile || "",
+      mobile: user.phoneMobile || "",
       company: companies.find(c => c._id === user.companyId)?.name || "",
-      category: "internal" // Default category, could be stored in user profile
+      category: "internal" as const // Default category, could be stored in user profile
     }));
 
   const filteredPersons = persons.filter((person) => {
@@ -51,64 +52,52 @@ export default function PersonManagement() {
     return matchesSearch && matchesCategory;
   });
 
-  if (!tenant) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div className="flex flex-col gap-6">
-      {/* Search, Filter and Add Button */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
-          <div className="w-full sm:w-auto sm:flex-1 max-w-md">
-            <PersonSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-          </div>
-          
-          {/* Category Filter */}
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-[#7600FF] focus:border-transparent"
-          >
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="flex justify-between items-center">
+        <PersonSearch
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+        />
         
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#7600FF] hover:bg-[#6600e5] rounded-md transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#F30] text-white rounded-lg hover:bg-[#E02D00] transition-colors"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="w-5 h-5" />
           Add Person
         </button>
       </div>
 
-      {/* Persons Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filteredPersons.length > 0 ? (
-          filteredPersons.map((person) => (
-            <ContactCard key={person.id} contact={person} />
-          ))
-        ) : (
-          <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
-            <User className="h-12 w-12 mb-4 text-gray-300" />
-            <p className="text-lg font-medium">No persons found</p>
-            <p className="text-sm mt-1">Try adjusting your search or filters</p>
-          </div>
-        )}
-      </div>
+      {filteredPersons.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 px-4">
+          <User className="w-16 h-16 text-gray-300 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No persons found</h3>
+          <p className="text-gray-500 text-center max-w-md">
+            {searchTerm 
+              ? `No persons match "${searchTerm}". Try adjusting your search.`
+              : "Get started by adding your first person."}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredPersons.map((person) => (
+            <ContactCard
+              key={person.id}
+              contact={person}
+            />
+          ))}
+        </div>
+      )}
 
-      {/* Add Person Modal */}
-      <AddPersonModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        tenant={tenant}
-        companies={companies}
-      />
+      {isAddModalOpen && (
+        <AddPersonModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          tenant={tenant}
+          companies={companies}
+        />
+      )}
     </div>
   );
 }

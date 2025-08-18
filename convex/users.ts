@@ -1,7 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { auth } from "./auth";
 
 // Get the current authenticated user
 export const currentUser = query({
@@ -105,5 +104,66 @@ export const assignUserToTenant = mutation({
       tenantId: args.tenantId,
       createdAt: Date.now(),
     });
+  },
+});
+
+// Check if a user with email exists and has access to the tenant
+export const validateEmailForTenant = query({
+  args: {
+    email: v.string(),
+    tenantId: v.id("tenants"),
+  },
+  returns: v.object({
+    isValid: v.boolean(),
+    isAdmin: v.boolean(),
+    message: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    // Find user by email
+    const users = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("email"), args.email))
+      .collect();
+
+    if (users.length === 0) {
+      return {
+        isValid: false,
+        isAdmin: false,
+        message: "No account found with this email. Please contact your administrator.",
+      };
+    }
+
+    const user = users[0];
+
+    // Check if user is admin (admins can access any tenant)
+    if (user.role === "admin") {
+      return {
+        isValid: true,
+        isAdmin: true,
+        message: "Admin access granted.",
+      };
+    }
+
+    // Check if user is assigned to the requested tenant
+    const userTenant = await ctx.db
+      .query("userTenants")
+      .withIndex("by_user_and_tenant", (q) =>
+        q.eq("userId", user._id).eq("tenantId", args.tenantId)
+      )
+      .unique();
+
+    if (!userTenant) {
+      return {
+        isValid: false,
+        isAdmin: false,
+        message: "You don't have access to this organization. Please contact your administrator.",
+      };
+    }
+
+    return {
+      isValid: true,
+      isAdmin: false,
+      message: "Access granted.",
+    };
   },
 });
