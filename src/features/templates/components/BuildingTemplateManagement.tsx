@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { TemplateField } from "../models";
 import { TemplateBuilder } from "./TemplateBuilder";
 import TemplatePreview from "./TemplatePreview";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface BuildingTemplateManagementProps {
   tenantId: string;
@@ -133,16 +135,14 @@ export default function BuildingTemplateManagement({ tenantId }: BuildingTemplat
           </div>
 
           <div className="mb-6">
-            <label htmlFor="templateName" className="block text-sm font-medium text-gray-700 mb-1">
-              Template Name
-            </label>
-            <input
+            <Label htmlFor="templateName">Template Name</Label>
+            <Input
               id="templateName"
               type="text"
               value={templateName}
               onChange={(e) => setTemplateName(e.target.value)}
               placeholder="e.g., Commercial Building Template"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#F30] focus:border-[#F30]"
+              className="mt-1"
             />
           </div>
 
