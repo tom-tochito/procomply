@@ -6,7 +6,7 @@ import { api } from "~/convex/_generated/api";
 import { Id } from "~/convex/_generated/dataModel";
 import { toast } from "sonner";
 import { TemplateField } from "../models";
-import TemplateBuilder from "./TemplateBuilder";
+import { TemplateBuilder } from "./TemplateBuilder";
 import TemplatePreview from "./TemplatePreview";
 
 interface BuildingTemplateManagementProps {
@@ -18,7 +18,6 @@ export default function BuildingTemplateManagement({ tenantId }: BuildingTemplat
   const [editingTemplate, setEditingTemplate] = useState<string | null>(null);
   const [templateName, setTemplateName] = useState("");
   const [templateFields, setTemplateFields] = useState<TemplateField[]>([]);
-  const [showPreview, setShowPreview] = useState(false);
 
   // Fetch existing templates
   const templates = useQuery(api.templates.getTemplates, {
@@ -113,7 +112,6 @@ export default function BuildingTemplateManagement({ tenantId }: BuildingTemplat
     setEditingTemplate(null);
     setTemplateName("");
     setTemplateFields([]);
-    setShowPreview(false);
   };
 
   if (isCreateMode) {
@@ -125,12 +123,6 @@ export default function BuildingTemplateManagement({ tenantId }: BuildingTemplat
               {editingTemplate ? "Edit Template" : "Create Building Template"}
             </h2>
             <div className="flex gap-2">
-              <button
-                onClick={() => setShowPreview(!showPreview)}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-              >
-                {showPreview ? "Hide Preview" : "Show Preview"}
-              </button>
               <button
                 onClick={cancelEdit}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
@@ -156,22 +148,21 @@ export default function BuildingTemplateManagement({ tenantId }: BuildingTemplat
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
-              <h3 className="text-lg font-medium mb-4">Template Fields</h3>
               <TemplateBuilder
-                fields={templateFields}
-                onChange={setTemplateFields}
+                entityType="building"
+                initialFields={templateFields}
+                onSave={(fields) => setTemplateFields(fields)}
               />
             </div>
 
-            {showPreview && (
-              <div>
-                <h3 className="text-lg font-medium mb-4">Preview</h3>
-                <TemplatePreview
-                  fields={templateFields}
-                  templateName={templateName}
-                />
-              </div>
-            )}
+            <div>
+              <h3 className="text-lg font-medium mb-4">Preview</h3>
+              <TemplatePreview
+                fields={templateFields}
+                templateName={templateName}
+                entityType="building"
+              />
+            </div>
           </div>
 
           <div className="mt-6 flex justify-end gap-3">
