@@ -10,9 +10,10 @@ import DynamicFieldDisplay from "./DynamicFieldDisplay";
 interface BuildingInfoProps {
   building: Building | BuildingWithTemplate;
   divisions?: Division[];
+  tenantSlug: string;
 }
 
-export default function BuildingInfo({ building, divisions = [] }: BuildingInfoProps) {
+export default function BuildingInfo({ building, divisions = [], tenantSlug }: BuildingInfoProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const renderTemplateFields = () => {
@@ -119,6 +120,7 @@ export default function BuildingInfo({ building, divisions = [] }: BuildingInfoP
         onClose={() => setIsEditModalOpen(false)}
         building={building}
         divisions={divisions}
+        tenantSlug={tenantSlug}
       />
     </div>
   );

@@ -203,6 +203,7 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
             <BuildingInfo
               building={buildingWithRelations}
               divisions={divisions}
+              tenantSlug={tenantSlug}
             />
           </div>
         );

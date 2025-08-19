@@ -9,12 +9,14 @@ import { Building } from "@/features/buildings/models";
 import { Division } from "@/features/divisions/models";
 import BuildingForm from "./BuildingForm";
 import { toast } from "sonner";
+import { uploadFile } from "@/common/services/storage/storage.service";
 
 interface EditBuildingModalProps {
   isOpen: boolean;
   onClose: () => void;
   building: Building;
   divisions?: Division[];
+  tenantSlug: string;
 }
 
 export default function EditBuildingModal({
@@ -22,6 +24,7 @@ export default function EditBuildingModal({
   onClose,
   building,
   divisions,
+  tenantSlug,
 }: EditBuildingModalProps) {
   const router = useRouter();
   const [successState, setSuccessState] = useState(false);
@@ -34,9 +37,21 @@ export default function EditBuildingModal({
       const divisionId = formData.get("divisionId") as string;
       const templateId = formData.get("templateId") as string;
       const templateDataStr = formData.get("templateData") as string;
+      const imageFile = formData.get("image") as File | null;
       
       // Parse template data if provided
       const templateData = templateDataStr ? JSON.parse(templateDataStr) : building.templateData || {};
+
+      let imagePath: string | undefined;
+
+      // Upload image if provided
+      if (imageFile && imageFile.size > 0) {
+        const timestamp = Date.now();
+        const sanitizedFileName = imageFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const path = `buildings/${building._id}/${sanitizedFileName}-${timestamp}`;
+        
+        imagePath = await uploadFile(tenantSlug, path, imageFile);
+      }
 
       await updateBuilding({
         buildingId: building._id,
@@ -45,6 +60,7 @@ export default function EditBuildingModal({
         divisionId: divisionId ? divisionId as Id<"divisions"> : undefined,
         templateId: templateId ? templateId as Id<"templates"> : undefined,
         templateData: templateData,
+        image: imagePath,
       });
 
       setSuccessState(true);
@@ -104,7 +120,7 @@ export default function EditBuildingModal({
         <BuildingForm
           building={building}
           divisions={divisions || []}
-          tenant={{ id: building.tenantId || "", name: "", slug: "" }}
+          tenant={{ id: building.tenantId || "", name: "", slug: tenantSlug }}
           onSubmit={handleSubmit}
           onCancel={onClose}
         />

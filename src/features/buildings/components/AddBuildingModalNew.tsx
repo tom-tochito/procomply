@@ -9,6 +9,7 @@ import { Tenant } from "@/features/tenant/models";
 import { Division } from "@/features/divisions/models";
 import BuildingForm from "./BuildingForm";
 import { toast } from "sonner";
+import { uploadFile } from "@/common/services/storage/storage.service";
 
 interface AddBuildingModalProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ export default function AddBuildingModal({
   const router = useRouter();
   const [successState, setSuccessState] = useState(false);
   const createBuilding = useMutation(api.buildings.createBuilding);
+  const updateBuilding = useMutation(api.buildings.updateBuilding);
 
   const handleSubmit = async (prevState: { error: string | null; success: boolean }, formData: FormData) => {
     try {
@@ -34,17 +36,35 @@ export default function AddBuildingModal({
       const divisionId = formData.get("divisionId") as string;
       const templateId = formData.get("templateId") as string;
       const templateDataStr = formData.get("templateData") as string;
+      const imageFile = formData.get("image") as File | null;
       
       // Parse template data if provided
       const templateData = templateDataStr ? JSON.parse(templateDataStr) : {};
 
-      await createBuilding({
+      // Create building first
+      const buildingId = await createBuilding({
         tenantId: tenant._id,
         name,
         divisionId: divisionId ? divisionId as Id<"divisions"> : undefined,
         templateId: templateId ? templateId as Id<"templates"> : undefined,
         templateData: templateData,
       });
+
+      // Upload image if provided and update building
+      if (imageFile && imageFile.size > 0 && buildingId) {
+        const timestamp = Date.now();
+        const sanitizedFileName = imageFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const path = `buildings/${buildingId}/${sanitizedFileName}-${timestamp}`;
+        
+        const imagePath = await uploadFile(tenant.slug, path, imageFile);
+        
+        // Update building with image path
+        await updateBuilding({
+          buildingId,
+          tenantId: tenant._id,
+          image: imagePath,
+        });
+      }
 
       setSuccessState(true);
       toast.success("Building created successfully");
