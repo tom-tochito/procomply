@@ -34,13 +34,13 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
   const [taskSearchTerm, setTaskSearchTerm] = useState("");
   
   // State for Task Details Dialog
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<TaskUI | null>(null);
+  // const [isDialogOpen, setIsDialogOpen] = useState(false);
+  // const [selectedTask, setSelectedTask] = useState<TaskUI | null>(null);
 
   // State for Task Modal
   const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
   const [editTaskId, setEditTaskId] = useState<string | undefined>(undefined);
-  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+  // const [modalMode, setModalMode] = useState<"create" | "edit">("create");
 
   // Fetch building data using Convex
   const building = useQuery(api.buildings.getBuilding, { 
@@ -49,7 +49,7 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
   });
   const divisions = useQuery(api.divisions.getDivisions, { tenantId: tenant._id }) || [];
   const tasks = useQuery(api.tasks.getTasks, { tenantId: tenant._id, buildingId: buildingId as Id<"buildings"> }) || [];
-  const teams = useQuery(api.teams.getTeams, { tenantId: tenant._id }) || [];
+  // const teams = useQuery(api.teams.getTeams, { tenantId: tenant._id }) || [];
   const users = useQuery(api.users.getUsers, { tenantId: tenant._id }) || [];
 
   // Calculate compliance
@@ -105,19 +105,19 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
   });
 
   const openTaskDialog = (task: TaskUI) => {
-    setSelectedTask(task);
-    setIsDialogOpen(true);
+    // TODO: Implement task dialog
+    console.log("Open task:", task);
   };
 
   const handleAddTask = () => {
     setEditTaskId(undefined);
-    setModalMode("create");
+    // setModalMode("create");
     setIsAddTaskModalOpen(true);
   };
 
   const handleEditTask = (task: TaskUI) => {
     setEditTaskId(task.id);
-    setModalMode("edit");
+    // setModalMode("edit");
     setIsAddTaskModalOpen(true);
   };
   
@@ -163,7 +163,7 @@ export default function BuildingDetails({ buildingId, tenant, tenantSlug }: Buil
               filterByAssignee={filterByAssignee}
               setFilterByAssignee={setFilterByAssignee}
               uniqueTeams={[]}
-              uniqueAssignees={users.map((u: any) => u?._id || '')}
+              uniqueAssignees={users.map((u: { _id: Id<"users"> }) => u?._id || '')}
               onAddNewTask={handleAddTask}
             />
             <TaskTable

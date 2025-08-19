@@ -2,22 +2,22 @@
 
 import React, { useState, useActionState } from "react";
 import { MessageSquare, Plus, Search, Calendar, User, Edit, Trash2, X, AlertCircle } from "lucide-react";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "~/convex/_generated/api";
+// import { useQuery, useMutation } from "convex/react";
+// import { api } from "~/convex/_generated/api";
 import { BuildingWithRelations } from "@/features/buildings/models";
 import { Note } from "@/features/notes/models";
-import {
-  createNote,
-  updateNote,
-  deleteNote,
-} from "@/features/notes/repository/notes.repository";
+// import {
+//   createNote,
+//   updateNote,
+//   deleteNote,
+// } from "@/features/notes/repository/notes.repository";
 import type { FormState } from "@/common/types/form";
 
 interface NotesTabProps {
   building: BuildingWithRelations;
 }
 
-export default function NotesTab({ building }: NotesTabProps) {
+export default function NotesTab({ }: NotesTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -32,7 +32,7 @@ export default function NotesTab({ building }: NotesTabProps) {
 
   // Form actions - TODO: Migrate to Convex
   const [addFormState, addFormAction, isAddPending] = useActionState(
-    async (prevState: FormState, formData: FormData): Promise<FormState> => {
+    async (): Promise<FormState> => {
       // TODO: Implement with Convex mutations
       return { error: "Not implemented" as string | null, success: false };
     },
@@ -40,7 +40,7 @@ export default function NotesTab({ building }: NotesTabProps) {
   );
 
   const [editFormState, editFormAction, isEditPending] = useActionState(
-    async (prevState: FormState, formData: FormData): Promise<FormState> => {
+    async (): Promise<FormState> => {
       if (!editingNote) return { error: "No note selected" as string | null, success: false };
       // TODO: Implement with Convex mutations
       return { error: "Not implemented" as string | null, success: false };
@@ -51,7 +51,7 @@ export default function NotesTab({ building }: NotesTabProps) {
   const handleDeleteNote = async (noteId: string) => {
     if (!confirm("Are you sure you want to delete this note?")) return;
     // TODO: Implement with Convex mutations
-    console.error("Delete note not implemented");
+    console.error("Delete note not implemented", noteId);
   };
 
   const getCategoryBadgeClass = (category: string) => {

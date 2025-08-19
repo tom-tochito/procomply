@@ -30,7 +30,7 @@ export default function AddCompanyModal({
       // Extract form data
       const name = formData.get("name") as string;
       const referral = formData.get("referral") as string;
-      const active = formData.get("active") === "true";
+      // const active = formData.get("active") === "true";
 
       // Create company using Convex
       await createCompany({

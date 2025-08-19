@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useMutation } from "convex/react";
-import { api } from "~/convex/_generated/api";
+// import { useMutation } from "convex/react";
+// import { api } from "~/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Tenant } from "@/features/tenant/models";
-import { FormState } from "@/common/types/form.types";
+// import { FormState } from "@/common/types/form.types";
 import PersonForm from "./PersonForm";
 import { X } from "lucide-react";
 import { toast } from "sonner";
@@ -21,23 +21,22 @@ interface AddPersonModalProps {
 export default function AddPersonModal({
   isOpen,
   onClose,
-  tenant,
   companies,
 }: AddPersonModalProps) {
   const router = useRouter();
   const [successState, setSuccessState] = useState(false);
   // const createUserProfile = useMutation(api.users.createUserProfile); // This mutation doesn't exist
 
-  const handleSubmit = async (prevState: FormState, formData: FormData) => {
+  const handleSubmit = async () => {
     try {
       // Extract form data
-      const name = formData.get("name") as string;
-      const email = formData.get("email") as string;
-      const phone = formData.get("phone") as string;
-      const phoneMobile = formData.get("phoneMobile") as string;
-      const position = formData.get("position") as string;
-      const companyId = formData.get("companyId") as string;
-      const role = formData.get("role") as string || "user";
+      // const name = formData.get("name") as string;
+      // const email = formData.get("email") as string;
+      // const phone = formData.get("phone") as string;
+      // const phoneMobile = formData.get("phoneMobile") as string;
+      // const position = formData.get("position") as string;
+      // const companyId = formData.get("companyId") as string;
+      // const role = formData.get("role") as string || "user";
 
       // Create user profile using Convex
       // Note: This creates a profile for the current authenticated user

@@ -15,19 +15,19 @@ interface PersonManagementProps {
 
 export default function PersonManagement({ tenant }: PersonManagementProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [categoryFilter] = useState("all");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Fetch data from Convex
   const users = useQuery(api.users.getUsers, { tenantId: tenant._id }) || [];
   const companies = useQuery(api.companies.getCompanies, { tenantId: tenant._id }) || [];
 
-  const categories = ["all", "internal", "contractor", "emergency", "supplier", "other"];
+  // const categories = ["all", "internal", "contractor", "emergency", "supplier", "other"];
 
   // Transform users to Contact format
   const persons: Contact[] = users
-    .filter((user: any) => user !== null)
-    .map((user: any) => ({
+    .filter((user: { _id: string; email: string; name?: string; phone?: string; phoneMobile?: string; companyId?: string } | null) => user !== null)
+    .map((user: { _id: string; email: string; name?: string; phone?: string; phoneMobile?: string; companyId?: string }) => ({
       id: user._id,
       name: user.name || user.email || "Unknown",
       email: user.email || "",

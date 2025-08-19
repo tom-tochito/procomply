@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "~/convex/_generated/api";
+import { Id } from "~/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
 import { Tenant } from "@/features/tenant/models";
 import { FormState } from "@/common/types/form.types";
@@ -44,8 +45,8 @@ export default function AddTeamModal({
         tenantId: tenant._id,
         code,
         description,
-        companyId: companyId ? companyId as any : undefined,
-        supervisorId: supervisorId ? supervisorId as any : undefined,
+        companyId: companyId ? companyId as Id<"companies"> : undefined,
+        supervisorId: supervisorId ? supervisorId as Id<"users"> : undefined,
       });
 
       setSuccessState(true);

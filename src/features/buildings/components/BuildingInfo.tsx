@@ -3,9 +3,8 @@
 import React, { useState } from "react";
 import { Building, BuildingWithTemplate } from "@/features/buildings/models";
 import { Division } from "@/features/divisions/models";
-import { TemplateField } from "@/features/templates/models";
 import EditBuildingModal from "./EditBuildingModal";
-import DynamicFieldDisplay from "./DynamicFieldDisplay";
+import { TemplateViewer } from "@/features/templates/components/TemplateViewer";
 
 interface BuildingInfoProps {
   building: Building | BuildingWithTemplate;
@@ -54,15 +53,10 @@ export default function BuildingInfo({ building, divisions = [], tenantSlug }: B
             Template: <span className="font-medium text-gray-900">{buildingWithTemplate.template.name}</span>
           </p>
         </div>
-        <dl className="divide-y divide-gray-200">
-          {templateFields.map((field: TemplateField) => (
-            <DynamicFieldDisplay
-              key={field.key}
-              field={field}
-              value={buildingData[field.key]}
-            />
-          ))}
-        </dl>
+        <TemplateViewer
+          fields={templateFields}
+          data={buildingData}
+        />
       </div>
     );
   };

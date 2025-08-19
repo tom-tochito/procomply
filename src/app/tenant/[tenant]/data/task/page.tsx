@@ -1,14 +1,13 @@
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
-import UnifiedTemplateManagement from "@/features/templates/components/UnifiedTemplateManagement";
+import TaskManagement from "@/features/tasks/components/TaskManagement";
 
-export default async function BuildingTemplatesPage({
+export default async function TaskPage({
   params,
 }: {
   params: Promise<{ tenant: string }>;
 }) {
   const { tenant: tenantSlug } = await params;
   
-  // Get tenant data
   const tenant = await findTenantBySlug(tenantSlug);
   if (!tenant) {
     throw new Error("Tenant not found");
@@ -16,7 +15,7 @@ export default async function BuildingTemplatesPage({
 
   return (
     <div className="p-6">
-      <UnifiedTemplateManagement tenantId={tenant._id} entityType="building" />
+      <TaskManagement tenant={tenant} />
     </div>
   );
 }

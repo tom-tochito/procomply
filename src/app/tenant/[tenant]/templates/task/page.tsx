@@ -1,6 +1,5 @@
 import { findTenantBySlug } from "@/features/tenant/repository/tenant.repository";
-// TODO: Migrate TaskTemplateManagement from InstantDB to Convex
-// import TaskTemplateManagement from "@/features/templates/components/TaskTemplateManagement";
+import UnifiedTemplateManagement from "@/features/templates/components/UnifiedTemplateManagement";
 
 interface TaskTemplatePageProps {
   params: Promise<{ tenant: string }>;
@@ -14,12 +13,9 @@ export default async function TaskTemplatePage({ params }: TaskTemplatePageProps
     throw new Error("Tenant not found");
   }
 
-
-  // TODO: Migrate TaskTemplateManagement from InstantDB to Convex
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Task Templates</h1>
-      <p className="text-gray-600">Task template management is currently being migrated to the new system.</p>
+      <UnifiedTemplateManagement tenantId={tenant._id} entityType="task" />
     </div>
   );
 }

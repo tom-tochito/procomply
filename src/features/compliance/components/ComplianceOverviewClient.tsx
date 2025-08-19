@@ -24,13 +24,19 @@ export default function ComplianceOverviewClient({
   const [buildingManagers, setBuildingManagers] = useState("Building Managers");
 
   // Fetch buildings, tasks, compliance checks, and divisions separately
-  const buildings = useQuery(api.buildings.getBuildings, { tenantId: tenant._id }) || [];
-  const divisions = useQuery(api.divisions.getDivisions, { tenantId: tenant._id }) || [];
-  const allTasks = useQuery(api.tasks.getTasks, { tenantId: tenant._id }) || [];
-  const allComplianceChecks = useQuery(api.complianceChecks.getComplianceChecks, { tenantId: tenant._id }) || [];
+  const buildingsQuery = useQuery(api.buildings.getBuildings, { tenantId: tenant._id });
+  const divisionsQuery = useQuery(api.divisions.getDivisions, { tenantId: tenant._id });
+  const allTasksQuery = useQuery(api.tasks.getTasks, { tenantId: tenant._id });
+  const allComplianceChecksQuery = useQuery(api.complianceChecks.getComplianceChecks, { tenantId: tenant._id });
   
-  const buildingsLoading = buildings === undefined || divisions === undefined || 
-                          allTasks === undefined || allComplianceChecks === undefined;
+  // Stabilize references with useMemo
+  const buildings = useMemo(() => buildingsQuery || [], [buildingsQuery]);
+  const divisions = useMemo(() => divisionsQuery || [], [divisionsQuery]);
+  const allTasks = useMemo(() => allTasksQuery || [], [allTasksQuery]);
+  const allComplianceChecks = useMemo(() => allComplianceChecksQuery || [], [allComplianceChecksQuery]);
+  
+  const buildingsLoading = buildingsQuery === undefined || divisionsQuery === undefined || 
+                          allTasksQuery === undefined || allComplianceChecksQuery === undefined;
 
   // Initialize selected divisions to all active divisions
   useEffect(() => {

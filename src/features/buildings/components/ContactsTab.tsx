@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Search, User, X, Trash2 } from "lucide-react";
+import { Plus, Search, User, X } from "lucide-react";
 import ContactCard from "@/features/contacts/components/ContactCard";
 import { BuildingWithRelations } from "@/features/buildings/models";
 import { Contact } from "@/features/contacts/models";
@@ -10,13 +10,13 @@ interface ContactsTabProps {
   building: BuildingWithRelations;
 }
 
-export default function ContactsTab({ building }: ContactsTabProps) {
+export default function ContactsTab({ }: ContactsTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting] = useState(false);
   
   // TODO: Migrate to Convex - for now using placeholder data
   const contacts: Contact[] = [];
@@ -46,10 +46,10 @@ export default function ContactsTab({ building }: ContactsTabProps) {
     console.log("Form submit not implemented");
   };
 
-  const handleDelete = async (contactId: string) => {
-    // TODO: Implement with Convex
-    console.log("Delete not implemented");
-  };
+  // const handleDelete = async (contactId: string) => {
+  //   // TODO: Implement with Convex
+  //   console.log("Delete not implemented");
+  // };
 
   const closeModal = () => {
     setShowAddModal(false);

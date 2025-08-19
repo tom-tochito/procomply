@@ -3,10 +3,8 @@
 import React, { useState, useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
 import BuildingCard from "./BuildingCard";
 import BuildingsTable from "./BuildingsTable";
-import BuildingFilters from "./BuildingFilters";
 import BuildingSearch from "./BuildingSearch";
 import AddBuildingModal from "./AddBuildingModalNew";
 import { BuildingWithStats } from "@/features/buildings/models";
@@ -21,9 +19,6 @@ interface BuildingsListProps {
 export default function BuildingsList({ tenant }: BuildingsListProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDivision, setSelectedDivision] = useState("Active Divisions");
-  const [buildingUse, setBuildingUse] = useState("Building Use");
-  const [availability, setAvailability] = useState("Availability");
   const [viewMode, setViewMode] = useState<"cards" | "table">("table");
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 10;
@@ -31,14 +26,13 @@ export default function BuildingsList({ tenant }: BuildingsListProps) {
   // Fetch buildings with Convex
   const buildings = useQuery(api.buildings.getBuildings, {
     tenantId: tenant._id,
-    divisionId: selectedDivision !== "Active Divisions" ? selectedDivision as Id<"divisions"> : undefined,
   });
 
   // Fetch divisions data
-  const divisions = useQuery(api.divisions.getDivisions, {
-    tenantId: tenant._id,
-    type: "Active",
-  });
+  // const divisions = useQuery(api.divisions.getDivisions, {
+  //   tenantId: tenant._id,
+  //   type: "Active",
+  // });
 
   // Fetch tasks for buildings
   const tasks = useQuery(api.tasks.getTasks, { tenantId: tenant._id });
@@ -78,18 +72,11 @@ export default function BuildingsList({ tenant }: BuildingsListProps) {
   const buildingsLoading = buildings === undefined || tasks === undefined;
   const buildingsError = null; // Convex handles errors differently
 
-  // Filter buildings based on division
+  // Filter buildings based on search
   const filteredBuildings = useMemo(() => {
     if (!buildingsWithStats) return [];
     
     let filtered = [...buildingsWithStats];
-    
-    // Division filter
-    if (selectedDivision !== "Active Divisions") {
-      filtered = filtered.filter(
-        (building) => building.divisionId === selectedDivision
-      );
-    }
     
     // Search filter
     if (searchTerm) {
@@ -97,13 +84,12 @@ export default function BuildingsList({ tenant }: BuildingsListProps) {
       filtered = filtered.filter(
         (building) =>
           building.name.toLowerCase().includes(term) ||
-          building.division?.toLowerCase().includes(term) ||
           (building.templateData && JSON.stringify(building.templateData).toLowerCase().includes(term))
       );
     }
     
     return filtered;
-  }, [buildingsWithStats, selectedDivision, searchTerm]);
+  }, [buildingsWithStats, searchTerm]);
 
   // Pagination
   const paginatedBuildings = useMemo(() => {
@@ -112,27 +98,27 @@ export default function BuildingsList({ tenant }: BuildingsListProps) {
   }, [filteredBuildings, pageNumber, pageSize]);
 
   // Get count of buildings per division
-  const divisionCounts = useMemo(() => {
-    if (!divisions || !buildingsWithStats) return {};
-    
-    const counts: Record<string, number> = {};
-    divisions.forEach((division) => {
-      counts[division._id] = buildingsWithStats.filter(
-        (building) => building.divisionId === division._id
-      ).length;
-    });
-    return counts;
-  }, [divisions, buildingsWithStats]);
+  // const divisionCounts = useMemo(() => {
+  //   if (!divisions || !buildingsWithStats) return {};
+  //   
+  //   const counts: Record<string, number> = {};
+  //   divisions.forEach((division) => {
+  //     counts[division._id] = buildingsWithStats.filter(
+  //       (building) => building.divisionId === division._id
+  //     ).length;
+  //   });
+  //   return counts;
+  // }, [divisions, buildingsWithStats]);
 
-  const handleDeleteBuilding = (buildingId: string) => {
-    // Implement delete functionality
-    console.log("Delete building:", buildingId);
-  };
+  // const handleDeleteBuilding = (buildingId: string) => {
+  //   // Implement delete functionality
+  //   console.log("Delete building:", buildingId);
+  // };
 
-  const handleEditBuilding = (buildingId: string) => {
-    // Implement edit functionality
-    console.log("Edit building:", buildingId);
-  };
+  // const handleEditBuilding = (buildingId: string) => {
+  //   // Implement edit functionality
+  //   console.log("Edit building:", buildingId);
+  // };
 
   const totalPages = Math.ceil(filteredBuildings.length / pageSize);
 
@@ -142,7 +128,7 @@ export default function BuildingsList({ tenant }: BuildingsListProps) {
         <h1 className="text-2xl font-semibold text-gray-900">Buildings</h1>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="rounded-md bg-[#7600FF] px-4 py-2 text-sm font-medium text-white hover:bg-[#6000CC]"
+          className="rounded-md bg-[#F30] px-4 py-2 text-sm font-medium text-white hover:bg-[#D20]"
         >
           Add Building
         </button>
@@ -172,12 +158,6 @@ export default function BuildingsList({ tenant }: BuildingsListProps) {
           </div>
         </div>
 
-        <BuildingFilters
-          buildingUse={buildingUse}
-          setBuildingUse={setBuildingUse}
-          availability={availability}
-          setAvailability={setAvailability}
-        />
 
         {buildingsLoading && (
           <div className="flex h-64 items-center justify-center">

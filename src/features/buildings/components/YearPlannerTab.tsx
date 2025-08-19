@@ -2,22 +2,22 @@
 
 import React, { useState, useActionState } from "react";
 import { Calendar, Plus, X, Clock, CheckCircle, XCircle, FileText } from "lucide-react";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "~/convex/_generated/api";
+// import { useQuery, useMutation } from "convex/react";
+// import { api } from "~/convex/_generated/api";
 import { BuildingWithRelations } from "@/features/buildings/models";
 import { YearPlannerEvent } from "@/features/year-planner/models";
-import {
-  createYearPlannerEvent,
-  updateYearPlannerEvent,
-  deleteYearPlannerEvent,
-} from "@/features/year-planner/repository/year-planner.repository";
+// import {
+//   createYearPlannerEvent,
+//   updateYearPlannerEvent,
+//   deleteYearPlannerEvent,
+// } from "@/features/year-planner/repository/year-planner.repository";
 import type { FormState } from "@/common/types/form";
 
 interface YearPlannerTabProps {
   building: BuildingWithRelations;
 }
 
-export default function YearPlannerTab({ building }: YearPlannerTabProps) {
+export default function YearPlannerTab({ }: YearPlannerTabProps) {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
@@ -29,7 +29,7 @@ export default function YearPlannerTab({ building }: YearPlannerTabProps) {
   const isLoading = false;
   // Form actions
   const [addFormState, addFormAction, isAddPending] = useActionState(
-    async (prevState: FormState, formData: FormData): Promise<FormState> => {
+    async (): Promise<FormState> => {
       // TODO: Implement with Convex mutations
       return { error: "Not implemented" as string | null, success: false };
     },
@@ -37,7 +37,7 @@ export default function YearPlannerTab({ building }: YearPlannerTabProps) {
   );
 
   const [editFormState, editFormAction, isEditPending] = useActionState(
-    async (prevState: FormState, formData: FormData): Promise<FormState> => {
+    async (): Promise<FormState> => {
       if (!editingEvent) return { error: "No event selected" as string | null, success: false };
       // TODO: Implement with Convex mutations
       return { error: "Not implemented" as string | null, success: false };
@@ -48,7 +48,7 @@ export default function YearPlannerTab({ building }: YearPlannerTabProps) {
   const handleDeleteEvent = async (eventId: string) => {
     if (!confirm("Are you sure you want to delete this event?")) return;
     // TODO: Implement with Convex mutations
-    console.error("Delete event not implemented");
+    console.error("Delete event not implemented", eventId);
   };
 
   const eventTypes = ["inspection", "maintenance", "compliance", "meeting", "training", "other"];

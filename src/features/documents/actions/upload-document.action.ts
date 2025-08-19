@@ -2,6 +2,7 @@
 
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
 import { fetchMutation } from "convex/nextjs";
 
 // Initialize S3 client for Cloudflare R2
@@ -50,9 +51,9 @@ export async function uploadDocumentAction(params: UploadDocumentParams) {
 
     // Create document record in Convex
     const documentId = await fetchMutation(api.documents.createDocument, {
-      tenantId: metadata.tenantId as any,
-      uploaderId: metadata.uploaderId as any,
-      buildingId: buildingId as any,
+      tenantId: metadata.tenantId as Id<"tenants">,
+      uploaderId: metadata.uploaderId as Id<"users">,
+      buildingId: buildingId as Id<"buildings">,
       name: file.name,
       type: file.type,
       path: fileKey,

@@ -7,11 +7,6 @@ import {
   Settings,
   ChevronDown,
   Building2,
-  Gavel,
-  FileCheck,
-  MapPin,
-  FolderOpen,
-  AlertTriangle,
   ClipboardList,
 } from "lucide-react";
 
@@ -24,14 +19,8 @@ const TEMPLATE_MENU_ITEMS: Array<{
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 }> = [
-  { href: "/templates/building", label: "Building", icon: Building2 },
-  { href: "/templates/country", label: "Country", icon: MapPin },
-  { href: "/templates/document", label: "Document", icon: FileCheck },
-  { href: "/templates/legislation", label: "Legislation", icon: Gavel },
-  { href: "/templates/risk-area", label: "Risk Area", icon: AlertTriangle },
-  { href: "/templates/subsection", label: "Subsection", icon: FolderOpen },
-  { href: "/templates/survey", label: "Survey", icon: ClipboardList },
-  { href: "/templates/task", label: "Task", icon: ClipboardList },
+  { href: "/templates/building", label: "Building Templates", icon: Building2 },
+  { href: "/templates/task", label: "Task Templates", icon: ClipboardList },
 ];
 
 export function TemplateManagementMenu({

@@ -6,7 +6,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { Tenant } from "@/features/tenant/models";
 import { Legislation } from "../models";
-import { startTransition } from "react";
+// import { startTransition } from "react";
 import SearchBar from "./SearchBar";
 import PageHeader from "./PageHeader";
 import LegislationTable from "./LegislationTable";

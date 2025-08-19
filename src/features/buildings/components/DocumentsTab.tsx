@@ -12,6 +12,7 @@ import { Tenant } from "@/features/tenant/models";
 import { getStorageFileUrl } from "@/common/utils/storage";
 import { DocumentWithRelations } from "@/features/documents/models";
 import { toast } from "sonner";
+import { Id } from "~/convex/_generated/dataModel";
 
 interface DocumentsTabProps {
   building: Building;
@@ -30,7 +31,7 @@ export default function DocumentsTab({
   // TODO: Migrate useDocuments to Convex
   const documents: DocumentWithRelations[] = [];
   const isLoading = false;
-  const error = null;
+  // const error = null;
 
   const handleDocumentClick = (document: DocumentWithRelations) => {
     setSelectedDocument(document);
@@ -50,7 +51,7 @@ export default function DocumentsTab({
 
   const handleDelete = async (document: DocumentWithRelations) => {
     try {
-      await deleteDocument({ documentId: document._id as any });
+      await deleteDocument({ documentId: document._id as Id<"documents"> });
       toast.success("Document deleted successfully");
     } catch (error) {
       console.error("Error deleting document:", error);

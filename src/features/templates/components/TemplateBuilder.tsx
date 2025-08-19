@@ -193,6 +193,11 @@ export function TemplateBuilder<T extends { _id: string }>({
   );
   const fileInputId = useId();
 
+  // Log entity and entityType if they're provided but not used
+  if (entity || entityType) {
+    console.debug('TemplateBuilder received entity/entityType:', { entity, entityType });
+  }
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {

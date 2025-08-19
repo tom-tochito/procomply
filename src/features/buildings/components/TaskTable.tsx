@@ -3,6 +3,7 @@
 import React from "react";
 import { useMutation } from "convex/react";
 import { api } from "~/convex/_generated/api";
+import { Id } from "~/convex/_generated/dataModel";
 import { isDateOverdue } from "@/common/utils/date";
 import { TaskUI } from "@/features/tasks/models";
 
@@ -102,7 +103,7 @@ export default function TaskTable({ tasks, onTaskClick, onTaskEdit, onTaskUpdate
                     try {
                       // Update task through Convex
                       await updateTask({
-                        taskId: task.id as any,
+                        taskId: task.id as Id<"tasks">,
                         status: newStatus,
                         completedDate: newStatus === "completed" ? Date.now() : undefined,
                       });

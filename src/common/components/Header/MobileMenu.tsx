@@ -22,7 +22,7 @@ interface MobileMenuProps {
   onClose: () => void;
   tenantSlug: string;
   tenant?: Tenant;
-  user?: any;
+  user?: { _id?: string; email?: string; name?: string; role?: string } | null;
 }
 
 const DATA_MGMT_ITEMS: Array<{

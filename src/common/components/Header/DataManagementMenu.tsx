@@ -7,8 +7,6 @@ import {
   Database,
   ChevronDown,
   Building2,
-  Menu,
-  Users,
   FileText,
   UserCircle,
   ClipboardList,
@@ -23,13 +21,10 @@ const MENU_ITEMS: Array<{
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 }> = [
-  { href: "/data/building", label: "Building", icon: Building2 },
-  { href: "/data/company", label: "Company", icon: Building2 },
-  { href: "/data/division", label: "Division", icon: Menu },
-  { href: "/data/task", label: "Task", icon: ClipboardList },
-  { href: "/data/document", label: "Document", icon: FileText },
-  { href: "/data/person", label: "Person", icon: UserCircle },
-  { href: "/data/team", label: "Team", icon: Users },
+  { href: "/data/building", label: "Buildings", icon: Building2 },
+  { href: "/data/task", label: "Tasks", icon: ClipboardList },
+  { href: "/data/document", label: "Documents", icon: FileText },
+  { href: "/data/person", label: "People", icon: UserCircle },
 ];
 
 export function DataManagementMenu({ tenantSlug }: DataManagementMenuProps) {

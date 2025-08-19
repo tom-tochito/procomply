@@ -23,13 +23,13 @@ export default function TeamManagement({ tenant }: TeamManagementProps) {
   const users = useQuery(api.users.getUsers, { tenantId: tenant._id }) || [];
 
   // Transform teams data to include company and supervisor names
-  const teamsWithDetails = teams.map((team: any) => {
+  const teamsWithDetails = teams.map((team) => {
     // Find user by matching profile id
-    const supervisor = users.find((u: any) => u && u._id === team.supervisorId);
+    const supervisor = users.find((u: { _id: string }) => u && u._id === team.supervisorId);
     return {
       id: team._id,
       code: team.code || "",
-      description: team.name, // TeamTable expects 'description' not 'name'
+      description: team.description,
       company: companies.find(c => c._id === team.companyId)?.name || "",
       supervisor: supervisor ? (supervisor.name || supervisor.email || "Unknown") : ""
     };

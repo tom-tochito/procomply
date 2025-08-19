@@ -9,8 +9,8 @@ import DocumentViewer from "@/features/documents/components/DocumentViewer";
 import DocumentSidebar from "./DocumentSidebar";
 import DocumentActionBar from "./DocumentActionBar";
 import { Tenant } from "@/features/tenant/models";
-import { getFileUrl } from "@/common/utils/file";
-import { Document } from "@/features/documents/models";
+// import { getFileUrl } from "@/common/utils/file";
+import { Document, DocumentWithRelations } from "@/features/documents/models";
 import { toast } from "sonner";
 import { Id } from "~/convex/_generated/dataModel";
 
@@ -43,10 +43,13 @@ export default function DocumentManagement({
   const divisions = useQuery(api.divisions.getDivisions, { tenantId: tenant._id }) || [];
   
   // Fetch documents from Convex
-  const documents = useQuery(api.documents.getDocuments, {
+  const documentsQuery = useQuery(api.documents.getDocuments, {
     tenantId: tenant._id,
     buildingId: selectedBuilding ? selectedBuilding as Id<"buildings"> : undefined,
-  }) || [];
+  });
+
+  // Stabilize reference with useMemo
+  const documents = useMemo(() => documentsQuery || [], [documentsQuery]);
 
   const deleteDocument = useMutation(api.documents.deleteDocument);
 
@@ -156,7 +159,7 @@ export default function DocumentManagement({
         {/* Documents Table */}
         <div className="flex-1 overflow-auto">
           <DocumentTable
-            documents={filteredDocuments as any}
+            documents={filteredDocuments}
             onRowClick={handleView}
             onDownload={handleDownload}
             onDelete={handleDelete}
@@ -179,7 +182,7 @@ export default function DocumentManagement({
             setViewerOpen(false);
             setSelectedDocument(null);
           }}
-          document={selectedDocument as any}
+          document={selectedDocument as DocumentWithRelations}
           tenantSlug={tenant.slug}
           onDownload={handleDownload}
         />
