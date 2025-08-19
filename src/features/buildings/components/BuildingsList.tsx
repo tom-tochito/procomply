@@ -9,7 +9,7 @@ import BuildingSearch from "./BuildingSearch";
 import AddBuildingModal from "./AddBuildingModalNew";
 import { BuildingWithStats } from "@/features/buildings/models";
 import { Tenant } from "@/features/tenant/models";
-import { getStorageFileUrl } from "@/common/utils/storage";
+import { getFileUrl } from "@/common/utils/file";
 // import { COMPLIANCE_CHECK_TYPES } from "@/features/compliance/models";
 
 interface BuildingsListProps {
@@ -19,7 +19,8 @@ interface BuildingsListProps {
 export default function BuildingsList({ tenant }: BuildingsListProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState<"cards" | "table">("table");
+  // Only list view for MVP
+  const viewMode = "table";
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 10;
 
@@ -60,7 +61,7 @@ export default function BuildingsList({ tenant }: BuildingsListProps) {
       
       return {
         ...building,
-        image: building.image ? getStorageFileUrl(tenant.slug, building.image) : undefined,
+        image: building.image ? getFileUrl(tenant.slug, building.image) : undefined,
         division: building.division || "Unassigned",
         status: "Active",
         compliance,
@@ -135,27 +136,8 @@ export default function BuildingsList({ tenant }: BuildingsListProps) {
       </div>
 
       <div className="rounded-lg bg-white p-6 shadow-sm">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6">
           <BuildingSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-          
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setViewMode("cards")}
-              className={`p-2 ${viewMode === "cards" ? "text-[#F30]" : "text-gray-400"}`}
-            >
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-              </svg>
-            </button>
-            <button
-              onClick={() => setViewMode("table")}
-              className={`p-2 ${viewMode === "table" ? "text-[#F30]" : "text-gray-400"}`}
-            >
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" clipRule="evenodd" />
-              </svg>
-            </button>
-          </div>
         </div>
 
 
@@ -179,18 +161,10 @@ export default function BuildingsList({ tenant }: BuildingsListProps) {
 
         {!buildingsLoading && !buildingsError && paginatedBuildings.length > 0 && (
           <>
-            {viewMode === "cards" ? (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {paginatedBuildings.map((building) => (
-                  <BuildingCard key={building._id} building={building} tenant={tenant.slug} />
-                ))}
-              </div>
-            ) : (
-              <BuildingsTable
-                buildings={paginatedBuildings}
-                tenant={tenant.slug}
-              />
-            )}
+            <BuildingsTable
+              buildings={paginatedBuildings}
+              tenant={tenant.slug}
+            />
 
             {totalPages > 1 && (
               <div className="mt-6 flex items-center justify-between">

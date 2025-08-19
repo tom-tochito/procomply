@@ -9,10 +9,10 @@ import DocumentViewer from "@/features/documents/components/DocumentViewer";
 import DocumentSidebar from "./DocumentSidebar";
 import DocumentActionBar from "./DocumentActionBar";
 import { Tenant } from "@/features/tenant/models";
-// import { getFileUrl } from "@/common/utils/file";
 import { Document, DocumentWithRelations } from "@/features/documents/models";
 import { toast } from "sonner";
 import { Id } from "~/convex/_generated/dataModel";
+import { getFileUrl } from "@/common/utils/file";
 
 // Type for documents with simplified relations as returned by the query
 type DocumentWithSimplifiedRelations = Document & {
@@ -96,9 +96,6 @@ export default function DocumentManagement({
     return matchesSearch && matchesStatus && matchesCategory && matchesFileType && matchesStatutory && matchesDivision;
   });
 
-  const getFileUrl = (tenantSlug: string, path: string) => {
-    return `/api/files/${path}`;
-  };
 
   const handleView = (document: DocumentWithSimplifiedRelations) => {
     setSelectedDocument(document);

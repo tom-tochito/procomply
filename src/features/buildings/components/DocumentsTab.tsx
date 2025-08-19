@@ -9,7 +9,7 @@ import DocumentViewer from "@/features/documents/components/DocumentViewer";
 import UploadDocumentDialog from "@/features/documents/components/UploadDocumentDialog";
 import { Building } from "@/features/buildings/models";
 import { Tenant } from "@/features/tenant/models";
-import { getStorageFileUrl } from "@/common/utils/storage";
+import { getFileUrl } from "@/common/utils/file";
 import { DocumentWithRelations } from "@/features/documents/models";
 import { toast } from "sonner";
 import { Id } from "~/convex/_generated/dataModel";
@@ -40,7 +40,7 @@ export default function DocumentsTab({
 
   const handleDownload = (document: DocumentWithRelations) => {
     if (document.path) {
-      const downloadUrl = getStorageFileUrl(tenant.slug, document.path);
+      const downloadUrl = getFileUrl(tenant.slug, document.path);
       window.open(downloadUrl, "_blank");
     } else {
       alert("File path not available");

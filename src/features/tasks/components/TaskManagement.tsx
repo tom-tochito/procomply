@@ -225,12 +225,12 @@ export default function TaskManagement({ tenant }: TaskManagementProps) {
 
             <div>
               <Label htmlFor="building">Building (Optional)</Label>
-              <Select value={buildingId} onValueChange={setBuildingId}>
+              <Select value={buildingId || "none"} onValueChange={(value) => setBuildingId(value === "none" ? "" : value)}>
                 <SelectTrigger id="building">
                   <SelectValue placeholder="Select a building" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No building</SelectItem>
+                  <SelectItem value="none">No building</SelectItem>
                   {buildings.map((building) => (
                     <SelectItem key={building._id} value={building._id}>
                       {building.name}
@@ -242,12 +242,12 @@ export default function TaskManagement({ tenant }: TaskManagementProps) {
 
             <div>
               <Label htmlFor="assignee">Assignee (Optional)</Label>
-              <Select value={assigneeId} onValueChange={setAssigneeId}>
+              <Select value={assigneeId || "unassigned"} onValueChange={(value) => setAssigneeId(value === "unassigned" ? "" : value)}>
                 <SelectTrigger id="assignee">
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Unassigned</SelectItem>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
                   {users.map((user: typeof users[0]) => (
                     <SelectItem key={user._id} value={user._id}>
                       {user.email || user.name || "Unknown User"}
